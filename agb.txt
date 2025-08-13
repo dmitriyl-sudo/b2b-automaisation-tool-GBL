@@ -1,0 +1,1104 @@
+Logo
+Search
+Introduction
+Environments
+Authentication
+Payments
+Refunds
+Payouts
+P2P
+Balance
+Disputes
+Notifications
+Dictionaries
+Need help?
+Contact us
+Introduction
+RizonPay is a simple, fast and reliable payment engine with open architecture. Founded back in 2018 now it is supported and constantly developing by the community of software engineers with bold background in payment and e-wallet systems.
+
+RizonPay Business API - a solution specifically designed for internet businesses in need of multicurrency payment processing. We support all major currencies.
+
+Environments
+There are two environments available for integration:
+
+Production environment: https://business.agbadvans.com
+Sandbox Environment
+Sandbox provides full functionality but it only emulates processing, no actual bank transactions are made. You can use the following PAN for tests:
+
+4617611794313933: CONFIRMED as 3-D Secure transaction
+4626233193837898: DECLINED as 3-D Secure transaction
+4392963203551251: CONFIRMED as non 3-D Secure transaction
+4730198364688516: DECLINED as non 3-D Secure transaction
+4627342642639018: APPROVED PAYOUT
+4968357931420422: DECLINED PAYOUT
+You can use any cardholder name, expiry date and CVV2/CVC2 with these PANs. 3-D Secure is also emulated with a page that doesn’t require any password but only shows you 2 buttons. One button is for successful authentication, another is for failed authentication. Note, that when you chose to fail authentication, order is always declined, no matter what PAN was used.
+
+Don’t use real cards on Sandbox environment.
+Production Environment
+Once you complete integration with Sandbox environment you will be provided with Production credentials. These are completely different credentials, not related with the ones on Sandbox. Production always makes real bank transactions, cards from Sandbox are not supported on this environment.
+
+Authentication
+curl https://business.agbadvans.com/v1/charges \
+   -H "Authorization: Bearer merchant_private_key"
+Authenticate your account when using the API, by including your secret API key which has been sent via email during registration. Management of your API keys can be done within the Backoffice. Your API keys carry importance and privileges, be sure to store them securely. Please do not share your secret API keys in publicly accessible areas such GitHub and client-side code areas.
+
+Authentication to the API is performed via bearer auth keys (for cross-origin requests), use -H “Authorization: Bearer merchant_private_key”.
+
+All API requests must be made through HTTPS. Calls made through plain HTTP will fail. API requests without authentication will also fail.
+
+Payments
+RizonPay payment processing REST API.
+
+Create
+Code:
+Copy
+
+curl "https://business.agbadvans.com/api/v1/payments" \
+    -X POST \
+    -H "Authorization: Bearer merchant_private_key" \
+    -H "Content-Type: application/json" -d '{
+        "product" : "Your Product",
+        "amount" : "1000",
+        "currency" : "CNY",
+        "redirectSuccessUrl" : "https://your-site.com/success",
+        "redirectFailUrl" : "https://your-site.com/fail",
+        "extraReturnParam" : "your order id or other info",
+        "pendingUrl" : "https://your-site.com/pending",`
+        "expires_at": 5,
+        "orderNumber" : "your order number",
+        "locale": "zh"
+
+    }'
+Return status 200 and JSON:
+Copy
+
+{
+  "success": true | false,
+  "errors": [],
+  "token": "[payment token]",
+  "processingUrl": "https://business.agbadvans.com/p/[payment token]",
+  "payment": {
+    "amount": "10020",
+    "currency": "CNY",
+    "status": "init"
+  },
+  "redirectRequest": {
+    "url": "[redirect url, for example ACS URL for 3ds]",
+    "params": {
+      "PaReq": "[PaReq for current payment]",
+      "TermUrl": "https://business.agbadvans.com/checkout_results/[payment token]/callback_3ds"
+    },
+    "type": "post"
+  }
+}
+Initialize payments - to begin receiving payments, you must first call using the following script. This will enable you to obtain a payment token, which will be required later to complete API integration.
+
+HTTP Request via SSL
+POST '/api/v1/payments'
+
+Query Parameters
+Parameter	Mandatory	Description	Validation
+product	yes	Product name (Service description) (example: 'iPhone').	minLength: 5, maxLength: 255
+amount	yes	Payment amount in cents (10020), except JPY	minLength: 1, maxLength: 32
+currency	yes	Currency code (CNY, EUR, USD, JPY).	minLength: 3, maxLength: 3
+callbackUrl	yes	The server URL a merchant will be notified about a payment finalisation	Valid URI format
+redirectSuccessUrl	no	The URL a customer will be redirected to in the case of successfull payment	Valid URI format
+redirectFailUrl	no	The URL a customer will be redirected to in the case of payment error or failure	Valid URI format
+pendingUrl	no	The URL a customer will be redirected to the specific page in the case of pending payment instead built-in checkout_resault_page	Valid URI format
+extraReturnParam	no	Bank/Payment method list, description, etc	minLength: 1, maxLength: 1024
+expires_at	no	Expired payment time for requests without a bank card	minLength: 1
+orderNumber	no	The current order number from a company system.	minLength: 3, maxLength: 255 (string)
+locale	no	The locale is used on a payment page by default. Currently supported locales: en, zh and jp from ISO 639-1.	minLength: 2, maxLength: 5 (string)
+walletToken	no	Set this parameter when making recurring payment from a customer’s wallet. A customer will receive notification and has to confirm the payment.	returns by API for recurring payments only
+recurring	no	Set this parameter to true when initializing recurring payment.	boolean
+recurringToken	no	Set this parameter when making recurring payment previously initialized with recurring param.	returns by API for recurring payments only
+needConfirmation	no	Set this parameter whe making payment in two steps (preAuth and confirm/decline)	
+card	no	Card object for Host2Host payments.	
+customer	no	Customer object for Host2Host payments.	
+recurring_data	no	Recurring data object for Host2Host payments.	
+merchantUrl	no	Param to control traffic from aggregators	
+Card Object Parameters
+Parameter	Mandatory	Description	Validation
+pan	yes	Customer’s card number (PAN). Any valid card number, may contain spaces	Valid card number (16-19 digits)
+expires	yes	Customer’s card expiration date. Format: mm/yyyy	mm/yyyy format
+holder	yes	Customer’s cardholder name. Any valid cardholder name	minLength: 5, maxLength: 50
+cvv	yes	Customer’s CVV2 / CVC2 / CAV2	minLength: 3, maxLength: 3 Only digits (\d+)
+Customer Object Parameters (optional)
+Parameter	Mandatory	Description	Validation
+email	yes	Customer’s email, is mandatory if Customer object posted on a request	Valid email format
+address	no	Customer's billing address	minLength: 5, maxLength: 55
+country	no	Customer's billing country	ISO country code format "GB"
+city	no	Customer's billing city	minLength: 4, maxLength: 55
+region	no	Customer's billing region	minLength: 5, maxLength: 55
+postcode	no	Customer's billing ZipCode	minLength: 4, maxLength: 55
+phone	no	Customer's billing phone number	minLength: 6, maxLength: 20
+ip	no	Customer IP address	Valid IP address format (XX.XX.XX.XX)
+browser	no	Customer browser object for 3ds2 payments.	
+Customer browser object for 3ds2 payments (optional)
+Parameter	Mandatory	Description	Example
+accept_header	no	Browser's content type	text/html
+color_depth	no	Browser's color depth value	32
+ip	no	Browser's ip	177.255.255.35
+language	no	Browser's language	ru
+screen_height	no	Browser's screen height	1080
+screen_width	no	Browser's screen width	1920
+tz	no	Browser's time zone	180
+user_agent	no	Browser's user agent	Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:96.0) Gecko/20100101 Firefox/96.0
+java_enabled	no	Is java enabled	true
+javascript_enabled	no	Is javascript enabled	true
+window_width	no	Browser's window width	1920
+window_height	no	Browser's bilwindowling height	1080
+Recurring data object for payments (optional)
+Parameter	Mandatory	Description	Validation
+days	no	Customer days object for payments.	Number of days between authorizations from 1
+exp_date	no	Customer exd_date object for payments.	Period of validity of periodic payments in format YYYYMMDD
+Payments Providers
+Code:
+Copy
+
+Return status 200 and JSON:
+Copy
+
+{
+  "success": true | false,
+  "errors": [],
+  "token": "[payment token]",
+  "processingUrl": [
+        {
+            "webmoney": "http://business.agbadvans.com/p/165998589a413b56ae72fbfdc15b016b/webmoney?locale=en"
+        },
+        {
+            "bank_card": "http://business.agbadvans.com/p/165998589a413b56ae72fbfdc15b016b/bank_card?locale=en"
+        },
+        {
+            "qiwi_wallet": "http://business.agbadvans.com/p/165998589a413b56ae72fbfdc15b016b/qiwi_wallet?locale=en"
+        },
+        {
+            "skrill_wallet": "http://business.agbadvans.com/p/165998589a413b56ae72fbfdc15b016b/skrill_wallet?locale=en"
+        }
+  ],
+  "selectorURL": "https://business.agbadvans.com/select/[payment token]/",
+  "payment": {
+    "amount": "10020",
+    "currency": "CNY",
+    "status": "init"
+  },
+  "redirectRequest": {
+    "url": "[redirect url, for example ACS URL for 3ds]",
+    "params": {
+      "PaReq": "[PaReq for current payment]",
+      "TermUrl": "https://business.agbadvans.com/checkout_results/[payment token]/callback_3ds"
+    },
+    "type": "post"
+  }
+}
+In case multiple payment providers enabled to a merchant account, Create payment reponse JSON will have processingUrl object represented as an array of available payment providers (please refer to JSON response). Use those URLs to redirect your customer to a payment provider (method).
+
+List of payment providers
+In case you want a customer to choose a payment provider (method) it might be convenient to use a specific page (widget) with payment provider list, which is availabe by "selectorURL" parameter in JSON response object
+
+List
+Code:
+Copy
+
+curl "https://business.agbadvans.com/api/v1/payments?dateFrom=2016-05-11&page=1&perPage=1" \
+    -H "Authorization: Bearer merchant_private_key"
+Return status 200 and JSON:
+Copy
+
+{
+  "success": true | false,
+  "errors": [],
+  "status": 200,
+  "totalCount": 10,
+  "curentPage": 1,
+  "perPage": 1,
+  "totalPage": 10,
+  "payments": [
+    {
+      "id": 1,
+      "status": "sent",
+      "token": "[payment token]",
+      "currency": "CNY",
+      "product": "Your Product",
+      "redirect_success_url": "https://your-site.com/success",
+      "redirect_fail_url": "https://your-site.com/fail",
+      "amount": 10000,
+      "created_at": "2016-06-27T14:13:00.273Z",
+      "updated_at": "2016-06-27T14:15:44.715Z",
+      "extra_return_param": "your order id or other info",
+      "operation_type": "pay",
+      "order_number": 1
+    }
+  ]
+}
+Payments List - this is the method used to display the list of returned payments.
+
+HTTP Request via SSL
+GET '/api/v1/payments'
+
+Query Parameters
+Parameter	Description	Required
+dateFrom	Date from (example: '2015-01-01')	No
+dateTo	Date to (example: '2015-01-02')	No
+page	Page number (default: 1)	No
+perPage	Payment per page (max: 500, default: 20)	No
+operationType	Operation type (Available values: pays, payouts, all)	No
+orderNumber	Merchant's order number	No
+Get
+Code:
+Copy
+
+curl "https://business.agbadvans.com/api/v1/payments/[payment_token]" \
+    -H "Authorization: Bearer merchant_private_key"
+Return status 200 and JSON:
+Copy
+
+{
+    "success": true | false,
+    "errors": [],
+    "status": 200,
+    "payment": {
+      "id": 2599,
+      "status": "pending | approved | declined",
+      "token": "[payment token]",
+      "currency": "[payment currency]",
+      "product": "[product description]",
+      "callback_url": "[callback/notification url]",
+      "redirect_success_url": "success redirection url",
+      "redirect_fail_url": "fail redirection url",
+      "amount": 0,
+      "created_at": "[creation date]",
+      "updated_at": "[last status update date]",
+      "extra_return_param": "[extra params, can be use to payment identification in merchat system]",
+      "operation_type": "pay | payout",
+      "order_number": "[merchant's order number]",
+      "commission_data": {
+                  "commission_value": 0.0,
+                  "commission_fee": 0.0,
+                  "commission_amount": 0.0
+              }
+    }
+}
+Payment Get - this is the method used to retrieve information about single payment.
+
+HTTP Request via SSL
+GET '/api/v1/payments/[payment_token]'
+
+Confirm Two-Step
+Code:
+Copy
+
+curl "https://business.agbadvans.com/api/v1/payments/confirm" \
+    -X POST \
+    -H "Authorization: Bearer merchant_private_key" \
+    -H "Content-Type: application/json" -d '{
+        "token" : "Your Product"
+    }'
+Return status 200 and JSON:
+Copy
+
+{
+  "success": true | false,
+  "result": 0,
+  "status": 200,
+  "payment": {
+    "amount": 100,
+    "gateway_amount": 100,
+    "currency": "USD",
+    "status": "approved|declined",
+    "two_stage_mode": true
+  }
+}
+Confirm Two-Step payment by providing a payment token.
+
+HTTP Request via SSL
+POST '/api/v1/payments/confirm'
+
+Query Parameters
+Parameter	Mandatory	Description
+token	yes	Payment token.
+Decline Two-Step
+Code:
+Copy
+
+curl "https://business.agbadvans.com/api/v1/payments/decline" \
+    -X POST \
+    -H "Authorization: Bearer merchant_private_key" \
+    -H "Content-Type: application/json" -d '{
+        "token" : "Your Product"
+    }'
+Return status 200 and JSON:
+Copy
+
+{
+  "success": true | false,
+  "result": 0,
+  "status": 200,
+  "payment": {
+    "amount": 100,
+    "gateway_amount": 100,
+    "currency": "USD",
+    "status": "approved|declined",
+    "two_stage_mode": true
+  }
+}
+Decline Two-Step payment by providing a payment token.
+
+HTTP Request via SSL
+POST '/api/v1/payments/decline'
+
+Query Parameters
+Parameter	Mandatory	Description
+token	yes	Payment token.
+Get/Order
+Code:
+Copy
+
+curl "https://business.agbadvans.com/api/v1/payments/order/[order_number]" \
+    -H "Authorization: Bearer merchant_private_key"
+Return status 200 and JSON:
+Copy
+
+{
+    "success":  true | false,
+    "result": 0,
+    "status": 200,
+    "totalCount": 1,
+    "curentPage": 1,
+    "perPage": 100,
+    "totalPage": 1,
+    "payments": [
+        {
+            "id": 123,
+            "status": "pending | approved | declined | expired",
+            "token": "[payment token]",
+            "currency": "[payment currency]",
+            "product": "[payment currency]",
+            "callback_url": "[callback/notification url]",
+            "redirect_success_url": "success redirection url",
+            "redirect_fail_url": "fail redirection url",
+            "amount": 100,
+            "created_at": "[creation date]",
+            "updated_at": "[last status update date]",
+            "extra_return_param": "[extra params, can be use to payment identification in merchant system]",
+            "operation_type": "pay | payout",
+            "order_number": "[merchant's order number]"
+        }
+    ]
+}
+Payment Get/Order - this is the method used to retrieve information about payments by order_number.
+
+HTTP Request via SSL
+GET '/api/v1/payments/order/[order_number]'
+
+Otp
+Code:
+Copy
+
+curl "https://business.agbadvans.com/api/v1/otp" \
+    -X POST \
+    -H "Authorization: Bearer merchant_private_key" \
+    -H "Content-Type: application/json" -d '{
+        "token" : "YP741BPPRuDYSAPJG6ErFyoofWYReZWA",
+        "otp" : "443443",
+    }'
+Return status 200 and JSON:
+Copy
+
+{
+    "success": true | false,
+    "errors": [],
+    "status": 200
+}
+Otp - this is the method used to confirm mobile payment.
+
+HTTP Request via SSL
+POST '/api/v1/otp'
+
+Query Parameters
+Parameter	Mandatory	Description	Validation
+token	yes	Payment token	
+otp	yes	Otp code	
+Otp resend
+Code:
+Copy
+
+curl "https://business.agbadvans.com/api/v1/otp-resend?token=YP741BPPRuDYSAPJG6ErFyoofWYReZWA" \
+    -H "Authorization: Bearer merchant_private_key"
+Return status 200 and JSON:
+Copy
+
+{
+    "success": true | false,
+    "errors": [],
+    "status": 200
+}
+Otp resend - this is the method used to resend the OTP code.
+
+HTTP Request via SSL
+GET '/api/v1/otp-resend'
+
+Refunds
+RizonPay refunds processing REST API.
+
+Create refund
+Code:
+Copy
+
+curl "https://business.agbadvans.com/api/v1/refunds" \
+    -X POST \
+    -H "Authorization: Bearer merchant_private_key" \
+    -H "Content-Type: application/json" -d '{
+        "token" : "Your Product",
+        "amount": 1000
+    }'
+Return status 200 and JSON:
+Copy
+
+{
+  "success": true | false,
+  "errors": [],
+  "token": "[payment token]",
+  "processingUrl": "https://business.agbadvans.com/p/[payment token]",
+  "refund": {
+    "token": "3a1a4fc8f975eb022a1c0ddb3abcded9",
+    "amount": "10020",
+    "currency": "USD",
+    "status": "approved|declined"
+  }
+}
+Create refunds by providing a payment token.
+
+HTTP Request via SSL
+POST '/api/v1/refunds'
+
+Query Parameters
+Parameter	Mandatory	Description
+token	yes	Payment token.
+amount	no	Refund amount in cents.
+Payouts
+Transferring money from a business account to a client account.
+
+Make a payout
+Code:
+Copy
+
+curl "https://business.agbadvans.com/api/v1/payouts" \
+    -X POST \
+    -H "Authorization: Bearer merchant_private_key" \
+    -H "Content-Type: application/json" -d '{
+        "amount" : 1000,
+        "currency" : "CNY",
+        "orderNumber": "10001",
+        "extraReturnParam" : "test payout",
+
+        "card": {
+            "pan" : "4276111152393643",
+            "expires" : "08/2022"
+        },
+
+        "customer": {
+            "first_name" : "Mike",
+            "last_name" : "Green",
+            "email" : "test@agbadvans.com",
+            "address" : "725 5th Ave, New York, NY 10022, United States",
+            "ip" : "1.1.1.1"
+        }
+}'
+Return status 200 and JSON:
+Copy
+
+{
+  "success": true | false,
+  "errors": [],
+  "payout": {
+      "token": "[payment token]",
+      "status": "[payment status]",
+      "timestamp": "2016-06-09T03:46:45Z"
+  }
+}
+Create a payout operation.
+
+HTTP Request via SSL
+POST '/api/v1/payouts'
+
+Query Parameters
+Parameter	Mandatory	Description
+amount	yes	Payment amount in minimal values as of; USD and EUR / Cents, for JPY / Yen, for CNY / Fen.
+currency	yes	Currency code (CNY, EUR, USD, JPY)
+orderNumber	yes	RizonPay's client inner order number
+card	yes	Card object for Host2Host payouts.
+customer	yes	Customer object for Host2Host payouts.
+Card Payout Object Parameters
+Parameter	Mandatory	Description
+pan	yes	Customer’s card number (PAN). Any valid card number, may contain spaces
+expires	yes	Customer’s card expiration date. Format: mm/yyyy
+Customer Object Parameters (optional)
+Parameter	Mandatory	Description
+email	yes	Customer’s email, is mandatory if Customer object posted on a request
+address	no	Customer's billing address in the full format like "725 5th Ave, New York, NY 10022, United States"
+ip	yes	Customer IP address
+first_name	no	Customer name
+last_name	no	Customer surname
+Providers
+Code:
+Copy
+
+curl "https://business.agbadvans.com/api/v1/payouts" \
+    -X POST \
+    -H "Authorization: Bearer merchant_private_key" \
+    -H "Content-Type: application/json" -d '{
+        "amount" : 1000,
+        "currency" : "CNY",
+        "orderNumber": "10001",
+        "extraReturnParam" : "test payout",
+
+        "card": {
+            "pan" : "4276111152393643",
+            "expires" : "08/2022"
+        },
+
+        "customer": {
+            "email" : "test@agbadvans.com",
+            "address" : "test test",
+            "ip" : "1.1.1.1",
+            "first_name" : "Mike",
+            "last_name" : "Green",
+        }
+}'
+Return status 200 and JSON:
+Copy
+
+{
+  "success": true | false,
+  "errors": [],
+  "token": "[payment token]",
+  "processingUrl": [
+        {
+            "webmoney": "http://business.agbadvans.com/pout/165998589a413b56ae72fbfdc15b016b/webmoney?locale=en"
+        },
+        {
+            "bank_card": "http://business.agbadvans.com/pout/165998589a413b56ae72fbfdc15b016b/bank_card?locale=en"
+        },
+        {
+            "qiwi_wallet": "http://business.agbadvans.com/pout/165998589a413b56ae72fbfdc15b016b/qiwi_wallet?locale=en"
+        },
+        {
+            "skrill_wallet": "http://business.agbadvans.com/pout/165998589a413b56ae72fbfdc15b016b/skrill_wallet?locale=en"
+        }
+  ],
+  "selectorURL": "https://business.agbadvans.com/select/pout/[payment token]/",
+  "payment": {
+    "amount": "10020",
+    "currency": "CNY",
+    "status": "init"
+  }
+}
+In case multiple payout providers enabled to a merchant account, Create payout reponse JSON will have processingUrl object represented as an array of available payout providers (please refer to JSON response). Use those URLs to redirect your customer to a payout provider (method).
+
+List of payout providers
+In case you want a customer to choose a payout provider (method) it might be convenient to use a specific page (widget) with payout provider list, which is availabe by "selectorURL" parameter in JSON response object
+
+P2P
+RizonPay p2p payment processing REST API.
+
+Payment
+Code:
+Copy
+
+curl "https://business.agbadvans.com/api/v1/payments" \
+    -X POST \
+    -H "Authorization: Bearer merchant_private_key" \
+    -H "Content-Type: application/json" -d '{
+      "product": "Tests",
+      "amount": 100300,
+      "currency": "RUB",
+      "callbackUrl": "https://test.com",
+      "redirectSuccessUrl": "https://success.test.com/",
+      "redirectFailUrl": "https://declined.test.com/",
+      "pendingUrl": "https://pending.test.com/",
+      "bank_account": {
+          "bank_name": "sber",
+          "requisite_type": "sbp/card/account/link"
+      },
+      "customer": {
+          "email": "test@test.com",
+          "ip": "178.175.50.34"
+      }
+    }'
+Return status 200 and JSON:
+Copy
+
+{
+    "success": true,
+    "result": 0,
+    "status": 200,
+    "token": "K9doc43HAPnqSuGdvN5RMX42tE54331",
+    "processingUrl": [
+        {
+            "trader": "https://business.agbadvans.com/p/K9doc43HAPnqSuGdvN5RMX42tE54331?..."
+        }
+    ],
+    "selectorUrl": "https://business.agbadvans.com/select/K9doc43HAPnqSuGdvN5RMX42tE54331?...",
+    "payment": {
+        "amount": 1000,
+        "gateway_amount": 1000,
+        "currency": "RUB",
+        "status": "init",
+        "two_stage_mode": false,
+        "commission": 0
+    }
+}
+Initialize payments - to begin receiving payments, you must first call using the following script. This will enable you to obtain a payment token, which will be required later to complete API integration. Use redirect/GET to processingUrl after request.
+
+HTTP Request via SSL
+POST '/api/v1/payments'
+
+Query Parameters
+Parameter	Mandatory	Description	Validation
+product	yes	Product name (Service description) (example: 'iPhone').	minLength: 5, maxLength: 255
+amount	yes	Payment amount in cents (10020), except JPY	minLength: 1, maxLength: 32
+currency	yes	Currency code (CNY, EUR, USD, JPY).	minLength: 3, maxLength: 3
+callbackUrl	yes	The server URL a merchant will be notified about a payment finalisation	Valid URI format
+redirectSuccessUrl	no	The URL a customer will be redirected to in the case of successfull payment	Valid URI format
+redirectFailUrl	no	The URL a customer will be redirected to in the case of payment error or failure	Valid URI format
+extraReturnParam	no	Bank/Payment method list, description, etc	minLength: 1, maxLength: 1024
+orderNumber	no	The current order number from a company system.	minLength: 3, maxLength: 255 (string)
+locale	no	The locale is used on a payment page by default. Currently supported locales: en, zh and jp from ISO 639-1.	minLength: 2, maxLength: 5 (string)
+bank_account	no	Bank details object for p2p payments.	
+customer	yes	Customer object for Host2Host payments.	
+Bank account Payment Object Parameters
+Parameter	Mandatory	Description
+bank_name	no	Customer bank name: sberbank/tbank/raiffeisen/uralsib/alfabank/sovcombank/humo/uzcard
+requisite_type	no	Requisite type for payment: sbp/card/account/link
+Customer Object Parameters (optional)
+Parameter	Mandatory	Description	Validation
+email	yes	Customer’s email, is mandatory if Customer object posted on a request	Valid email format
+ip	no	Customer IP address	Valid IP address format (XX.XX.XX.XX)
+Payout Card
+Code:
+Copy
+
+curl "https://business.agbadvans.com/api/v1/payouts" \
+    -X POST \
+    -H "Authorization: Bearer merchant_private_key" \
+    -H "Content-Type: application/json" -d '{
+        "amount" : 1000,
+        "currency" : "RUB",
+        "orderNumber": "10001",
+        "callbackUrl": "https://test.com",
+        "bank_account": {
+            "bank_name": "sber",
+            "requisite_type": "card"
+        },
+        "card": {
+            "pan": "4627342642639018"
+        },
+        "customer": {
+            "email": "test@test.com",
+            "ip": "178.175.20.33",
+            "first_name": "Иванов",
+            "last_name": "Иван",
+            "middle_name": "Иванович",
+            "phone": "79998889900"
+        }
+    }'
+Return status 200 and JSON:
+Copy
+
+{
+    "success": true,
+    "result": 0,
+    "status": 200,
+    "token": "c3452f792233e43aeaa819c68766043",
+    "processingUrl": [
+        {
+            "trader": "https://business.agbadvans.com/payout/..."
+        }
+    ],
+    "selectorUrl": "https://business.agbadvans.com/select/payout/c3452f792233e43aeaa819c68766043",
+    "payment": {
+        "amount": 30000,
+        "currency": "RUB",
+        "gateway_amount": 30000,
+        "gateway_currency": "RUB",
+        "status": "init"
+    }
+}
+
+Create a payout operation. Use GET to processingUrl after request.
+
+HTTP Request via SSL
+POST '/api/v1/payouts'
+
+Query Parameters
+Parameter	Mandatory	Description
+amount	yes	Payment amount in minimal values. ex: 123 RUB = 1.23 RUB.
+currency	yes	Currency code
+orderNumber	yes	RizonPay's client inner order number
+callbackUrl	no	merchat notification url
+bank_account	yes	Bank details object for p2p payouts.
+card	yes	Card object for card p2p payouts.
+customer	yes	Customer object for payouts.
+Card Payout Object Parameters
+Parameter	Mandatory	Description
+pan	yes	Customer’s card number (PAN). Any valid card number
+Bank account Payout Object Parameters
+Parameter	Mandatory	Description
+bank_name	no	Customer bank name: sberbank/tbank/raiffeisen/uralsib/alfabank/sovcombank/humo/uzcard
+requisite_type	yes	card
+Customer Object Parameters
+Parameter	Mandatory	Description
+email	yes	Valid email format
+ip	yes	Customer IP address
+first_name	no	Customer name
+last_name	no	Customer surname
+middle_name	no	Customer middle name
+phone	no	Customer phone for sbp
+Payout SBP
+Code:
+Copy
+
+curl "https://business.agbadvans.com/api/v1/payouts" \
+    -X POST \
+    -H "Authorization: Bearer merchant_private_key" \
+    -H "Content-Type: application/json" -d '{
+        "amount" : 1000,
+        "currency" : "RUB",
+        "orderNumber": "10001",
+        "callbackUrl": "https://test.com",
+        "bank_account": {
+            "bank_name": "sber",
+            "requisite_type": "sbp"
+        },
+        "customer": {
+            "email": "test@test.com",
+            "ip": "178.175.20.33",
+            "first_name": "Иванов",
+            "last_name": "Иван",
+            "middle_name": "Иванович",
+            "phone": "79998889900"
+        }
+    }'
+Return status 200 and JSON:
+Copy
+
+{
+    "success": true,
+    "result": 0,
+    "status": 200,
+    "token": "c3452f792233e43aeaa819c68766043",
+    "processingUrl": [
+        {
+            "trader": "https://business.agbadvans.com/payout/..."
+        }
+    ],
+    "selectorUrl": "https://business.agbadvans.com/select/payout/c3452f792233e43aeaa819c68766043",
+    "payment": {
+        "amount": 30000,
+        "currency": "RUB",
+        "gateway_amount": 30000,
+        "gateway_currency": "RUB",
+        "status": "init"
+    }
+}
+
+Create a payout operation. Use GET to processingUrl after request.
+
+HTTP Request via SSL
+POST '/api/v1/payouts'
+
+Query Parameters
+Parameter	Mandatory	Description
+amount	yes	Payment amount in minimal values. ex: 123 RUB = 1.23 RUB.
+currency	yes	Currency code
+orderNumber	yes	RizonPay's client inner order number
+callbackUrl	no	merchat notification url
+bank_account	yes	Bank details object for p2p payouts.
+customer	yes	Customer object for payouts.
+Bank account Payout Object Parameters
+Parameter	Mandatory	Description
+bank_name	yes	Customer bank name: sberbank/tbank/raiffeisen/uralsib/alfabank/sovcombank/humo/uzcard
+requisite_type	yes	sbp
+Customer Object Parameters
+Parameter	Mandatory	Description
+email	yes	Valid email format
+ip	yes	Customer IP address
+first_name	no	Customer name
+last_name	no	Customer surname
+middle_name	no	Customer middle name
+phone	yes	Customer phone for sbp
+Payout Account
+Code:
+Copy
+
+curl "https://business.agbadvans.com/api/v1/payouts" \
+    -X POST \
+    -H "Authorization: Bearer merchant_private_key" \
+    -H "Content-Type: application/json" -d '{
+        "amount" : 1000,
+        "currency" : "RUB",
+        "orderNumber": "10001",
+        "callbackUrl": "https://test.com",
+        "bank_account": {
+            "bank_name": "sber",
+            "requisite_type": "account",
+            "account_number": "1234567891123456"
+        },
+        "customer": {
+            "email": "test@test.com",
+            "ip": "178.175.20.33",
+            "first_name": "Иванов",
+            "last_name": "Иван",
+            "middle_name": "Иванович",
+            "phone": "79998889900"
+        }
+    }'
+Return status 200 and JSON:
+Copy
+
+{
+    "success": true,
+    "result": 0,
+    "status": 200,
+    "token": "c3452f792233e43aeaa819c68766043",
+    "processingUrl": [
+        {
+            "trader": "https://business.agbadvans.com/payout/..."
+        }
+    ],
+    "selectorUrl": "https://business.agbadvans.com/select/payout/c3452f792233e43aeaa819c68766043",
+    "payment": {
+        "amount": 30000,
+        "currency": "RUB",
+        "gateway_amount": 30000,
+        "gateway_currency": "RUB",
+        "status": "init"
+    }
+}
+
+Create a payout operation. Use GET to processingUrl after request.
+
+HTTP Request via SSL
+POST '/api/v1/payouts'
+
+Query Parameters
+Parameter	Mandatory	Description
+amount	yes	Payment amount in minimal values. ex: 123 RUB = 1.23 RUB.
+currency	yes	Currency code
+orderNumber	yes	RizonPay's client inner order number
+callbackUrl	no	merchat notification url
+bank_account	yes	Bank details object for p2p payouts.
+customer	yes	Customer object for payouts.
+Bank account Payout Object Parameters
+Parameter	Mandatory	Description
+bank_name	yes	Customer bank name: sberbank/tbank/raiffeisen/uralsib/alfabank/sovcombank/humo/uzcard
+account_number	yes	Customer’s account number. Any valid account number
+requisite_type	yes	account
+Customer Object Parameters
+Parameter	Mandatory	Description
+email	yes	Valid email format
+ip	yes	Customer IP address
+first_name	no	Customer name
+last_name	no	Customer surname
+middle_name	no	Customer middle name
+phone	no	Customer phone for sbp
+Balance
+Request current RizonPay balance.
+
+Receive Balance
+Code:
+Copy
+
+curl "https://business.agbadvans.com/api/v1/balance?currency=CNY" \
+    -X GET \
+    -H "Authorization: Bearer merchant_private_key" \
+    -H "Content-Type: application/json"
+Return status 200 and JSON:
+Copy
+
+{
+  "success": true | false,
+  "result": 0,
+  "status": 200,
+  "errors": [],
+  "wallet": {
+    "available": 0,
+    "hold": 0,
+    "currency": "CNY"
+  }
+}
+Receiving the balance for a business account. Balance is returned as an object displaying available and pending amounts. Balances shown may be not be released and/or processed.
+
+The `errors` field may not be present in the response
+HTTP Request via SSL
+GET '/api/v1/balance'
+
+Query Parameters
+Parameter	Description
+currency	Currency code (CNY)
+Disputes
+Request current RizonPay dispute list.
+
+Dispute list
+Code:
+Copy
+
+curl "https://business.agbadvans.com/api/v1/disputes" \
+    -X GET \
+    -H "Authorization: Bearer merchant_private_key" \
+    -H "Content-Type: application/json"
+Return status 200 and JSON:
+Copy
+
+{
+    "success": true,
+    "status": 200,
+    "disputes": [
+        {
+            "id": 27,
+            "amount": 2,
+            "currency": "USD",
+            "investigation_report": null,
+            "status": "processing",
+            "merchant_profile_id": 3,
+            "user_profile_id": 3,
+            "feed_id": 330,
+            "created_at": "2019-09-13T08:46:21.302Z",
+            "updated_at": "2019-09-13T08:46:21.343Z",
+            "dispute_type": 2,
+            "reason_code": "123",
+            "comment": "some comment"
+        }
+    ]
+}
+Getting a list of last disputes for a business account.
+
+HTTP Request via SSL
+GET '/api/v1/disputes'
+
+Query Parameters
+Returns 100 latest records
+
+Parameter	Mandatory	Description
+status	no	Dispute status for filter [approved/pending/declined]
+date	no	Date for filter
+requisite	no	Requisite for filter
+device	no	Device for filter
+Create a dispute
+Code:
+Copy
+
+curl "https://business.agbadvans.com/api/v1/disputes" \
+    -X POST \
+    -header "Authorization: Bearer merchant_private_key" \
+    --header 'Content-Type: application/json' \
+    --form 'token="XsKkj4kmSjNATwoJdoiwwCmEKbT5efZX"' \
+    --form 'description="test description"' \
+    --form 'document=@"/home/test/Pictures/Screenshot from 2024-04-12 17-38-19.png"'
+}'
+Return status 200 and JSON:
+Copy
+
+{
+  "success": true | false,
+  "result": 0,
+  "status": 200
+}
+Create a dispute.
+
+HTTP Request via SSL
+POST '/api/v1/disputes'
+
+Query Parameters
+Parameter	Mandatory	Description
+token	yes	Payment token
+description	yes	Description for dispute
+document	yes	Payment receipt for dispute
+amount	no	Amount for dispute
+Operator
+Code:
+Copy
+
+curl "https://business.agbadvans.com/api/v1/operator?phone=77775415544" \
+    -H "Authorization: Bearer merchant_private_key"
+Return status 200 and JSON:
+Copy
+
+{
+  "success": true | false,
+  "status": 200,
+  "operator": "beeline"
+}
+Return operator by phone
+
+HTTP Request via SSL
+GET '/api/v1/operator'
+
+Query Parameters
+Parameter	Mandatory	Description
+phone	yes	Phone number.
+Notifications
+Notifications with the payment or payout status are sent to your callback URL using POST methods. In case payment or payout status changed (pending/approved/declined) -- notification type is sent accordingly.
+
+Code:
+Copy
+
+Params:
+Copy
+
+{
+
+  "token": "payment token",
+  "type": "payment type: payment | payout",
+  "status" : "payment status: pending | approved | declined ",
+  "extraReturnParam" : "extra params",
+  "orderNumber" : "merchant order number",
+  "walletToken": "payer's RizonPay wallet unique identifier, only for Rizonpay payments",
+  "recurringToken": "payer's previously initialized recurring token, for making recurrent payment repeatedly",
+  "sanitizedMask": "payer's sanitized card, if it was provided",
+  "amount": "payment amount in cents",
+  "currency": "payment currency",
+  "gatewayAmount": "exchanged amount in cents",
+  "gatewayCurrency": "exchanged currency"
+}
+`callback` can be configured in the company's back office.
+We define a notification as “successfully being sent” only in the case that your server responded with a 200 HTTP status code. If your server responded any error codes, we schedule recursive callbacks within a 1 hour interval, but not more than 9 times.
+Dictionaries
+Errors
+If any method failed, the JSON response with status code 403 returned that specified the problem.
+
+Return status 403 and JSON:
+Copy
+
+{'success': false, 'result': 1, 'status': 403, 'errors': {'list': [{'code': 'merchant_not_found', 'kind': 'api_error'}]}}
+
+{'success': false, 'result': 1, 'status': 403, 'errors': [{'code': 'amount_less_than_minimum', 'kind': 'invalid_request_error'}]}
+
+{'success': false, 'result': 1, 'status': 403, 'errors': [{'code': 'amount_less_than_balance', 'kind': 'processing_error'}]}
+Payment states
+State	Final	Description
+init	no	Request to API will initiate payments.
+pending	no	User redirected to the RizonPay Checkout facility during payment processing period.
+approved	yes	Successfully completed payment.
+declined	yes	Unsuccessful payment.
+expired	no	The transaction has expired due to timeout but may still be processed.
+Kinds of errors
+Kind	Description
+api_error	Indicate rare occasions such as an RizonPay API server technicality.
+authentication_error	Authentication request failure.
+invalid_request_error	Invalid parameters which produce invalid requests.
+processing_error	Processing the payment generated an error.
+Codes of errors
+Code	Description
+incorrect_private_key	The current private key cannot identify the user.
+incorrect_address_info	Absent or incorrect address information.
+incorrect_bank_card_info	Absent or incorrect bank card information.
+order_number_already_exists	Repeating an order of already identified order number.
+amount_less_than_balance	Payout cannot be completed due to insufficient funds.
+incorrect_amount	Absent or incorrect amount value.
+incorrect_currency	Absent or incorrect currency value.
+incorrect_order_number	Absent or incorrect order value.
+amount_less_than_minimum	Minimum payout amount has not been requested.
+cURLPythonPHPJava

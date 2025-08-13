@@ -1,0 +1,26 @@
+# Backend
+fastapi==0.110.0
+uvicorn==0.29.0
+pydantic==1.10.13
+python-jose==3.3.0
+requests==2.31.0
+openpyxl==3.1.2
+
+# Google API (для работы с Google Sheets/Drive)
+google-api-python-client==2.126.0
+google-auth==2.29.0
+google-auth-oauthlib==1.2.0
+
+# Frontend (React проект)
+# Эти библиотеки указываются в package.json, но добавим их сюда для полноты
+axios==1.6.8  # только если ты используешь axios в Python, иначе это часть фронта
+# React, Chakra UI, Lucide и т.п. не ставятся через pip, а через npm/yarn
+
+# Прочее
+pprintpp==0.4.0  # опционально, если хочешь красиво логировать
+
+# Тестирование
+pytest==8.2.2
+
+# Dev Utils
+python-dotenv==1.0.1  # если будешь использовать переменные окружения

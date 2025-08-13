@@ -1,0 +1,601 @@
+POST https://rollingslots.com/api/v1/en/account/login HTTP/2.0                                                       
+                         ← 200 application/json 1.9k 592ms
+user-agent:       Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:139.0) Gecko/20100101 Firefox/139.0                                    
+accept:           application/json, text/plain, */*                                                                                       
+accept-language:  en-US,en;q=0.5                                                                                                          
+accept-encoding:  gzip, deflate, br, zstd                                                                                                 
+content-type:     application/json                                                                                                        
+content-length:   81                                                                                                                      
+referer:          https://rollingslots.com/en                                                                                             
+origin:           https://rollingslots.com                                                                                                
+sec-fetch-dest:   empty                                                                                                                   
+sec-fetch-mode:   cors                                                                                                                    
+sec-fetch-site:   same-origin                                                                                                             
+x-fingerprint:                                                                                                                            
+cookie:           LANGUAGE=en                                                                                                             
+cookie:           _ga_2WT0GKZ0W6=GS2.1.s1750748211$o9$g1$t1750748705$j48$l0$h0                                                            
+cookie:           _ga=GA1.1.1940264323.1749029640                                                                                         
+cookie:           _cioanonid=9d35bdeb-9658-0604-d8ee-688927d7bcee                                                                         
+cookie:           rtgio_tid=v1.0.10984386825.10708183285                                                                                  
+cookie:           _gcl_au=1.1.233023430.1749029723                                                                                        
+cookie:           last-login=asddeeur                                                                                                     
+cookie:           _cioid=1960424                                                                                                          
+cookie:           lang=en                                                                                                                 
+priority:         u=4                                                                                                                     
+te:               trailers                                                                                                                
+JSON                                                                                                                                [m:auto]
+{
+    "login": "asddeeur",
+    "password": "123123123",
+    "google_token": "",
+    "facebook_token": ""
+}
+
+response : 
+date:                           Tue, 24 Jun 2025 07:05:17 GMT                                                                             
+content-type:                   application/json; charset=utf-8                                                                           
+content-security-policy:        default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors        
+                                'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self'   
+                                https: 'unsafe-inline';upgrade-insecure-requests                                                          
+cross-origin-opener-policy:     same-origin                                                                                               
+cross-origin-resource-policy:   same-origin                                                                                               
+origin-agent-cluster:           ?1                                                                                                        
+referrer-policy:                no-referrer                                                                                               
+strict-transport-security:      max-age=15552000; includeSubDomains                                                                       
+x-content-type-options:         nosniff                                                                                                   
+x-dns-prefetch-control:         off                                                                                                       
+x-download-options:             noopen                                                                                                    
+x-frame-options:                SAMEORIGIN                                                                                                
+x-permitted-cross-domain-polic  none                                                                                                      
+ies:                                                                                                                                      
+x-xss-protection:               0                                                                                                         
+vary:                           Origin                                                                                                    
+set-cookie:                     __token=; Path=/api/v1; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly                                   
+set-cookie:                     __Sec-Fp=; Path=/api/v1; Expires=Thu, 01 Jan 1970 00:00:00 GMT                                            
+set-cookie:                     __Sec-Fp=0.tkvyv1vwh5r; Path=/; Expires=Fri, 23 Jun 2028 07:05:16 GMT; SameSite=Lax                       
+set-cookie:                     lang=en; Path=/                                                                                           
+set-cookie:                     __token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50X2lkIjoxOTYwNDI0LCJwcmVmaXgiOiJSTFNfIiwibG9naW4iO
+                                iJBU0RERUVVUiIsImVtYWlsIjoiYXNkQGdtYWlsLmNvbSIsImlwIjoiMTI3LjAuMC4xIiwiZW50aXR5X2lkIjozMDAwLCJzZXNzaW9uX2l
+                                kIjoiUkxTX0FTRERFRVVSOjk0ZmQ0NDQwLTUwYzktMTFmMC1iMzk2LTZiM2E5NWYyNzJmNCIsImxhbmd1YWdlIjoiRU4iLCJjdXJyZW5je
+                                SI6IkVVUiIsImNvdW50cnkiOiJERSIsImxldmVsIjoxLCJwcm9maWxlIjp7InRmYSI6eyJzZWNyZXQiOiJQQkZTMlBES05ZRVQ0V1FKIiw
+                                ic3RhdHVzIjpmYWxzZX0sImNpdHkiOiJCZXJsaW4iLCJuYW1lIjoiYXNkZiIsImF2YXRhciI6InJvY2tlcl8zIiwiZ2VuZGVyIjoiTSIsI
+                                nJlZ2lvbiI6IiIsImFkZHJlc3MiOiJkZmdkc2Znc2QiLCJzdXJuYW1lIjoic2RnZmRzZmdzZGZnIiwiYmlydGhkYXkiOiIxOTkwLTEyLTE
+                                yIiwicG9zdGNvZGUiOiJhc2Rmc2FkZiIsImlzX2ZkYl9tYWRlIjpmYWxzZSwiaXNfZmlyc3RfZGVwb3NpdF9tYWRlIjp0cnVlLCJkZXBvc
+                                2l0X3N1bSI6NDM3OCwiZGVwb3NpdF9jb3VudCI6MTgsInRpdGxlIjpudWxsLCJzdGF0ZSI6bnVsbH0sImVidGFnIjoiIiwic3ViaWQiOiI
+                                iLCJmcCI6ImFjOGZmMzU2ZTdjODVjYjIzMjRjZTUxZDc4ODMwMDg2IiwiZGF0YSI6eyJ3aXRoZHJhd19tYXgiOjUwMCwiZW1haWwiOnsid
+                                mFsaWRfZW1haWwiOmZhbHNlfX0sImlhdCI6MTc1MDc0ODcxNn0.FrbAhfD6aJT1KeHezvdaYKShfP4LsYk0RPKAXH0BI0E; Path=/;   
+                                Expires=Fri, 23 Jun 2028 07:05:16 GMT; HttpOnly; SameSite=Lax                                             
+cache-control:                  private, no-cache                                                                                         
+cf-cache-status:                DYNAMIC                                                                                                   
+server:                         cloudflare                                                                                                
+cf-ray:                         954a6036afdfe854-FRA                                                                                      
+content-encoding:               br                                                                                                        
+alt-svc:                        h3=":443"; ma=86400                     
+
+{
+    "account_id": 1960424,
+    "balance": 82.21,
+    "bonus": {
+        "casino": {
+            "sum": 0,
+            "rollover": 0,
+            "rollover_init": 0,
+            "rollover_pct": 0
+        },
+        "sport": {
+            "sum": 0,
+            "rollover": 0,
+            "rollover_init": 0,
+            "rollover_pct": 0
+        },
+        "freespin": {
+            "rounds": 0,
+            "rounds_played": 0
+        }
+    },
+    "created": "2022-09-08 08:56:50",
+    "country": "DE",
+    "countryISO": "DEU",
+    "currency": "EUR",
+    "language": "en",
+    "prefix": "RLS_",
+    "login": "ASDDEEUR",
+    "entity_id": 3000,
+    "phone": "+0092808299",
+    "email": "asd@gmail.com",
+    "profile": {
+        "tfa": {
+            "secret": "PBFS2PDKNYET4WQJ",
+            "status": false
+        },
+        "city": "Berlin",
+        "name": "asdf",
+        "avatar": "rocker_3",
+        "gender": "M",
+        "region": "",
+        "address": "dfgdsfgsd",
+        "surname": "sdgfdsfgsdfg",
+        "birthday": "1990-12-12",
+        "postcode": "asdfsadf",
+        "is_fdb_made": false,
+        "is_first_deposit_made": true,
+        "deposit_sum": 4378,
+        "deposit_count": 18,
+"title": null,
+        "state": null,
+        "achievements": {
+            "earned": 0,
+            "total": 0
+        }
+    },
+    "level": 1,
+    "level_pct": 0,
+    "loyalty": 37,
+    "level_info": null,
+    "session_id": "RLS_ASDDEEUR:94fd4440-50c9-11f0-b396-6b3a95f272f4",
+    "activated": true,
+    "type": "test",
+    "active_bonus": 0,
+    "gdpr_marketing": "",
+    "limits": {
+        "deposit": [],
+        "losses": [],
+        "wager": []
+    },
+    "withdraw_amount": 0,
+    "withdraw_rollover": 12657,
+    "wof": null,
+    "features": {
+        "mask": 0,
+        "achieves": 11,
+        "allowed_mask": []
+    },
+    "coins": 37,
+    "last_win": [],
+    "max_win": {},
+    "data": {
+        "verified": {
+            "psp": true,
+            "bills": true,
+            "selfie": true,
+            "id_card": true
+        },
+        "confirmed": {
+            "profile": {
+                "promos": {
+                    "easter_2024": {
+                        "value": {
+                            "promo_img_2": true,
+                            "promo_img_4": true,
+                            "promo_img_6": true
+                        },
+                        "date_at": "2024-03-29T17:04:23.947Z"
+                    },
+                    "promoBonus_1": {
+                        "value": {
+                            "promo_img_1": true,
+                            "promo_img_2": true,
+                            "promo_img_3": true,
+                            "promo_img_4": true,
+                            "promo_img_5": true,
+                            "promo_img_6": true,
+                            "isBonusActivated": true
+                        },
+                        "date_at": "2024-02-12T09:32:29.606Z"
+                    },
+                    "halloweenBonus": {
+                        "value": {
+                            "pump_1": true,
+                            "pump_2": true,
+                            "pump_3": true,
+                            "pump_4": true,
+                            "pump_5": true,
+                            "pump_6": true,
+                            "isBonusActivated": true
+                        },
+                        "date_at": "2023-10-19T13:09:41.514Z"
+                    },
+                    "october_fest_24": {
+                        "value": {
+                            "promo_img_1": true,
+                            "promo_img_2": true,
+                            "promo_img_3": true,
+                            "promo_img_4": true,
+                            "promo_img_5": true,
+                            "promo_img_6": true,
+                            "isBonusActivated": true
+      },
+                        "date_at": "2023-10-19T13:09:41.514Z"
+                    },
+                    "october_fest_24": {
+                        "value": {
+                            "promo_img_1": true,
+                            "promo_img_2": true,
+                            "promo_img_3": true,
+                            "promo_img_4": true,
+                            "promo_img_5": true,
+                            "promo_img_6": true,
+                            "isBonusActivated": true
+                        },
+                        "date_at": "2024-10-03T14:58:04.686Z"
+                    },
+                    "patrick_fest_25": {
+                        "value": {
+                            "promo_img_1": true,
+                            "promo_img_2": true,
+                            "promo_img_3": true,
+                            "promo_img_4": true,
+                            "promo_img_5": true,
+                            "promo_img_6": true,
+                            "isBonusActivated": true
+                        },
+                        "date_at": "2025-03-13T14:48:52.692Z"
+                    },
+                    "christmas_fest_24": {
+                        "value": {
+                            "promo_img_1": true,
+                            "promo_img_6": true
+                        },
+                        "date_at": "2025-01-14T08:55:09.821Z"
+                    }
+                },
+                "push_on": true,
+                "reality_check": 180,
+                "password": true
+            }
+        },
+        "withdraw_max": 500,
+        "m_settings": {
+            "bonuses": 1,
+            "promo_sms": 0,
+            "promo_email": false,
+            "transaction_email": 1
+        },
+        "frozen": {
+            "from": null,
+            "reason": null
+        },
+        "email": {
+            "valid": true,
+            "valid_email": false,
+            "verified": false
+        },
+        "deposit_count": 8,
+        "withdraw_count": 0,
+        "ip": "91.227.40.137",
+        "corefy_oct": null,
+        "telegram_info": null,
+        "zimpler": null,
+        "last_deposit": {
+            "amount": 10,
+            "paymethod": "helloclever_bsb"
+        },
+        "subid": ""
+    },
+    "btag": null,
+    "favorites_count": 0,
+    "last_played_count": 0,
+    "vip": false,
+    "tags": [],
+    "frozen": 0,
+    "affiliate": "",
+    "level_points": 12,
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50X2lkIjoxOTYwNDI0LCJwcmVmaXgiOiJSTFNfIiwibG9naW4iOiJBU0RERUVVUiIsImVtYWlsIjoiY
+XNkQGdtYWlsLmNvbSIsImlwIjoiMTI3LjAuMC4xIiwiZW50aXR5X2lkIjozMDAwLCJzZXNzaW9uX2lkIjoiUkxTX0FTRERFRVVSOjk0ZmQ0NDQwLTUwYzktMTFmMC1iMzk2LTZiM2E5N
+WYyNzJmNCIsImxhbmd1YWdlIjoiRU4iLCJjdXJyZW5jeSI6IkVVUiIsImNvdW50cnkiOiJERSIsImxldmVsIjoxLCJwcm9maWxlIjp7InRmYSI6eyJzZWNyZXQiOiJQQkZTMlBES05ZR
+VQ0V1FKIiwic3RhdHVzIjpmYWxzZX0sImNpdHkiOiJCZXJsaW4iLCJuYW1lIjoiYXNkZiIsImF2YXRhciI6InJvY2tlcl8zIiwiZ2VuZGVyIjoiTSIsInJlZ2lvbiI6IiIsImFkZHJlc
+3MiOiJkZmdkc2Znc2QiLCJzdXJuYW1lIjoic2RnZmRzZmdzZGZnIiwiYmlydGhkYXkiOiIxOTkwLTEyLTEyIiwicG9zdGNvZGUiOiJhc2Rmc2FkZiIsImlzX2ZkYl9tYWRlIjpmYWxzZ
+SwiaXNfZmlyc3RfZGVwb3NpdF9tYWRlIjp0cnVlLCJkZXBvc2l0X3N1bSI6NDM3OCwiZGVwb3NpdF9jb3VudCI6MTgsInRpdGxlIjpudWxsLCJzdGF0ZSI6bnVsbH0sImVidGFnIjoiI
+iwic3ViaWQiOiIiLCJmcCI6ImFjOGZmMzU2ZTdjODVjYjIzMjRjZTUxZDc4ODMwMDg2IiwiZGF0YSI6eyJ3aXRoZHJhd19tYXgiOjUwMCwiZW1haWwiOnsidmFsaWRfZW1haWwiOmZhb
+HNlfX0sImlhdCI6MTc1MDc0ODcxNn0.FrbAhfD6aJT1KeHezvdaYKShfP4LsYk0RPKAXH0BI0E"}
+
+
+------------------
+
+Deposit field request : 
+GET https://rollingslots.com/api/v1/en/model/paysystem/deposit?fields=images,name,title,display_type,show_amount,par 
+                        ent_paysystem,run_iframe,version&limit=100 HTTP/2.0    
+
+user-agent:       Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:139.0) Gecko/20100101 Firefox/139.0                                    
+accept:           application/json, text/plain, */*                                                                                       
+accept-language:  en-US,en;q=0.5                                                                                                          
+accept-encoding:  gzip, deflate, br, zstd                                                                                                 
+referer:          https://rollingslots.com/en                                                                                             
+sec-fetch-dest:   empty                                                                                                                   
+sec-fetch-mode:   cors                                                                                                                    
+sec-fetch-site:   same-origin                                                                                                             
+x-fingerprint:                                                                                                                            
+cookie:           LANGUAGE=en                                                                                                             
+cookie:           _ga_2WT0GKZ0W6=GS2.1.s1750748211$o9$g1$t1750748242$j29$l0$h0                                                            
+cookie:           _ga=GA1.1.1940264323.1749029640                                                                                         
+cookie:           _cioanonid=9d35bdeb-9658-0604-d8ee-688927d7bcee                                                                         
+cookie:           rtgio_tid=v1.0.10984386825.10708183285                                                                                  
+cookie:           _gcl_au=1.1.233023430.1749029723                                                                                        
+cookie:           last-login=asddeeur                                                                                                     
+cookie:           _cioid=1960424                                                                                                          
+cookie:           __Sec-Fp=0.2birmvw0hzw                                                                                                  
+cookie:           lang=en                                                                                                                 
+cookie:           __token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50X2lkIjoxOTYwNDI0LCJwcmVmaXgiOiJSTFNfIiwibG9naW4iOiJBU0RERUVVUiI
+                  sImVtYWlsIjoiYXNkQGdtYWlsLmNvbSIsImlwIjoiMTI3LjAuMC4xIiwiZW50aXR5X2lkIjozMDAwLCJzZXNzaW9uX2lkIjoiUkxTX0FTRERFRVVSOjZkZDJ
+                  hY2QwLTUwYzgtMTFmMC04ZWUyLWY3NDVkNzk5N2YxMCIsImxhbmd1YWdlIjoiRU4iLCJjdXJyZW5jeSI6IkVVUiIsImNvdW50cnkiOiJERSIsImxldmVsIjo
+                  xLCJwcm9maWxlIjp7InRmYSI6eyJzZWNyZXQiOiJQQkZTMlBES05ZRVQ0V1FKIiwic3RhdHVzIjpmYWxzZX0sImNpdHkiOiJCZXJsaW4iLCJuYW1lIjoiYXN
+                  kZiIsImF2YXRhciI6InJvY2tlcl8zIiwiZ2VuZGVyIjoiTSIsInJlZ2lvbiI6IiIsImFkZHJlc3MiOiJkZmdkc2Znc2QiLCJzdXJuYW1lIjoic2RnZmRzZmd
+                  zZGZnIiwiYmlydGhkYXkiOiIxOTkwLTEyLTEyIiwicG9zdGNvZGUiOiJhc2Rmc2FkZiIsImlzX2ZkYl9tYWRlIjpmYWxzZSwiaXNfZmlyc3RfZGVwb3NpdF9
+                  tYWRlIjp0cnVlLCJkZXBvc2l0X3N1bSI6NDM3OCwiZGVwb3NpdF9jb3VudCI6MTgsInRpdGxlIjpudWxsLCJzdGF0ZSI6bnVsbH0sImVidGFnIjoiIiwic3V
+                  iaWQiOiIiLCJmcCI6ImNjMWUyNzE5YjUxOWEzMzFmZDJmYTZkNjEwMDQxZTY5IiwiZGF0YSI6eyJ3aXRoZHJhd19tYXgiOjUwMCwiZW1haWwiOnsidmFsaWR
+                  fZW1haWwiOmZhbHNlfX0sImlhdCI6MTc1MDc0ODIyMX0.SN7WGIsnfW_9Vic8BBggnGSdttEx-2u05vqzQtGUnbU                                
+cookie:           logged-in=true                                                                                                          
+cookie:           user_id=1960424                                                                                                         
+priority:         u=0                                                                                                                     
+te:               trailers                                                                                                                
+                                                                                                                                    [m:auto]
+No request content
+
+
+Deposit Response : 
+date:                           Tue, 24 Jun 2025 06:57:24 GMT                                                                             
+content-type:                   application/json; charset=utf-8                                                                           
+content-security-policy:        default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors        
+                                'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self'   
+                                https: 'unsafe-inline';upgrade-insecure-requests                                                          
+cross-origin-opener-policy:     same-origin                                                                                               
+cross-origin-resource-policy:   same-origin                                                                                               
+origin-agent-cluster:           ?1                                                                                                        
+referrer-policy:                no-referrer                                                                                               
+strict-transport-security:      max-age=15552000; includeSubDomains                                                                       
+x-content-type-options:         nosniff                                                                                                   
+x-dns-prefetch-control:         off                                                                                                       
+x-download-options:             noopen                                                                                                    
+x-frame-options:                SAMEORIGIN                                                                                                
+x-permitted-cross-domain-polic  none                                                                                                      
+ies:                                                                                                                                      
+x-xss-protection:               0                                                                                                         
+vary:                           Origin                                                                                                    
+cache-control:                  private, no-cache                                                                                         
+cf-cache-status:                DYNAMIC                                                                                                   
+server:                         cloudflare                                                                                                
+cf-ray:                         954a54aeab90e854-FRA                                                                                      
+content-encoding:               br                                                                                                        
+alt-svc:                        h3=":443"; ma=86400                 Ё
+
+
+{
+    "count": 31,
+    "page": 1,
+    "limit": 100,
+    "data": [
+        {
+            "alias": "dm0tY29yZWZ5LWNhcmRzLTFkZXA=",
+            "allow_only_kyc_users": false,
+            "display_type": "out",
+            "images": {
+                "drop_down_image": [],
+                "image_footer": [
+                    "/paysystem/en/Visa, Mastercard-min_rls_a3522375-f488-4918-be3e-a811bd446f1e.svg"
+                ],
+                "static": [
+                    "/paysystem/en/VISAMC_rls_a41bb60f-d06c-4a44-8975-28aee6201e99.svg"
+                ]
+            },
+            "name": "V/M_Corefy_Cards_1DEP",
+            "oct_withdrawal": false,
+            "parent_paysystem": "",
+            "run_iframe": false,
+            "title": "Visa/Mastercard",
+            "doc_id": "rls_9038fc1f-07a1-447c-a409-9b10025b8132",
+            "paymethods": {
+                "currency": {
+                    "code": "EUR",
+                    "currency": "EUR",
+                    "id": "rls_8cc50e3e-8b74-4750-ad63-de0b842ec4b2"
+                },
+                "default": 50,
+                "description": "The transaction description in your statement may vary. Please contact us, if you need clarification.",
+                "duration": "",
+                "field": {
+                    "label": "",
+                    "name": "",
+                    "type": ""
+                },
+                "field_label": "",
+                "field_name": "",
+                "field_type": "",
+                "fields": [
+                    {
+                        "field": {
+                            "best_choice": "",
+                            "input_mode": "",
+                            "label": "",
+                            "name": "",
+                            "patern": "",
+                            "type": ""
+                        }
+                    }
+                ],
+                "max": 750,
+                "max_dep_flow": 750,
+                "min": 20,
+                "min_dep_flow": 10,
+                "operation_type": "deposit",
+                "paymethod": {
+                    "code": "payment_card_eur_hpp",
+                    "id": "e294d340-b894-4311-839d-298c9deacf10",
+                    "name": "Y29yZWZ5X2NjX2V1cg==",
+                    "paymethod_id": 26011,
+                    "paysystem": {
+                        "id": "f0bacc29-c6e1-41e6-909b-1b7e5e660002",
+                        "name": "corefy",
+                        "paysystem_id": 1132
+                    }
+                },
+                "paysystem": {
+                    "id": "f0bacc29-c6e1-41e6-909b-1b7e5e660002",
+                    "name": "corefy"
+                },
+                "range": "30,50,100,250,500,750",
+                "recomended": {
+                    "countries": [],
+                    "crypto_memo_flow": false,
+                    "status": true
+                },
+                 "secondary_payment": {
+                    "bet_sum": false,
+                    "deposit_limit": false,
+                    "deposit_sum": false,
+                    "payment_bet_hide_max": "",
+                    "payment_bet_hide_min": "",
+                    "payment_bet_show_max": "",
+                    "payment_bet_show_min": "",
+                    "payment_count_hide_max": "",
+                    "payment_count_hide_min": "",
+                    "payment_count_show_max": "",
+                    "payment_count_show_min": "",
+                    "payment_hide_max": "",
+                    "payment_hide_min": "",
+                    "payment_show_max": "",
+                    "payment_show_min": "",
+                    "payment_sum_hide_max": "",
+                    "payment_sum_hide_min": "",
+                    "payment_sum_show_max": "",
+                    "payment_sum_show_min": "",
+                    "paysystem_bet_hide": "",
+                    "paysystem_bet_show": "",
+                    "paysystem_count_hide": "",
+                    "paysystem_count_show": "",
+                    "paysystem_hide": "",
+                    "paysystem_show": "",
+                    "paysystem_sum_hide": "",
+                    "paysystem_sum_show": ""
+                },
+                "show_amount": true,
+                "special_bonus": {
+                    "card_amount": "",
+                    "offer_description": "\n",
+                    "show_special_bonus": false
+                }
+            },
+            "version": 2
+        },
+details : 
+Server Connection:
+    Address           rollingslots.com:443
+    Resolved Address  194.113.223.1:443
+    HTTP Version      HTTP/2.0
+    ALPN              h2
+Server Certificate:
+    Type           EC (secp256r1), 256 bits
+    SHA256 digest  fe 03 d5 f2 6d a2 f2 69 81 46 2e 0c 97 23 df c7 a3 1b 3b 0b 6e 97 44 b5 d5 e0 b4 db f5 fb 4b b9
+    Valid from     2025-05-01 12:01:48+00:00
+    Valid to       2025-07-30 13:01:24+00:00
+    Serial         31933810260859487878500081358495244808
+    Subject        CN  rollingslots.com                                                                                                   
+    Issuer         C   US                                                                                                                 
+                   O   Google Trust Services                                                                                              
+                   CN  WE1                                                                                                                
+    Alt names      rollingslots.com, *.rollingslots.com
+Client Connection:
+    Address                 127.0.0.1:50770
+    HTTP Version            HTTP/2.0
+    TLS Version             TLSv1.3
+    Server Name Indication  rollingslots.com
+    Cipher Name             TLS_AES_256_GCM_SHA384
+    ALPN                    h2
+Timing:
+    Client conn. established    2025-06-24 09:56:47.779
+    Server conn. initiated      2025-06-24 09:56:47.785
+    Server conn. TCP handshake  2025-06-24 09:56:47.909
+    Server conn. TLS handshake  2025-06-24 09:56:47.998
+    Client conn. TLS handshake  2025-06-24 09:56:48.014
+    First request byte          2025-06-24 09:57:24.166
+    Request complete            2025-06-24 09:57:24.169
+    First response byte         2025-06-24 09:57:24.586
+    Response complete           2025-06-24 09:57:24.653
+    Client conn. closed         –
+    Server conn. closed         –
+
+
+
+---------------
+Deposit method click 
+
+ POST https://rollingslots.com/api/v1/en/payment/deposit HTTP/2.0                                                     
+                         ← 200 application/json 122b 4.57s
+user-agent:       Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:139.0) Gecko/20100101 Firefox/139.0                                    
+accept:           application/json, text/plain, */*                                                                                       
+accept-language:  en-US,en;q=0.5                                                                                                          
+accept-encoding:  gzip, deflate, br, zstd                                                                                                 
+content-type:     application/json                                                                                                        
+content-length:   130                                                                                                                     
+referer:          https://rollingslots.com/en/account/dashboard                                                                           
+origin:           https://rollingslots.com                                                                                                
+sec-fetch-dest:   empty                                                                                                                   
+sec-fetch-mode:   cors                                                                                                                    
+sec-fetch-site:   same-origin                                                                                                             
+x-fingerprint:                                                                                                                            
+cookie:           LANGUAGE=en                                                                                                             
+cookie:           _ga_2WT0GKZ0W6=GS2.1.s1750748211$o9$g1$t1750748608$j57$l0$h0                                                            
+cookie:           _ga=GA1.1.1940264323.1749029640                                                                                         
+cookie:           _cioanonid=9d35bdeb-9658-0604-d8ee-688927d7bcee                                                                         
+cookie:           rtgio_tid=v1.0.10984386825.10708183285                                                                                  
+cookie:           _gcl_au=1.1.233023430.1749029723                                                                                        
+cookie:           last-login=asddeeur                                                                                                     
+cookie:           _cioid=1960424                                                                                                          
+cookie:           __Sec-Fp=0.2birmvw0hzw                                                                                                  
+cookie:           lang=en                                                                                                                 
+cookie:           __token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50X2lkIjoxOTYwNDI0LCJwcmVmaXgiOiJSTFNfIiwibG9naW4iOiJBU0RERUVVUiI
+                  sImVtYWlsIjoiYXNkQGdtYWlsLmNvbSIsImlwIjoiMTI3LjAuMC4xIiwiZW50aXR5X2lkIjozMDAwLCJzZXNzaW9uX2lkIjoiUkxTX0FTRERFRVVSOjZkZDJ
+                  hY2QwLTUwYzgtMTFmMC04ZWUyLWY3NDVkNzk5N2YxMCIsImxhbmd1YWdlIjoiRU4iLCJjdXJyZW5jeSI6IkVVUiIsImNvdW50cnkiOiJERSIsImxldmVsIjo
+                  xLCJwcm9maWxlIjp7InRmYSI6eyJzZWNyZXQiOiJQQkZTMlBES05ZRVQ0V1FKIiwic3RhdHVzIjpmYWxzZX0sImNpdHkiOiJCZXJsaW4iLCJuYW1lIjoiYXN
+                  kZiIsImF2YXRhciI6InJvY2tlcl8zIiwiZ2VuZGVyIjoiTSIsInJlZ2lvbiI6IiIsImFkZHJlc3MiOiJkZmdkc2Znc2QiLCJzdXJuYW1lIjoic2RnZmRzZmd
+                  zZGZnIiwiYmlydGhkYXkiOiIxOTkwLTEyLTEyIiwicG9zdGNvZGUiOiJhc2Rmc2FkZiIsImlzX2ZkYl9tYWRlIjpmYWxzZSwiaXNfZmlyc3RfZGVwb3NpdF9
+                  tYWRlIjp0cnVlLCJkZXBvc2l0X3N1bSI6NDM3OCwiZGVwb3NpdF9jb3VudCI6MTgsInRpdGxlIjpudWxsLCJzdGF0ZSI6bnVsbH0sImVidGFnIjoiIiwic3V
+                  iaWQiOiIiLCJmcCI6ImNjMWUyNzE5YjUxOWEzMzFmZDJmYTZkNjEwMDQxZTY5IiwiZGF0YSI6eyJ3aXRoZHJhd19tYXgiOjUwMCwiZW1haWwiOnsidmFsaWR
+                  fZW1haWwiOmZhbHNlfX0sImlhdCI6MTc1MDc0ODIyMX0.SN7WGIsnfW_9Vic8BBggnGSdttEx-2u05vqzQtGUnbU                                
+cookie:           logged-in=true                                                                                                          
+cookie:           user_id=1960424                                                                                                         
+priority:         u=0                                                                                                                     
+te:               trailers                                                                                                                
+JSON                                                                                                                                [m:auto]
+{
+    "amount": "50",
+    "currency": "EUR",
+    "paymethod": "Y29yZWZ5X2NjX2V1cg==",
+    "fields": {},
+    "alias": "dm0tY29yZWZ5LWNhcmRzLTFkZXA=",
+    "version": 2
+}
+
+response : 
+date:                           Tue, 24 Jun 2025 07:03:38 GMT                                                                             
+content-type:                   application/json; charset=utf-8                                                                           
+content-security-policy:        default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors        
+                                'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self'   
+                                https: 'unsafe-inline';upgrade-insecure-requests                                                          
+cross-origin-opener-policy:     same-origin                                                                                               
+cross-origin-resource-policy:   same-origin                                                                                               
+origin-agent-cluster:           ?1                                                                                                        
+referrer-policy:                no-referrer                                                                                               
+strict-transport-security:      max-age=15552000; includeSubDomains                                                                       
+x-content-type-options:         nosniff                                                                                                   
+x-dns-prefetch-control:         off                                                                                                       
+x-download-options:             noopen                                                                                                    
+x-frame-options:                SAMEORIGIN                                                                                                
+x-permitted-cross-domain-polic  none                                                                                                      
+ies:                                                                                                                                      
+x-xss-protection:               0                                                                                                         
+vary:                           Origin                                                                                                    
+cache-control:                  private, no-cache                                                                                         
+cf-cache-status:                DYNAMIC                                                                                                   
+server:                         cloudflare                                                                                                
+cf-ray:                         954a5db76e0ee854-FRA                                                                                      
+content-encoding:               br                                                                                                        
+alt-svc:                        h3=":443"; ma=86400                                                                                       
+JSON [decoded br]                                                                                                                   [m:auto]
+{
+    "url": "https://checkout.trustypayments.net/hpp/cgi_IfK5zYcQNDwYCY0C",
+    "alias": "RLS_ASDDEEUR#40122182",
+    "method": "GET",
+    "body": [],
+    "post": {}
+}
+

@@ -1,0 +1,5 @@
+0depaffilateurmobi | Mifinity_Mifinity_Wallet | 500 | Internal Server Error
+0depaffilateurdesk | Mifinity_Mifinity_Wallet | 500 | Internal Server Error
+0depaffilseeurmobi | Mifinity_Mifinity_Wallet | 500 | Internal Server Error
+0depaffilseeurdesk | Mifinity_Mifinity_Wallet | 500 | Internal Server Error
+4depaffilseeurmobi1 | Mifinity_Mifinity_Wallet | 500 | Internal Server Error
