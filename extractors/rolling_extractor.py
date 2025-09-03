@@ -1,64 +1,69 @@
 import logging
+from typing import List, Tuple, Set, Dict, Any, Optional
+
 from .base_extractor import BaseExtractor
-from .min_deposit_extractor import compute_min_deposit  # уже есть импорт
+from .min_deposit_extractor import compute_min_deposit
+
 
 class RollingExtractor(BaseExtractor):
+    """
+    Экстрактор для Rolling:
+    - тянем сырые депозиты с return_raw=True
+    - считаем min_deposit для каждой депозитной пары
+    - ⭐ recommended берём ТОЛЬКО из депозита (как раньше)
+    """
+
+
     def __init__(self, login, password, user_agent=None, base_url=None):
         super().__init__(login, password, user_agent, base_url)
-
-    def _inject_min_deposit(self, methods_list):
-        """
-        Пробегаемся по сырым items (как в твоём payload) и добавляем:
-          - min_deposit (число)
-          - min_source  ('min_dep_flow' | 'min' | 'range' | 'default' | 'not_deposit' | 'none')
-          - currency    (если можно вытащить из paymethods.currency)
-        Если структура элемента уже нормализована и нет paymethods — просто пропускаем.
-        """
-        out = []
-        for item in methods_list or []:
-            # стараемся не ломать исходный объект
-            m = dict(item)
-
-            # если доступны сырые поля paymethods — считаем минималку
-            pm = (m.get("paymethods") or {}) if isinstance(m, dict) else {}
-            try:
-                min_val, src = compute_min_deposit(m)
-                if min_val is not None:
-                    m["min_deposit"] = min_val
-                m["min_source"] = src
-
-                # подтащим валюту (если в элементе нет своего поля currency)
-                if "currency" not in m:
-                    cur_block = pm.get("currency") or {}
-                    cur_code = cur_block.get("code") or cur_block.get("currency")
-                    if cur_code:
-                        m["currency"] = cur_code
-            except Exception as e:
-                logging.exception("Ошибка расчёта min_deposit для метода: %s", e)
-
-            out.append(m)
-        return out
 
     def get_payment_and_withdraw_systems(self, current_geo: str):
         current_country = current_geo.split("_")[0]
 
         logging.info("Получение данных о депозитах")
-        deposit_methods, deposit_names, recommended_deposit = self.fetch_methods(self.DEPOSIT_URL, current_country)
-        # обогащаем минималкой
-        deposit_methods = self._inject_min_deposit(deposit_methods)
+        dep_titles, dep_names, rec_dep, dep_raw = self.fetch_methods(
+            self.DEPOSIT_URL, current_country, return_raw=True
+        )
 
         logging.info("Получение данных о выводах")
-        withdraw_methods, withdraw_names, recommended_withdraw = self.fetch_methods(self.WITHDRAW_URL, current_country)
-        # для withdraw тоже можно посчитать — compute_min_deposit вернёт 'not_deposit' и мы не сломаемся
-        withdraw_methods = self._inject_min_deposit(withdraw_methods)
+        wd_titles, wd_names, rec_wd, _ = self.fetch_methods(
+            self.WITHDRAW_URL, current_country, return_raw=True
+        )
 
-        recommended_methods = recommended_deposit.union(recommended_withdraw)
+        # ── обогащаем депозиты min_deposit
+        deposit_enriched: List[Dict[str, Any]] = []
+        for item in dep_raw or []:
+            try:
+                title = (item.get("title") or item.get("alias") or item.get("name") or "").strip()
+                pm = item.get("paymethods") or {}
+                pm_pay = pm.get("paymethod") or {}
+                name = (item.get("name") or pm_pay.get("name") or pm_pay.get("code") or "").strip()
+                if not title or not name:
+                    continue
 
+                min_val, source = compute_min_deposit(item)
+                currency = ((pm.get("currency") or {}).get("code")) or self.currency
+
+                deposit_enriched.append({
+                    "title": title,
+                    "name": name,
+                    "min_deposit": float(min_val) if min_val is not None else None,
+                    "currency": currency,
+                    "min_source": source,
+                })
+            except Exception:
+                # не падаем на отдельной записи
+                continue
+
+        # ⭐ только депозитные рекомендации (никакого union)
+        recommended_methods: Set[Tuple[str, str]] = set(rec_dep)
+
+        # возвращаем в прежнем контракте
         return (
-            deposit_methods,
-            withdraw_methods,
-            deposit_names,
-            withdraw_names,
+            deposit_enriched,      # вместо списка титулов — обогащённый список dict'ов
+            wd_titles,             # withdraw titles (как раньше)
+            dep_names,             # не используется фронтом, но оставляем для совместимости
+            wd_names,
             self.currency,
             self.deposit_count,
             recommended_methods

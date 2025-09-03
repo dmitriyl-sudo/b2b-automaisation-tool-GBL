@@ -18,7 +18,7 @@ from extractors.slota_extractor import SlotaExtractor
 from extractors.spinline_extractor import SpinlineExtractor
 from extractors.glitchspin_extractor import GlitchSpinExtractor
 from extractors.azur_extractor import AzurSlotExtractor
-from extractors.slotsvader_extractor import SlotsvaderExtractor
+from extractors.slotsvader_extractor import SlotsVaderExtractor
 from utils.google_drive import create_google_file
 
 # Настройка логирования
@@ -49,7 +49,7 @@ geo_groups = {
     "HU_HUF": ["0depnoaffhuhufmobi", "0depaffilhuhufmobi", "0depaffilhuhufdesk", "0depnoaffhuhufdesk", "4depaffilhuhufmobi1"],
     "HU_EUR": ["0depnoaffhueurmobi", "0depaffilhueurmobi", "0depaffilhueurdesk", "0depnoaffhueurdesk", "4depaffilhueurmobi1"],
     "AU_AUD": ["0depnoaffauaudmobi1", "0depaffilauaudmobi1", "0depaffilauauddesk1", "0depnoaffauauddesk1", "4depaffilauaudmobi1"],
-    "CA_CAD": ["0depnoaffcacadmobi", "0depaffilcacadmobi", "0depaffilcacaddesk", "0depnoaffcacaddesk", "4depaffilcacadmobi1"]
+    "CA_CAD": ["0depnoaffcacadmobi", "0depaffilcacadmobi", "0depaffilcacaddesk", "0depnoaffcacaddesk", "4depaffilcacadmobi1"],
 }
 
 password_data = "123123123"
@@ -132,7 +132,7 @@ site_list = [
         "name": "Slotsvader",
         "stage_url": "https://stage.slotsvader.com",
         "prod_url": "https://slotsvader.com",
-        "extractor_class": SlotsvaderExtractor
+        "extractor_class": SlotsVaderExtractor
     }
 ]
 

@@ -1,52 +1,46 @@
-from typing import Any, Dict, Optional, Tuple
+# extractors/min_deposit_extractor.py
+from typing import Tuple, Optional, Any
 
-def _to_float(x: Any) -> Optional[float]:
+def _to_float_safe(v: Any) -> Optional[float]:
+    """Пытается привести v к float. Возвращает None, если не получилось."""
+    if v is None:
+        return None
     try:
-        if x is None or (isinstance(x, str) and not x.strip()):
+        s = str(v).strip()
+        if not s:
             return None
-        return float(x)
+        return float(s.replace(",", "."))
     except Exception:
         return None
 
-def _min_from_range(range_str: Any) -> Optional[float]:
-    if not isinstance(range_str, str) or not range_str.strip():
-        return None
-    nums = []
-    for part in range_str.split(","):
-        v = _to_float(part.strip())
-        if v is not None:
-            nums.append(v)
-    return min(nums) if nums else None
-
-def compute_min_deposit(method: Dict[str, Any]) -> Tuple[Optional[float], str]:
+def compute_min_deposit(item: dict) -> Tuple[Optional[float], str]:
     """
-    method — один элемент из массива data[*] (как ты прислал).
-    Возвращает (min_value, source), где source указывает из какого поля взяли минималку.
-    Алгоритм:
-      1) min_dep_flow
-      2) min
-      3) range (минимум из списка)
-      4) default
-    Только для operation_type == "deposit".
+    Возвращает:
+      (min_value, source)
+    Политика: используем min из разных возможных мест.
+    
+    Приоритет:
+      1. item["min"]
+      2. item["paymethods"]["min"]
+      3. item["paymethod"]["min"]
+      4. item["min_dep_flow"]
+      5. item["default"] (если это тоже минимальная сумма)
     """
-    pm = (method or {}).get("paymethods") or {}
-    if (pm.get("operation_type") or "").lower() != "deposit":
-        return (None, "not_deposit")
+    if not isinstance(item, dict):
+        return None, "none"
 
-    v = _to_float(pm.get("min_dep_flow"))
-    if v is not None:
-        return (v, "min_dep_flow")
+    # Список потенциальных мест, где может лежать минимальный депозит
+    candidates = [
+        ("min", item.get("min")),
+        ("paymethods.min", item.get("paymethods", {}).get("min") if isinstance(item.get("paymethods"), dict) else None),
+        ("paymethod.min", item.get("paymethod", {}).get("min") if isinstance(item.get("paymethod"), dict) else None),
+        ("min_dep_flow", item.get("min_dep_flow")),
+        ("default", item.get("default")),
+    ]
 
-    v = _to_float(pm.get("min"))
-    if v is not None:
-        return (v, "min")
+    for source, raw_val in candidates:
+        min_val = _to_float_safe(raw_val)
+        if min_val is not None and min_val >= 0:
+            return min_val, source
 
-    v = _min_from_range(pm.get("range"))
-    if v is not None:
-        return (v, "range")
-
-    v = _to_float(pm.get("default"))
-    if v is not None:
-        return (v, "default")
-
-    return (None, "none")
+    return None, "none"

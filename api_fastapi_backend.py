@@ -10,7 +10,7 @@ import json
 import sys
 import re
 from datetime import timedelta, datetime
-from typing import Literal, List, Dict, Optional
+from typing import Literal, List, Dict, Optional, Any, Tuple
 
 import pandas as pd
 import openpyxl
@@ -31,10 +31,7 @@ from google.auth.transport.requests import Request
 from main import geo_groups, password_data, site_list
 from utils.excel_utils import save_payment_data_to_excel, merge_payment_data
 from utils.google_drive import create_google_file, upload_table_to_sheets, get_credentials
-from utils.google_drive import finalize_google_sheet_formatting # Added this import
-
-# --- ИСПРАВЛЕНИЕ: Удален неработающий импорт ---
-# from auth_and_fetch import run_login_check, get_methods_only
+from utils.google_drive import finalize_google_sheet_formatting
 
 from extractors.ritzo_extractor import RitzoExtractor
 from extractors.rolling_extractor import RollingExtractor
@@ -152,8 +149,73 @@ EXTRACTORS = {
     for site in site_list
 }
 
-# --- ИСПРАВЛЕНИЕ: Логика вынесена в отдельные функции ---
+# 1) ПОМОЩНИКИ
+def _key_join(title: str, name: str) -> str:
+    return f"{(title or '').strip()}|||{(name or '').strip()}"
 
+def _extract_pairs_and_minlist(methods_or_titles, names_opt=None):
+    """
+    Унифицирует оба формата:
+      - старый: methods_or_titles = List[str], names_opt = List[str]
+      - новый:  methods_or_titles = List[dict] с полями title/name/min_deposit
+    Возвращает:
+      pairs:    List[Tuple[str, str]]
+      min_list: List[Dict[str, Any]]  # [{"title","name","min_deposit","currency"?, "min_source"?, ...}]
+    """
+    pairs, min_list = [], []
+
+    if isinstance(methods_or_titles, list) and methods_or_titles and isinstance(methods_or_titles[0], dict):
+        for it in methods_or_titles:
+            t = (it.get("title") or it.get("alias") or it.get("name") or "").strip()
+            n = (it.get("name") or it.get("alias") or it.get("doc_id") or "").strip()
+            if not t or not n:
+                continue
+            pairs.append((t, n))
+            if it.get("min_deposit") is not None:
+                try:
+                    row = {
+                        "title": t,
+                        "name": n,
+                        "min_deposit": float(it["min_deposit"]),
+                    }
+                    if it.get("currency"):    row["currency"] = it["currency"]
+                    if it.get("min_source"):  row["min_source"] = it["min_source"]
+                    min_list.append(row)
+                except (ValueError, TypeError):
+                    continue
+    else:
+        if not isinstance(names_opt, list):
+            names_opt = []
+        pairs = list(zip(methods_or_titles or [], names_opt))
+    return pairs, min_list
+    
+def _is_geo_forbidden_for_project(project: str, geo: str) -> bool:
+    """
+    Если у класса экстрактора есть статический метод is_geo_forbidden_static(geo),
+    используем его, чтобы решить — пропускать GEO или нет.
+    """
+    try:
+        extractor_class, _, _ = EXTRACTORS[project]
+    except Exception:
+        return False
+
+    # Статический метод на классе
+    if hasattr(extractor_class, "is_geo_forbidden_static"):
+        try:
+            return bool(extractor_class.is_geo_forbidden_static(geo))
+        except Exception:
+            return False
+
+    # На всякий — инстанс и инстансовый метод
+    try:
+        tmp = extractor_class(login="", password="", base_url="")
+        if hasattr(tmp, "is_geo_forbidden"):
+            return bool(tmp.is_geo_forbidden(geo))
+    except Exception:
+        pass
+    return False
+
+# 2) GET_METHODS_ONLY
 def get_methods_only(project: str, geo: str, env: str, login: str):
     if project not in EXTRACTORS:
         raise HTTPException(status_code=400, detail="Unknown project")
@@ -169,26 +231,56 @@ def get_methods_only(project: str, geo: str, env: str, login: str):
         return {"success": False, "error": "Authentication failed"}
     try:
         deposit, withdraw, dep_names, wd_names, currency, dep_count, recommended = extractor.get_payment_and_withdraw_systems(geo)
-        deposit_pairs = list(zip(deposit, dep_names))
-        withdraw_pairs = list(zip(withdraw, wd_names))
-        recommended_pairs = [
-            (title, name)
-            for title, name in deposit_pairs + withdraw_pairs
-            if (title, name) in recommended
+
+        # Нормализуем оба формата
+        deposit_pairs, dep_min_list = _extract_pairs_and_minlist(deposit, dep_names)
+        withdraw_pairs, wd_min_list = _extract_pairs_and_minlist(withdraw, wd_names)
+        min_deposit_list = dep_min_list + wd_min_list
+
+        # Для фронта: мапа ключ->значение и легаси-массив
+        min_deposit_by_key = {
+            _key_join(x["title"], x["name"]): x["min_deposit"] for x in min_deposit_list
+        }
+        min_deposits_legacy = [
+            {
+                "Title": x.get("title", ""),
+                "Name": x.get("name", ""),
+                "MinDeposit": x.get("min_deposit", None),
+                "Currency": x.get("currency", "") or currency or extractor.currency or ""
+            }
+            for x in min_deposit_list
         ]
+
+        # Нормализация recommended + дедупликация по порядку
+        # recommended приходит set[(title,name)], нормализуем пробелы
+        recommended_norm = {(t.strip(), n.strip()) for (t, n) in (recommended or set())}
+        recommended_pairs: List[Tuple[str, str]] = []
+        seen_rec: set = set()
+        for pair in (deposit_pairs + withdraw_pairs):
+            p = (pair[0].strip(), pair[1].strip())
+            if p in recommended_norm and p not in seen_rec:
+                recommended_pairs.append(pair)
+                seen_rec.add(p)
+
         return {
             "success": True,
+            "currency": currency or extractor.currency,
             "deposit_methods": deposit_pairs,
             "withdraw_methods": withdraw_pairs,
             "recommended_methods": recommended_pairs,
+            "min_deposit_map": min_deposit_list,       # новый формат (list of dicts)
+            "min_deposit_by_key": min_deposit_by_key,  # быстрый доступ по ключу
+            "min_deposits": min_deposits_legacy,       # ЛЕГАСИ для старого фронта
             "debug": {
-                "recommended_pairs": list(recommended),
-                "deposit_raw": deposit,
-                "withdraw_raw": withdraw
+                "recommended_pairs": list(recommended_norm),
+                "deposit_raw_type": type(deposit).__name__,
+                "withdraw_raw_type": type(withdraw).__name__,
+                "deposit_len": len(deposit) if isinstance(deposit, list) else None,
+                "withdraw_len": len(withdraw) if isinstance(withdraw, list) else None
             }
         }
     except Exception as e:
-        logging.error(f"Error in get_methods_only for {project}/{geo}/{login}: {e}")
+        logging.exception(f"Error in get_methods_only for {project}/{geo}/{login}: {e}")
         return {"success": False, "error": str(e)}
 
 def run_login_check(project: str, geo: str, env: str, login: str):
@@ -237,10 +329,44 @@ def list_geo_groups():
 
 @app.post("/get-methods-only")
 def get_methods_only_endpoint(request: LoginTestRequest):
+    # ⬇️ новое:
+    if _is_geo_forbidden_for_project(request.project, request.geo):
+        return {
+            "success": True,
+            "deposit_methods": [],
+            "withdraw_methods": [],
+            "recommended_methods": [],
+            "skipped_geo": True,
+            "reason": "forbidden_geo"
+        }
+
     return get_methods_only(project=request.project, geo=request.geo, env=request.env, login=request.login)
+
+# ЭНДПОИНТ ДЛЯ ПОЛУЧЕНИЯ МИНИМАЛЬНЫХ ДЕПОЗИТОВ
+@app.post("/get-min-deposits")
+def get_min_deposits_endpoint(request: LoginTestRequest):
+    res = get_methods_only(project=request.project, geo=request.geo, env=request.env, login=request.login)
+    if not res.get("success"):
+        raise HTTPException(status_code=400, detail=res.get("error", "Unknown error"))
+    # отдадим оба, чтобы фронт мог выбрать любой вариант
+    return {
+        "success": True,
+        "min_deposit_map": res.get("min_deposit_map", []),
+        "min_deposits": res.get("min_deposits", []),
+        "min_deposit_by_key": res.get("min_deposit_by_key", {})
+    }
 
 @app.post("/run-login-check")
 def run_login_check_endpoint(request: LoginTestRequest):
+    # ⬇️ новое:
+    if _is_geo_forbidden_for_project(request.project, request.geo):
+        return {
+            "success": True,
+            "currency": None,
+            "deposit_count": 0,
+            "skipped_geo": True,
+        }
+
     return run_login_check(project=request.project, geo=request.geo, env=request.env, login=request.login)
 
 
@@ -269,6 +395,7 @@ def export_table_to_sheets(payload: Dict = Body(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
         
+# ЭКСПОРТ FULL-ПРОЕКТА В ЛОКАЛЬНЫЙ EXCEL
 @app.post("/export-full-project")
 def export_full_project(req: FullProjectExportRequest, background_tasks: BackgroundTasks):
     if req.project not in [site["name"] for site in site_list]:
@@ -283,6 +410,11 @@ def export_full_project(req: FullProjectExportRequest, background_tasks: Backgro
         wb.remove(wb['Sheet'])
 
     for geo, logins in geo_groups.items():
+        # ⬇️ новое:
+        if _is_geo_forbidden_for_project(req.project, geo):
+            logging.info(f"Skipping export for project '{req.project}' and forbidden geo '{geo}'")
+            continue
+        
         if not logins:
             continue
 
@@ -293,6 +425,9 @@ def export_full_project(req: FullProjectExportRequest, background_tasks: Backgro
         seen_titles = set()
         currency = None
         conditions_raw = {} 
+
+        min_by_title: Dict[str, float] = {}
+        had_any_min = False
 
         for login in logins:
             user_agent = (
@@ -306,8 +441,25 @@ def export_full_project(req: FullProjectExportRequest, background_tasks: Backgro
 
             deposit, withdraw, dep_names, wd_names, curr, _, recommended = extractor.get_payment_and_withdraw_systems(geo)
             currency = currency or curr
-            deposit_pairs = list(zip(deposit, dep_names))
-            withdraw_pairs = list(zip(withdraw, wd_names))
+
+            deposit_pairs, dep_min_list = _extract_pairs_and_minlist(deposit, dep_names)
+            withdraw_pairs, wd_min_list = _extract_pairs_and_minlist(withdraw, wd_names)
+            
+            if dep_min_list:
+                had_any_min = True
+                for row in dep_min_list:
+                    title = row.get("title")
+                    val = row.get("min_deposit")
+                    if title is not None and val is not None:
+                        try:
+                            val_float = float(val)
+                            if title not in min_by_title:
+                                min_by_title[title] = val_float
+                            else:
+                                min_by_title[title] = min(min_by_title[title], val_float)
+                        except (ValueError, TypeError):
+                            continue
+
             all_pairs = deposit_pairs + withdraw_pairs
 
             for title, name in all_pairs:
@@ -355,11 +507,12 @@ def export_full_project(req: FullProjectExportRequest, background_tasks: Backgro
         )
 
         sheet = wb.create_sheet(title=f"{req.project}_{geo}_{req.env}")
-        headers = ["Paymethod", "Payment Name", "Currency", "Deposit", "Withdraw", "Status", "Details"]
+        headers = ["Paymethod", "Payment Name", "Currency", "Deposit", "Withdraw", "Status", "Min Deposit", "Details"]
         for col, header in enumerate(headers, start=1):
             sheet.cell(row=1, column=col, value=header)
 
         for i, method in enumerate(merged, start=2):
+            row_min = min_by_title.get(method) if had_any_min else None
             row_data = [
                 method, 
                 merged[method].get("Payment Name", ""),
@@ -367,24 +520,41 @@ def export_full_project(req: FullProjectExportRequest, background_tasks: Backgro
                 merged[method].get("Deposit", ""),
                 merged[method].get("Withdraw", ""),
                 merged[method].get("Status", ""),
+                row_min if row_min is not None else "",
                 merged[method].get("Details", "")
             ]
             for col, val in enumerate(row_data, start=1):
                 sheet.cell(row=i, column=col, value=val)
 
+    if 'Sheet' in wb.sheetnames:
+        wb.remove(wb['Sheet'])
     wb.save(filename)
-    file_id = upload_table_to_sheets(merged, original_order=original_order) 
+    
+    try:
+        creds = get_credentials()
+        file_metadata = {
+            'name': filename,
+            'mimeType': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        }
+        media = MediaFileUpload(filename, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        drive_service = build('drive', 'v3', credentials=creds)
+        
+        file = drive_service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+        file_id = file.get('id')
+        
+        os.remove(filename)
 
-    return {
-        "success": True,
-        "message": "Проект экспортирован с несколькими GEO-листами",
-        "sheet_url": f"https://docs.google.com/spreadsheets/d/{file_id}"
-    }
+        return {
+            "success": True,
+            "message": "Проект экспортирован с несколькими GEO-листами и загружен на Google Drive",
+            "sheet_url": f"https://docs.google.com/spreadsheets/d/{file_id}"
+        }
+    except Exception as e:
+        logging.error(f"Failed to upload merged Excel file to Google Drive: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to upload file: {str(e)}")
 
 
-# ==============================================================================
-# === НОВЫЙ ЭНДПОИНТ ДЛЯ ЭКСПОРТА ВСЕГО ПРОЕКТА В GOOGLE SHEETS ===
-# ==============================================================================
+# ЭКСПОРТ FULL-ПРОЕКТА В GOOGLE SHEETS
 @app.post("/export-full-project-to-google-sheet")
 def export_full_project_to_google_sheet(data: FullProjectExportRequest):
     """
@@ -415,12 +585,20 @@ def export_full_project_to_google_sheet(data: FullProjectExportRequest):
     all_sheets_data = {}
 
     for geo in all_geo:
+        # ⬇️ новое:
+        if _is_geo_forbidden_for_project(project, geo):
+            logging.info(f"Skipping sheet creation for project '{project}' and forbidden geo '{geo}'")
+            continue
+        
         logins = geo_groups.get(geo, [])
         if not logins:
             continue
 
         seen_methods = {}
         recommended_set = set()
+
+        # Мапа для сбора минимальных депозитов по всем логинам в рамках одного GEO
+        min_deposits_by_key_geo: Dict[str, Dict] = {}
 
         for login in logins:
             try:
@@ -434,9 +612,23 @@ def export_full_project_to_google_sheet(data: FullProjectExportRequest):
             for (title, name) in methods.get("recommended_methods", []):
                 recommended_set.add((title.strip(), name.strip()))
 
-            all_methods = set(methods.get("deposit_methods", []) + methods.get("withdraw_methods", []))
+            deposit_pairs = methods.get("deposit_methods", [])
+            withdraw_pairs = methods.get("withdraw_methods", [])
+            all_pairs = set(deposit_pairs + withdraw_pairs)
 
-            for (title, name) in all_methods:
+            # Собираем минимумы для этого логина и объединяем в общую мапу по GEO
+            min_deposits_map = { _key_join(d['title'], d['name']): d for d in methods.get('min_deposit_map', []) }
+            for key, min_info in min_deposits_map.items():
+                if key not in min_deposits_by_key_geo:
+                    min_deposits_by_key_geo[key] = min_info
+                else:
+                    # Если найдено меньшее значение, обновляем
+                    current_min = min_deposits_by_key_geo[key].get('min_deposit')
+                    new_min = min_info.get('min_deposit')
+                    if new_min is not None and (current_min is None or new_min < current_min):
+                        min_deposits_by_key_geo[key]['min_deposit'] = new_min
+
+            for (title, name) in all_pairs:
                 key = (title.strip(), name.strip())
                 if key not in seen_methods:
                     seen_methods[key] = {
@@ -445,15 +637,23 @@ def export_full_project_to_google_sheet(data: FullProjectExportRequest):
                         "Deposit": "NO",
                         "Withdraw": "NO",
                         "Payment Name": name,
+                        "Min Dep": "", 
                         "Conditions": extract_conditions_from_name(name),
                         "Env": env.upper()
                     }
-                if (title, name) in methods.get("deposit_methods", []):
+                
+                if (title, name) in deposit_pairs:
                     seen_methods[key]["Deposit"] = "YES"
-                if (title, name) in methods.get("withdraw_methods", []):
+                if (title, name) in withdraw_pairs:
                     seen_methods[key]["Withdraw"] = "YES"
                 if (title, name) in recommended_set:
                     seen_methods[key]["Recommended"] = "⭐"
+
+        # Заполняем поле "Min Dep" после объединения всех логинов
+        for key, method_data in seen_methods.items():
+            min_info = min_deposits_by_key_geo.get(_key_join(key[0], key[1]))
+            if min_info and min_info.get("min_deposit") is not None:
+                method_data["Min Dep"] = f"{min_info['min_deposit']} {min_info.get('currency', '')}"
 
         if seen_methods:
             rows = list(seen_methods.values())
@@ -513,9 +713,7 @@ def export_full_project_to_google_sheet(data: FullProjectExportRequest):
     return {"success": True, "sheet_url": f"https://docs.google.com/spreadsheets/d/{file_id}"}
 
 
-# ==============================================================================
-# === НОВЫЙ ЭНДПОИНТ ДЛЯ ЭКСПОРТА НЕСКОЛЬКИХ ТАБЛИЦ В GOOGLE SHEETS (ПО ФРОНТУ) ===
-# ==============================================================================
+# ЭКСПОРТ НЕСКОЛЬКИХ ТАБЛИЦ В GOOGLE SHEETS (ПО ФРОНТУ)
 @app.post("/export-table-to-sheets-multi")
 def export_table_to_sheets_multi(payload: Dict = Body(...)):
     """
@@ -538,11 +736,10 @@ def export_table_to_sheets_multi(payload: Dict = Body(...)):
         file_id = spreadsheet["spreadsheetId"]
         logging.info(f"Created new spreadsheet: {file_id}")
 
-        # 1. Создать листы и заполнить данными
         requests = []
-        data_to_update = [] # Переименовано для ясности
+        data_to_update = [] 
 
-        for sheet_data_item in sheets: # Переименовано для ясности
+        for sheet_data_item in sheets:
             title = sheet_data_item.get("geo", "Sheet")[:100]
             rows = sheet_data_item.get("rows", [])
             if not rows:
@@ -560,13 +757,11 @@ def export_table_to_sheets_multi(payload: Dict = Body(...)):
         if not requests:
             return {"success": False, "message": "No valid data to export"}
 
-        # Выполняем запросы на создание листов
         sheets_service.spreadsheets().batchUpdate(
             spreadsheetId=file_id,
             body={"requests": requests}
         ).execute()
 
-        # Выполняем запросы на заполнение данными
         sheets_service.spreadsheets().values().batchUpdate(
             spreadsheetId=file_id,
             body={
@@ -575,7 +770,6 @@ def export_table_to_sheets_multi(payload: Dict = Body(...)):
             }
         ).execute()
 
-        # 4. Удалить стандартный Sheet1 (если остался) - ПЕРЕМЕЩЕНО СЮДА
         try:
             metadata = sheets_service.spreadsheets().get(spreadsheetId=file_id).execute()
             for sheet_info in metadata.get("sheets", []):
@@ -586,11 +780,10 @@ def export_table_to_sheets_multi(payload: Dict = Body(...)):
                         body={"requests": [{"deleteSheet": {"sheetId": default_sheet_id}}]}
                     ).execute()
                     logging.info(f"Удален стандартный лист 'Sheet1' (ID: {default_sheet_id}).")
-                    break # Выходим после удаления первого найденного "Sheet1"
+                    break
         except Exception as e:
             logging.warning(f"Не удалось удалить стандартный лист 'Sheet1': {e}")
 
-        # 🟣 НАКОНЕЦ — применяем стили и сортировку!
         finalize_google_sheet_formatting(file_id, delete_columns_by_header=["RecommendedSort"])
 
         return {

@@ -3,10 +3,10 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
   Box, Button, Heading, HStack, VStack, Select, Text, Spacer, Flex, Checkbox,
-  ChakraProvider, extendTheme // Added ChakraProvider and extendTheme for full app
+  ChakraProvider, extendTheme
 } from '@chakra-ui/react';
 import { LogOut } from 'lucide-react';
-// Assuming these components are in the correct paths relative to App.js
+
 import LoginPage from './LoginPage';
 import ExportPanel from './panels/ExportPanel';
 import AuthCheckPanel from './panels/AuthCheckPanel';
@@ -15,12 +15,8 @@ import GeoMethodsPanel from './panels/GeoMethodsPanel';
 import LoginTestUI from './LoginTestUI';
 import MethodTestPanel from './panels/MethodTestPanel';
 
-// Extend Chakra UI theme for Inter font
 const theme = extendTheme({
-  fonts: {
-    heading: 'Inter, sans-serif',
-    body: 'Inter, sans-serif',
-  },
+  fonts: { heading: 'Inter, sans-serif', body: 'Inter, sans-serif' },
 });
 
 export default function App() {
@@ -28,7 +24,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState("Auth");
   const [project, setProject] = useState('');
   const [geo, setGeo] = useState('');
-  const [env, setEnv] = useState('stage'); // State for environment
+  const [env, setEnv] = useState('stage');
   const [projects, setProjects] = useState([]);
   const [geoGroups, setGeoGroups] = useState({});
   const [isFullProject, setIsFullProject] = useState(false);
@@ -61,20 +57,15 @@ export default function App() {
   };
 
   const getMinDEP = (condStr) => {
-    const matches = condStr.match(/(\d)DEP/g);
-    if (!matches) return 99;
+    const matches = condStr?.match?.(/(\d)DEP/g) || [];
+    if (!matches.length) return 99;
     return Math.min(...matches.map(d => parseInt(d)));
   };
 
   const getCryptoSortIndex = (title) => {
-    if (title === 'Crypto') return -1; // ⬅️ явно ставим первым
-    const order = [
-      'USDTT', 'LTC', 'ETH', 'TRX', 'BTC', 'SOL', 'XRP',
-      'USDTE', 'DOGE', 'ADA', 'USDC', 'BCH', 'TON'
-    ];
-    for (let i = 0; i < order.length; i++) {
-      if (title.toUpperCase().startsWith(order[i])) return i;
-    }
+    if (title === 'Crypto') return -1;
+    const order = ['USDTT','LTC','ETH','TRX','BTC','SOL','XRP','USDTE','DOGE','ADA','USDC','BCH','TON'];
+    for (let i = 0; i < order.length; i++) if (title.toUpperCase().startsWith(order[i])) return i;
     return 999;
   };
 
@@ -94,7 +85,7 @@ export default function App() {
       const methodTypeMap = {};
       const recommendedSet = new Set();
       const seen = new Set();
-      const order = []; // This 'order' variable is not used after its declaration.
+      const order = [];
       const currencySet = new Set();
 
       setLoadingMessage(`🔄 GEO: ${currentGeo} (${allLogins.length} логинов)...`);
@@ -104,21 +95,24 @@ export default function App() {
         setLoadingMessage(`🔄 GEO: ${currentGeo} (${i + 1}/${allLogins.length}) — ${login}`);
         try {
           const authRes = await axios.post('/run-login-check', { project, geo: currentGeo, env, login });
-          if (authRes.data.currency) currencySet.add(authRes.data.currency);
+          if (authRes.data?.currency) currencySet.add(authRes.data.currency);
 
           const res = await axios.post('/get-methods-only', { project, geo: currentGeo, env, login });
 
-          res.data.recommended_methods?.forEach(([title, name]) => {
+          // рекомендации
+          res.data?.recommended_methods?.forEach(([title, name]) => {
             recommendedSet.add(`${title}|||${name}`);
           });
 
-          [...(res.data.deposit_methods || []), ...(res.data.withdraw_methods || [])].forEach(([title, name]) => {
+          const dep = res.data?.deposit_methods || [];
+          const wdr = res.data?.withdraw_methods || [];
+          [...dep, ...wdr].forEach(([title, name]) => {
             const key = `${title}|||${name}`;
             const isCrypto = /Coinspaid|Crypto|Tether|Bitcoin|Ethereum|Litecoin|Ripple|Tron|USDC|USDT|DOGE|Cardano|Solana|Toncoin|Binance|Jeton/i.test(name);
 
             methodTypeMap[key] = methodTypeMap[key] || {};
-            if (res.data.deposit_methods.some(([t, n]) => t === title && n === name)) methodTypeMap[key].deposit = true;
-            if (res.data.withdraw_methods.some(([t, n]) => t === title && n === name)) methodTypeMap[key].withdraw = true;
+            if (dep.some(([t, n]) => t === title && n === name)) methodTypeMap[key].deposit = true;
+            if (wdr.some(([t, n]) => t === title && n === name)) methodTypeMap[key].withdraw = true;
             methodTypeMap[key].group = isCrypto ? 'crypto' : 'regular';
 
             titleMap[title] = titleMap[title] || new Set();
@@ -131,11 +125,45 @@ export default function App() {
             }
 
             if (!seen.has(title)) {
-              // 'order' is declared but not used elsewhere. You might want to remove this if it's not needed.
               order.push(title);
               seen.add(title);
             }
           });
+
+          // ⬇️ АККУМУЛИРУЕМ MIN-DEPOSITS ПО ВСЕМ ЛОГИНАМ GEO
+          newData[currentGeo] = newData[currentGeo] || {
+            currency: '—',
+            groupedIds: {},
+            conditionsMap: {},
+            recommendedPairs: [],
+            methodTypes: {},
+            originalOrder: [],
+            methodsOnly: {
+              deposit_methods: [],
+              withdraw_methods: [],
+              recommended_methods: [],
+              min_deposit_map: [],      // список dict
+              min_deposits: [],         // легаси
+              min_deposit_by_key: {}    // "Title|||Name" -> number (min по всем логинам)
+            }
+          };
+          const acc = newData[currentGeo].methodsOnly;
+
+          // 1) by_key — берём минимум среди логинов
+          const mdByKey = res.data?.min_deposit_by_key || {};
+          for (const [k, v] of Object.entries(mdByKey)) {
+            const num = Number(v);
+            if (!Number.isFinite(num)) continue;
+            acc.min_deposit_by_key[k] = Math.min(
+              Number.isFinite(acc.min_deposit_by_key[k]) ? acc.min_deposit_by_key[k] : Infinity,
+              num
+            );
+          }
+          // 2) новый список dict — добавляем как есть (дедуп будет на чтении)
+          (res.data?.min_deposit_map || []).forEach(row => acc.min_deposit_map.push(row));
+          // 3) легаси — тоже добавляем
+          (res.data?.min_deposits || []).forEach(row => acc.min_deposits.push(row));
+
         } catch (err) {
           console.warn(`❌ Ошибка логина ${login}:`, err);
         }
@@ -144,57 +172,74 @@ export default function App() {
       const groupedIds = Object.fromEntries(Object.entries(titleMap).map(([t, s]) => [t, Array.from(s).join('\n')]));
       const conditionsMap = Object.fromEntries(Object.entries(conditionMap).map(([t, s]) => [t, s.size ? Array.from(s).sort().join('\n') : 'ALL']));
 
+      // подготовим быстрые проверки по title
+      const recommendedKeySet = new Set(Array.from(recommendedSet)); // "title|||name"
+      const titleHasWithdraw = (title) => {
+        const names = Array.from(titleMap[title] || []);
+        return names.some((n) => (methodTypeMap[`${title}|||${n}`]?.withdraw));
+      };
+      const titleIsRecommended = (title) => {
+        const names = Array.from(titleMap[title] || []);
+        return names.some((n) => recommendedKeySet.has(`${title}|||${n}`));
+      };
+      const titleGroup = (title) => {
+        const names = Array.from(titleMap[title] || []);
+        return names.some((n) => (methodTypeMap[`${title}|||${n}`]?.group === 'crypto'))
+          ? 'crypto'
+          : 'regular';
+      };
+      const minDepFromConditions = (title) => getMinDEP(conditionsMap[title] || '');
+      
+      // финальная сортировка заголовков
       const sortedOrder = Array.from(seen).sort((a, b) => {
-        const aNames = Array.from(titleMap[a] || []);
-        const bNames = Array.from(titleMap[b] || []);
-        const aKey = `${a}|||${aNames[0] || ''}`;
-        const bKey = `${b}|||${bNames[0] || ''}`;
-        const aType = methodTypeMap[aKey] || {};
-        const bType = methodTypeMap[bKey] || {};
+        const ga = titleGroup(a);
+        const gb = titleGroup(b);
+        if (ga !== gb) return ga === 'crypto' ? 1 : -1;
 
-        // 1. Группировка: regular < crypto
-        const aGroup = aType.group || 'regular';
-        const bGroup = bType.group || 'regular';
-        if (aGroup !== bGroup) return aGroup === 'crypto' ? 1 : -1;
-        // 2. Внутри crypto — явно ставим "Crypto" заголовок вверх
-        if (aGroup === 'crypto' && bGroup === 'crypto') {
+        if (ga === 'crypto' && gb === 'crypto') {
           return getCryptoSortIndex(a) - getCryptoSortIndex(b);
         }
 
-        // 3. Рекомендованные первыми
-        const aRec = recommendedSet.has(aKey);
-        const bRec = recommendedSet.has(bKey);
-        if (aRec !== bRec) return aRec ? -1 : 1;
+        const ra = titleIsRecommended(a);
+        const rb = titleIsRecommended(b);
+        if (ra !== rb) return ra ? -1 : 1;
 
-        // 4. DEP-сортировка
-        const aDep = getMinDEP(conditionsMap[a] || '');
-        const bDep = getMinDEP(conditionsMap[b] || '');
-        if (aDep !== bDep) return aDep - bDep;
+        const da = minDepFromConditions(a);
+        const db = minDepFromConditions(b);
+        if (da !== db) return da - db;
 
-        // 5. Методы без Withdraw — вниз
-        const aNoWithdraw = !aType.withdraw;
-        const bNoWithdraw = !bType.withdraw;
-        if (aNoWithdraw !== bNoWithdraw) return aNoWithdraw ? 1 : -1;
+        const wa = titleHasWithdraw(a);
+        const wb = titleHasWithdraw(b);
+        if (wa !== wb) return wa ? -1 : 1;
 
-        // 6. Финальный fallback — по алфавиту
         return a.localeCompare(b);
       });
 
+      // итоговая сборка по GEO
+      const depositPairs  = Object.entries(methodTypeMap).filter(([, t]) => t.deposit).map(([k]) => k.split('|||'));
+      const withdrawPairs = Object.entries(methodTypeMap).filter(([, t]) => t.withdraw).map(([k]) => k.split('|||'));
+      const recommendedPairs = Array.from(recommendedSet).map(s => s.split('|||'));
 
       newData[currentGeo] = {
         currency: currencySet.size === 1 ? Array.from(currencySet)[0] : '—',
         groupedIds,
         conditionsMap,
-        recommendedPairs: Array.from(recommendedSet).map(s => s.split('|||')),
+        recommendedPairs,
         methodTypes: methodTypeMap,
         originalOrder: sortedOrder,
         methodsOnly: {
-          deposit_methods: Object.entries(methodTypeMap).filter(([_, t]) => t.deposit).map(([k]) => k.split('|||')),
-          withdraw_methods: Object.entries(methodTypeMap).filter(([_, t]) => t.withdraw).map(([k]) => k.split('|||')),
-          recommended_methods: Array.from(recommendedSet).map(s => s.split('|||')),
+          deposit_methods: depositPairs,
+          withdraw_methods: withdrawPairs,
+          recommended_methods: recommendedPairs,
+
+          // ⬇️ ПРОКИДЫВАЕМ АККУМУЛИРОВАННЫЕ MIN-DEPS
+          min_deposit_map: newData[currentGeo].methodsOnly.min_deposit_map,
+          min_deposits: newData[currentGeo].methodsOnly.min_deposits,
+          min_deposit_by_key: newData[currentGeo].methodsOnly.min_deposit_by_key
         }
       };
     }
+
     window.__ALL_GEO_DATA__ = newData;
     setPerGeoData(newData);
     setLoadingMessage("✅ Готово");
@@ -231,7 +276,7 @@ export default function App() {
   ];
 
   return (
-    <ChakraProvider theme={theme}> {/* Wrap the entire app with ChakraProvider */}
+    <ChakraProvider theme={theme}>
       <Box px={6} py={4} maxW="6xl" mx="auto">
         <Flex align="center" mb={6} gap={4} wrap="wrap">
           <Heading size="lg">💳 Payment Checker</Heading>
@@ -241,6 +286,7 @@ export default function App() {
             Выйти
           </Button>
         </Flex>
+
         <HStack spacing={3} mb={4} wrap="wrap">
           {tabs.map(tab => (
             <Button key={tab.key} onClick={() => setActiveTab(tab.key)}
@@ -250,12 +296,13 @@ export default function App() {
             </Button>
           ))}
         </HStack>
-        {loadingMessage && <Text fontSize="sm" color="gray.600" mb={2}>{loadingMessage}</Text>}
-        {exportStatus && <Text fontSize="sm" color="gray.600" mb={2}>{exportStatus}</Text>}
 
-        {activeTab === "Auth" && <AuthCheckPanel />}
-        {activeTab === "Single" && <SingleLoginPanel />}
-        {activeTab === "Geo" && (
+        {loadingMessage && <Text fontSize="sm" color="gray.600" mb={2}>{loadingMessage}</Text>}
+        {exportStatus &&   <Text fontSize="sm" color="gray.600" mb={2}>{exportStatus}</Text>}
+
+        {activeTab === "Auth"        && <AuthCheckPanel />}
+        {activeTab === "Single"      && <SingleLoginPanel />}
+        {activeTab === "Geo"         && (
           <VStack align="stretch" spacing={3} mb={4}>
             <Select value={project} onChange={(e) => setProject(e.target.value)} placeholder="-- select project --">
               {projects.map(p => <option key={p.name} value={p.name}>{p.name}</option>)}
@@ -276,6 +323,7 @@ export default function App() {
             </HStack>
           </VStack>
         )}
+
         {activeTab === "Geo" && Object.keys(perGeoData).length > 0 && (
           <>
             {Object.entries(perGeoData).map(([geoKey, data]) => (
@@ -291,15 +339,16 @@ export default function App() {
                 originalOrder={data.originalOrder}
                 hidePaymentName={user.role === 'viewer'}
                 isFullProject={isFullProject}
-                env={env} 
+                env={env}
                 project={project}
               />
             ))}
           </>
         )}
+
         {activeTab === "TestMethods" && <MethodTestPanel />}
-        {activeTab === "Export" && <ExportPanel />}
-        {activeTab === "Dev" && <LoginTestUI />}
+        {activeTab === "Export"      && <ExportPanel />}
+        {activeTab === "Dev"         && <LoginTestUI />}
       </Box>
     </ChakraProvider>
   );
