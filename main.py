@@ -1,7 +1,7 @@
 import argparse
 import logging
 import openpyxl
-import re # Импортируем 're' для работы с регулярными выражениями
+import re  # Импортируем 're' для работы с регулярными выражениями
 
 # Импортируем вспомогательные функции из поддиректорий
 from utils.excel_utils import save_payment_data_to_excel, merge_payment_data
@@ -27,7 +27,7 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
-# Список логинов для тестирования по GEO
+# Список логинов для тестирования по GEO (БАЗОВЫЙ для всех проектов)
 geo_groups = {
     "DE": ["0depnoaffdeeurmobi", "0depaffildeeurmobi", "0depaffildeeurdesk", "0depnoaffdeeurdesk", "4depaffildeeurmobi1"],
     "IT": ["0depnoaffiteurmobi", "0depaffiliteurmobi", "0depaffiliteurdesk", "0depnoaffiteurdesk", "4depaffiliteurmobi1"],
@@ -50,6 +50,24 @@ geo_groups = {
     "HU_EUR": ["0depnoaffhueurmobi", "0depaffilhueurmobi", "0depaffilhueurdesk", "0depnoaffhueurdesk", "4depaffilhueurmobi1"],
     "AU_AUD": ["0depnoaffauaudmobi1", "0depaffilauaudmobi1", "0depaffilauauddesk1", "0depnoaffauauddesk1", "4depaffilauaudmobi1"],
     "CA_CAD": ["0depnoaffcacadmobi", "0depaffilcacadmobi", "0depaffilcacaddesk", "0depnoaffcacaddesk", "4depaffilcacadmobi1"],
+}
+
+# >>> ДОП. GEO только для проекта Glitchspin (SI и CZ)
+GLITCHSPIN_EXTRA_GEOS = {
+    "SI": [
+        "0depnoaffsieurmobi",
+        "0depaffilsieurmobi",
+        "0depaffilsieurdesk",
+        "0depnoaffsieurdesk",
+        "4depaffilsieurmobi1",
+    ],
+    "CZ": [
+        "0depnoaffczeurmobi",
+        "0depaffilczeurmobi",
+        "0depaffilczeurdesk",
+        "0depnoaffczeurdesk",
+        "4depaffilczeurmobi1",
+    ],
 }
 
 password_data = "123123123"
@@ -144,9 +162,9 @@ def get_base_url(project_name, environment):
     for project in site_list:
         if project["name"] == project_name:
             if environment == "stage":
-                 return project["stage_url"], environment
+                return project["stage_url"], environment
             elif environment == "prod":
-                 return project["prod_url"], environment
+                return project["prod_url"], environment
     raise ValueError(f"Проект {project_name} не найден!")
 
 # Вспомогательные функции для сортировки платежных методов (соответствуют логике фронтенда)
@@ -162,7 +180,7 @@ def get_crypto_index(title: str) -> int:
     for i, prefix in enumerate(order):
         if title.upper().startswith(prefix):
             return i
-    return 999 # Для методов, не являющихся криптовалютами из списка
+    return 999  # Для методов, не являющихся криптовалютами из списка
 
 def get_min_dep(details: str) -> int:
     """
@@ -184,7 +202,7 @@ def main():
 
     # Создаем парсер для командной строки
     parser = argparse.ArgumentParser(description="Обработка проектов с переключением между окружениями")
-    
+
     # Добавляем параметр командной строки для выбора окружения
     parser.add_argument("--env", choices=["stage", "prod"], default="prod", help="Укажите окружение: stage или prod")
     args = parser.parse_args()
@@ -196,25 +214,32 @@ def main():
         site_name = site["name"]
         extractor_class = site["extractor_class"]
         logging.info(f"Обработка проекта: {site_name}")
-        
+
         # Получаем базовый URL и окружение для текущего проекта
         base_url, environment = get_base_url(site_name, args.env)
         logging.info(f"Используем URL: {base_url} и окружение: {environment}")
 
+        # >>> НОВОЕ: для Glitchspin расширяем список GEO только в рамках этого проекта
+        if site_name == "Glitchspin":
+            effective_geo_groups = {**geo_groups, **GLITCHSPIN_EXTRA_GEOS}
+            logging.info(f"[Glitchspin] Активировано {len(GLITCHSPIN_EXTRA_GEOS)} дополнительных GEO: {', '.join(GLITCHSPIN_EXTRA_GEOS.keys())}")
+        else:
+            effective_geo_groups = geo_groups
+
         # Создаем новую рабочую книгу Excel для каждого проекта
         wb = openpyxl.Workbook()
         if 'Sheet' in wb.sheetnames:
-            wb.remove(wb['Sheet']) # Удаляем стандартный лист 'Sheet'
+            wb.remove(wb['Sheet'])  # Удаляем стандартный лист 'Sheet'
             logging.debug("Стандартный лист 'Sheet' удалён.")
 
         # Обрабатываем каждый GEO-регион
-        for geo_key, login_list in geo_groups.items():
+        for geo_key, login_list in effective_geo_groups.items():
             # Создаем лист для обычных данных авторизации и методов
             ws = wb.create_sheet(title=f"{site_name}_{geo_key}")
-            current_start_row = 1 # Начальная строка для записи в текущий лист
+            current_start_row = 1  # Начальная строка для записи в текущий лист
 
-            all_payment_data = {} # Инициализируем данные о платежах для текущего GEO
-            last_iteration_methods = [] # Методы из последней итерации логина для текущего GEO
+            all_payment_data = {}        # Инициализируем данные о платежах для текущего GEO
+            last_iteration_methods = []  # Методы из последней итерации логина для текущего GEO
             all_recommended_methods = [] # Все рекомендованные методы для текущего GEO
 
             # Проходим по каждому логину в списке для текущего GEO
@@ -222,33 +247,36 @@ def main():
                 logging.info(f"Обработка логина: {login} для проекта {site_name}, итерация {i+1}")
 
                 # Определяем User-Agent в зависимости от типа логина (мобильный/десктоп)
-                user_agent = ("Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) "
-                              "AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1"
-                              if "mobi" in login else
-                              "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Safari/605.1.15")
+                user_agent = (
+                    "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) "
+                    "AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1"
+                    if "mobi" in login else
+                    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Safari/605.1.15"
+                )
 
                 # Создаем экземпляр экстрактора для текущего сайта
                 extractor = extractor_class(login, password_data, user_agent, base_url)
 
                 if extractor.authenticate():
                     # Получаем платежные и выводные системы
-                    (deposit_methods,
-                     withdraw_methods,
-                     payment_names,
-                     withdraw_names,
-                     currency,
-                     deposit_count,
-                     recommended_methods,
-                     ) = extractor.get_payment_and_withdraw_systems(geo_key)
+                    (
+                        deposit_methods,
+                        withdraw_methods,
+                        payment_names,
+                        withdraw_names,
+                        currency,
+                        deposit_count,
+                        recommended_methods,
+                    ) = extractor.get_payment_and_withdraw_systems(geo_key)
 
-                    all_recommended_methods.extend(recommended_methods) # Добавляем рекомендованные методы
+                    all_recommended_methods.extend(recommended_methods)  # Добавляем рекомендованные методы
 
                     logging.debug(f"Данные депозита: {deposit_methods}")
                     logging.debug(f"Данные вывода: {withdraw_methods}")
 
                     # Объединяем методы депозита и вывода, исключая дубликаты
                     combined_methods = deposit_methods + [method for method in withdraw_methods if method not in deposit_methods]
-                    
+
                     # Создаем словарь для сопоставления названий методов и их отображаемых имен
                     method_title_to_payment_name = {}
                     for idx, method_name in enumerate(deposit_methods):
@@ -278,7 +306,7 @@ def main():
                         ws=ws,
                         start_row=current_start_row
                     )
-                    
+
                     # Сохраняем данные для объединения по всем логинам текущего GEO
                     all_payment_data[login] = {
                         method_title: {
@@ -300,19 +328,19 @@ def main():
                 all_payment_data,
                 login_list,
                 last_iteration_methods,
-                currency, # Валюта из последнего обработанного логина
+                currency,  # Валюта из последнего обработанного логина
                 all_recommended_methods,
-                excel_filename = f"{site_name}_{environment}.xlsx",
-                url = base_url
+                excel_filename=f"{site_name}_{environment}.xlsx",
+                url=base_url
             )
-            
+
             # Создаем новый лист для объединенных и отсортированных данных для данного GEO
             merged_ws = wb.create_sheet(title=f"{site_name}_{geo_key}_merged")
 
             # Заголовки для объединенного листа
             headers = ["Paymethod", "Payment Name", "Currency", "Deposit", "Withdraw", "Status", "Details"]
             for col_idx, header in enumerate(headers, start=1):
-                merged_ws.cell(row=1, column=col_idx, value=header) # Записываем заголовки в первую строку
+                merged_ws.cell(row=1, column=col_idx, value=header)  # Записываем заголовки в первую строку
 
             # Сортируем методы согласно логике фронтенда
             sorted_methods = sorted(
@@ -328,7 +356,7 @@ def main():
             )
 
             # Заполняем объединенные данные в отсортированном порядке
-            for row_idx, method in enumerate(sorted_methods, start=2): # Начинаем запись данных со второй строки
+            for row_idx, method in enumerate(sorted_methods, start=2):  # Начинаем запись данных со второй строки
                 data = merged_data[method]
                 merged_ws[f"A{row_idx}"] = method
                 merged_ws[f"B{row_idx}"] = data.get("Payment Name", "")
@@ -337,12 +365,12 @@ def main():
                 merged_ws[f"E{row_idx}"] = data.get("Withdraw", "")
                 merged_ws[f"F{row_idx}"] = data.get("Status", "")
                 merged_ws[f"G{row_idx}"] = data.get("Details", "")
-            
+
         # Сохраняем файл Excel для текущего проекта и окружения
         output_filename = f"{site_name}__{environment}.xlsx"
         wb.save(output_filename)
         logging.info(f"Все данные сохранены в {output_filename}")
-        create_google_file(output_filename) # Загружаем файл на Google Drive
+        create_google_file(output_filename)  # Загружаем файл на Google Drive
 
 if __name__ == "__main__":
     main()

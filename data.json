@@ -1,0 +1,41 @@
+{
+  "card": {
+    "number": "4000000000000044",
+    "expire_month": "06",
+    "expire_year": "30",
+    "cvv": "052"
+  },
+  "amount": 10.01,
+  "currency": "EUR",
+  "comment": "test charge via curl",
+  "result_url": "https://merchant.example/result",
+  "return_url": "https://merchant.example/return",
+  "order_id": "ORD-123",
+  "details": { "account": "client-123" },
+  "card_holder": {
+    "first_name": "Mr",
+    "last_name": "Cardholder",
+    "country": "804",
+    "post_code": "03201",
+    "state": "RO",
+    "city": "Kyiv",
+    "address_line_1": "test",
+    "address_line_2": "",
+    "address_line_3": "",
+    "phone": "380501112233",
+    "email": "test@gmail.com"
+  },
+  "browser": {
+    "accept_header": "*/*",
+    "color_depth": 24,
+    "ip": "1.1.1.1",
+    "language": "en",
+    "screen_height": 1080,
+    "screen_width": 1920,
+    "time_different": -180,
+    "user_agent": "Mozilla/5.0",
+    "java_enabled": 1,
+    "window_width": 1024,
+    "window_height": 640
+  }
+}

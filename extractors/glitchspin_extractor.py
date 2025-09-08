@@ -18,6 +18,19 @@ class GlitchSpinExtractor(BaseExtractor):
     DEPOSIT_URL: str  = "/api/v1/model/paysystem/deposit"
     WITHDRAW_URL: str = "/api/v1/model/paysystem/withdraw"
 
+    # GEO aliases for SI and CZ support
+    GEO_ALIASES: Dict[str, str] = {
+        "DE": "DE",
+        "SI": "SI", "SI_WEB": "SI", "SI_MOB": "SI",
+        "CZ": "CZ", "CZ_WEB": "CZ", "CZ_MOB": "CZ",
+    }
+
+    # Fallback mapping - if SI or CZ fails, fallback to DE
+    FALLBACK_TO: Dict[str, str] = {
+        "SI": "DE",
+        "CZ": "DE",
+    }
+
     def __init__(
         self,
         login,
@@ -37,13 +50,23 @@ class GlitchSpinExtractor(BaseExtractor):
         Set[Tuple[str, str]]   # recommended {(title, name), ...}
     ]:
         country = (current_geo or "").split("_")[0]
-
-        logging.info("[GlitchSpin] Fetching DEPOSIT methods")
+        
+        # Apply GEO aliases and immediate fallback for blocked countries
+        if country in self.GEO_ALIASES:
+            country = self.GEO_ALIASES[country]
+        
+        # For SI/CZ, use fallback immediately since they're geo-blocked
+        if country in self.FALLBACK_TO:
+            fallback_country = self.FALLBACK_TO[country]
+            logging.info(f"[GlitchSpin] Using fallback {fallback_country} for geo-blocked country {country}")
+            country = fallback_country
+        
+        logging.info(f"[GlitchSpin] Fetching DEPOSIT methods for country: {country}")
         dep_titles, dep_names, rec_dep, dep_raw = self.fetch_methods(
             self.DEPOSIT_URL, country, return_raw=True
         )
 
-        logging.info("[GlitchSpin] Fetching WITHDRAW methods")
+        logging.info(f"[GlitchSpin] Fetching WITHDRAW methods for country: {country}")
         wd_titles, wd_names, _rec_wd, _ = self.fetch_methods(
             self.WITHDRAW_URL, country, return_raw=True
         )

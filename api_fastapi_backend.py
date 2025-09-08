@@ -28,7 +28,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 
 # --- ВАЖНО: Импорты из вашего проекта ---
-from main import geo_groups, password_data, site_list
+from main import geo_groups, password_data, site_list, GLITCHSPIN_EXTRA_GEOS
 from utils.excel_utils import save_payment_data_to_excel, merge_payment_data
 from utils.google_drive import create_google_file, upload_table_to_sheets, get_credentials
 from utils.google_drive import finalize_google_sheet_formatting
@@ -291,7 +291,7 @@ def run_login_check(project: str, geo: str, env: str, login: str):
     user_agent = (
         "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1"
         if "mobi" in login
-        else "Mozilla/5.5 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Safari/605.1.15"
+        else "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Safari/605.1.15"
     )
     extractor = extractor_class(login, password_data, user_agent=user_agent, base_url=url)
     if not extractor.authenticate():
@@ -324,8 +324,10 @@ def list_projects():
     ]
 
 @app.get("/geo-groups")
-def list_geo_groups():
-    return geo_groups
+def get_geo_groups():
+    # Возвращаем базовые GEO + доп. GEO для Glitchspin, чтобы фронт их видел
+    merged = {**geo_groups, **GLITCHSPIN_EXTRA_GEOS}
+    return merged
 
 @app.post("/get-methods-only")
 def get_methods_only_endpoint(request: LoginTestRequest):

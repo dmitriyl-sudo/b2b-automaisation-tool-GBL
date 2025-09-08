@@ -90,6 +90,24 @@ export default function App() {
 
       setLoadingMessage(`🔄 GEO: ${currentGeo} (${allLogins.length} логинов)...`);
 
+      // Инициализируем структуру данных для текущего GEO перед циклом
+      newData[currentGeo] = {
+        currency: '—',
+        groupedIds: {},
+        conditionsMap: {},
+        recommendedPairs: [],
+        methodTypes: {},
+        originalOrder: [],
+        methodsOnly: {
+          deposit_methods: [],
+          withdraw_methods: [],
+          recommended_methods: [],
+          min_deposit_map: [],
+          min_deposits: [],
+          min_deposit_by_key: {}
+        }
+      };
+
       for (let i = 0; i < allLogins.length; i++) {
         const login = allLogins[i];
         setLoadingMessage(`🔄 GEO: ${currentGeo} (${i + 1}/${allLogins.length}) — ${login}`);
@@ -131,22 +149,6 @@ export default function App() {
           });
 
           // ⬇️ АККУМУЛИРУЕМ MIN-DEPOSITS ПО ВСЕМ ЛОГИНАМ GEO
-          newData[currentGeo] = newData[currentGeo] || {
-            currency: '—',
-            groupedIds: {},
-            conditionsMap: {},
-            recommendedPairs: [],
-            methodTypes: {},
-            originalOrder: [],
-            methodsOnly: {
-              deposit_methods: [],
-              withdraw_methods: [],
-              recommended_methods: [],
-              min_deposit_map: [],      // список dict
-              min_deposits: [],         // легаси
-              min_deposit_by_key: {}    // "Title|||Name" -> number (min по всем логинам)
-            }
-          };
           const acc = newData[currentGeo].methodsOnly;
 
           // 1) by_key — берём минимум среди логинов
