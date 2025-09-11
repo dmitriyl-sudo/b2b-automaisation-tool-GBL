@@ -8,29 +8,28 @@ import {
 import { LogOut } from 'lucide-react';
 
 import LoginPage from './LoginPage';
-import ExportPanel from './panels/ExportPanel';
 import AuthCheckPanel from './panels/AuthCheckPanel';
 import SingleLoginPanel from './panels/SingleLoginPanel';
 import GeoMethodsPanel from './panels/GeoMethodsPanel';
 import LoginTestUI from './LoginTestUI';
 import MethodTestPanel from './panels/MethodTestPanel';
+import { GlobalSelectionProvider, useGlobalSelection } from './contexts/GlobalSelectionContext';
 
 const theme = extendTheme({
   fonts: { heading: 'Inter, sans-serif', body: 'Inter, sans-serif' },
 });
 
-export default function App() {
+function AppContent() {
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState("Auth");
-  const [project, setProject] = useState('');
-  const [geo, setGeo] = useState('');
-  const [env, setEnv] = useState('stage');
-  const [projects, setProjects] = useState([]);
-  const [geoGroups, setGeoGroups] = useState({});
   const [isFullProject, setIsFullProject] = useState(false);
   const [perGeoData, setPerGeoData] = useState({});
   const [loadingMessage, setLoadingMessage] = useState("");
-  const [exportStatus, setExportStatus] = useState("");
+  
+  const { 
+    project, geo, env, projects, geoGroups, 
+    setProject, setGeo, setEnv 
+  } = useGlobalSelection();
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -39,8 +38,6 @@ export default function App() {
         .then(res => setUser({ ...res.data, token }))
         .catch(() => setUser(null));
     }
-    axios.get('/list-projects').then(res => setProjects(res.data));
-    axios.get('/geo-groups').then(res => setGeoGroups(res.data));
   }, []);
 
   if (!user) return <LoginPage onLogin={setUser} />;
@@ -247,111 +244,95 @@ export default function App() {
     setLoadingMessage("✅ Готово");
   };
 
-  const handleExportFullProject = async () => {
-    if (!project || !env) {
-      setExportStatus("❗ Укажи проект и окружение");
-      return;
-    }
-    setExportStatus("📤 Экспорт проекта...");
-    try {
-      const res = await axios.post('/export-full-project', { project, env }, {
-        headers: { Authorization: `Bearer ${user.token}` }
-      });
-      if (res.data?.sheet_url) {
-        setExportStatus("✅ Успешно, открываем...");
-        window.open(res.data.sheet_url, '_blank');
-      } else {
-        setExportStatus("⚠️ Нет ссылки");
-      }
-    } catch (err) {
-      setExportStatus(`❌ Ошибка: ${err.response?.data?.detail || err.message}`);
-    }
-  };
 
   const tabs = [
     { label: "Auth", key: "Auth" },
     { label: "Single Login", key: "Single" },
     { label: "GEO Methods", key: "Geo" },
     { label: "Test Methods", key: "TestMethods" },
-    { label: "Export", key: "Export" },
     ...(user.role !== 'viewer' ? [{ label: "Dev Panel", key: "Dev" }] : [])
   ];
 
   return (
-    <ChakraProvider theme={theme}>
-      <Box px={6} py={4} maxW="6xl" mx="auto">
-        <Flex align="center" mb={6} gap={4} wrap="wrap">
-          <Heading size="lg">💳 Payment Checker</Heading>
-          <Spacer />
-          <Button onClick={() => { localStorage.removeItem('token'); setUser(null); }}
-            leftIcon={<LogOut size={18} />} colorScheme="red" variant="solid" size="sm">
-            Выйти
+    <Box px={6} py={4} maxW="6xl" mx="auto">
+      <Flex align="center" mb={6} gap={4} wrap="wrap">
+        <Heading size="lg">💳 Payment Checker</Heading>
+        <Spacer />
+        <Button onClick={() => { localStorage.removeItem('token'); setUser(null); }}
+          leftIcon={<LogOut size={18} />} colorScheme="red" variant="solid" size="sm">
+          Выйти
+        </Button>
+      </Flex>
+
+      <HStack spacing={3} mb={4} wrap="wrap">
+        {tabs.map(tab => (
+          <Button key={tab.key} onClick={() => setActiveTab(tab.key)}
+            colorScheme={activeTab === tab.key ? 'blue' : 'gray'}
+            variant={activeTab === tab.key ? 'solid' : 'outline'} size="sm">
+            {tab.label}
           </Button>
-        </Flex>
+        ))}
+      </HStack>
 
-        <HStack spacing={3} mb={4} wrap="wrap">
-          {tabs.map(tab => (
-            <Button key={tab.key} onClick={() => setActiveTab(tab.key)}
-              colorScheme={activeTab === tab.key ? 'blue' : 'gray'}
-              variant={activeTab === tab.key ? 'solid' : 'outline'} size="sm">
-              {tab.label}
-            </Button>
+      {loadingMessage && <Text fontSize="sm" color="gray.600" mb={2}>{loadingMessage}</Text>}
+
+      {activeTab === "Auth"        && <AuthCheckPanel />}
+      {activeTab === "Single"      && <SingleLoginPanel />}
+      {activeTab === "Geo"         && (
+        <VStack align="stretch" spacing={3} mb={4}>
+          <Select value={project} onChange={(e) => setProject(e.target.value)} placeholder="-- select project --">
+            {projects.map(p => <option key={p.name} value={p.name}>{p.name}</option>)}
+          </Select>
+          <Select value={geo} onChange={(e) => setGeo(e.target.value)} placeholder="-- select geo --" isDisabled={isFullProject}>
+            {Object.keys(geoGroups).map(g => <option key={g} value={g}>{g}</option>)}
+          </Select>
+          <Select value={env} onChange={(e) => setEnv(e.target.value)} placeholder="-- environment --">
+            <option value="stage">stage</option>
+            <option value="prod">prod</option>
+          </Select>
+          <Checkbox isChecked={isFullProject} onChange={() => setIsFullProject(!isFullProject)}>
+            📦 Full project mode (все GEO)
+          </Checkbox>
+          <HStack spacing={4}>
+            <Button onClick={handleLoadGeoMethods} colorScheme="blue">Load GEO Methods</Button>
+          </HStack>
+        </VStack>
+      )}
+
+      {activeTab === "Geo" && Object.keys(perGeoData).length > 0 && (
+        <>
+          {Object.entries(perGeoData).map(([geoKey, data]) => (
+            <GeoMethodsPanel
+              key={geoKey}
+              geo={geoKey}
+              currency={data.currency}
+              methodsOnly={data.methodsOnly}
+              groupedIds={data.groupedIds}
+              conditionsMap={data.conditionsMap}
+              recommendedPairs={data.recommendedPairs}
+              methodTypes={data.methodTypes}
+              originalOrder={data.originalOrder}
+              hidePaymentName={user.role === 'viewer'}
+              isFullProject={isFullProject}
+              env={env}
+              project={project}
+            />
           ))}
-        </HStack>
+        </>
+      )}
 
-        {loadingMessage && <Text fontSize="sm" color="gray.600" mb={2}>{loadingMessage}</Text>}
-        {exportStatus &&   <Text fontSize="sm" color="gray.600" mb={2}>{exportStatus}</Text>}
+      {activeTab === "TestMethods" && <MethodTestPanel />}
+      {activeTab === "Dev"         && <LoginTestUI />}
+    </Box>
+  );
+}
 
-        {activeTab === "Auth"        && <AuthCheckPanel />}
-        {activeTab === "Single"      && <SingleLoginPanel />}
-        {activeTab === "Geo"         && (
-          <VStack align="stretch" spacing={3} mb={4}>
-            <Select value={project} onChange={(e) => setProject(e.target.value)} placeholder="-- select project --">
-              {projects.map(p => <option key={p.name} value={p.name}>{p.name}</option>)}
-            </Select>
-            <Select value={geo} onChange={(e) => setGeo(e.target.value)} placeholder="-- select geo --" isDisabled={isFullProject}>
-              {Object.keys(geoGroups).map(g => <option key={g} value={g}>{g}</option>)}
-            </Select>
-            <Select value={env} onChange={(e) => setEnv(e.target.value)} placeholder="-- environment --">
-              <option value="stage">stage</option>
-              <option value="prod">prod</option>
-            </Select>
-            <Checkbox isChecked={isFullProject} onChange={() => setIsFullProject(!isFullProject)}>
-              📦 Full project mode (все GEO)
-            </Checkbox>
-            <HStack spacing={4}>
-              <Button onClick={handleLoadGeoMethods} colorScheme="blue">Load GEO Methods</Button>
-              <Button onClick={handleExportFullProject} colorScheme="yellow">Export Full Project</Button>
-            </HStack>
-          </VStack>
-        )}
-
-        {activeTab === "Geo" && Object.keys(perGeoData).length > 0 && (
-          <>
-            {Object.entries(perGeoData).map(([geoKey, data]) => (
-              <GeoMethodsPanel
-                key={geoKey}
-                geo={geoKey}
-                currency={data.currency}
-                methodsOnly={data.methodsOnly}
-                groupedIds={data.groupedIds}
-                conditionsMap={data.conditionsMap}
-                recommendedPairs={data.recommendedPairs}
-                methodTypes={data.methodTypes}
-                originalOrder={data.originalOrder}
-                hidePaymentName={user.role === 'viewer'}
-                isFullProject={isFullProject}
-                env={env}
-                project={project}
-              />
-            ))}
-          </>
-        )}
-
-        {activeTab === "TestMethods" && <MethodTestPanel />}
-        {activeTab === "Export"      && <ExportPanel />}
-        {activeTab === "Dev"         && <LoginTestUI />}
-      </Box>
+export default function App() {
+  return (
+    <ChakraProvider theme={theme}>
+      <GlobalSelectionProvider>
+        <AppContent />
+      </GlobalSelectionProvider>
     </ChakraProvider>
   );
 }

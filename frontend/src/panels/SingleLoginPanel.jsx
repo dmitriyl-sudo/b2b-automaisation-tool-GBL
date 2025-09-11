@@ -1,15 +1,13 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import axios from 'axios';
 import {
   Box, Heading, Text, FormControl, FormLabel, Select, Checkbox,
   Button, Table, Thead, Tbody, Tr, Th, Td, useToast, Stack, Center, SimpleGrid, Spinner
 } from '@chakra-ui/react';
+import { useGlobalSelection } from '../contexts/GlobalSelectionContext';
 
 export default function SingleLoginPanel() {
-  const [projects, setProjects] = useState([]);
-  const [geoGroups, setGeoGroups] = useState({});
-  const [form, setForm] = useState({ project: '', login: '', geo: '', env: 'stage' });
-  const [logins, setLogins] = useState([]);
+  const [localLogin, setLocalLogin] = useState('');
   const [methodsData, setMethodsData] = useState(null);
   const [filterRecommended, setFilterRecommended] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -17,25 +15,16 @@ export default function SingleLoginPanel() {
   const toast = useToast();
   const projectRef = useRef(null);
 
-  useEffect(() => {
-    axios.get('/list-projects').then(res => setProjects(res.data));
-    axios.get('/geo-groups').then(res => setGeoGroups(res.data));
-    setTimeout(() => projectRef.current?.focus(), 300);
-  }, []);
-
-  useEffect(() => {
-    if (form.geo && geoGroups[form.geo]) {
-      setLogins(geoGroups[form.geo]);
-    }
-  }, [form.geo, geoGroups]);
-
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const { 
+    project, geo, env, projects, geoGroups, logins,
+    setProject, setGeo, setEnv
+  } = useGlobalSelection();
 
   const handleFetch = async () => {
     setLoading(true);
     setStatusMessage('⏳ Загрузка методов...');
     try {
-      const res = await axios.post('/get-methods-only', form);
+      const res = await axios.post('/get-methods-only', { project, geo, env, login: localLogin });
       setMethodsData(res.data);
       setStatusMessage('✅ Методы загружены');
     } catch (err) {
@@ -99,25 +88,25 @@ export default function SingleLoginPanel() {
           <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
             <FormControl>
               <FormLabel>Project</FormLabel>
-              <Select ref={projectRef} placeholder="Выберите проект" name="project" value={form.project} onChange={handleChange} textAlign="center">
+              <Select ref={projectRef} placeholder="Выберите проект" value={project} onChange={(e) => setProject(e.target.value)} textAlign="center">
                 {projects.map(p => <option key={p.name} value={p.name}>{p.name}</option>)}
               </Select>
             </FormControl>
             <FormControl>
               <FormLabel>GEO</FormLabel>
-              <Select placeholder="Выберите GEO" name="geo" value={form.geo} onChange={handleChange} textAlign="center">
+              <Select placeholder="Выберите GEO" value={geo} onChange={(e) => setGeo(e.target.value)} textAlign="center">
                 {Object.keys(geoGroups).map(g => <option key={g} value={g}>{g}</option>)}
               </Select>
             </FormControl>
             <FormControl>
               <FormLabel>Login</FormLabel>
-              <Select placeholder="Выберите логин" name="login" value={form.login} onChange={handleChange} textAlign="center">
+              <Select placeholder="Выберите логин" value={localLogin} onChange={(e) => setLocalLogin(e.target.value)} textAlign="center">
                 {logins.map(l => <option key={l} value={l}>{l}</option>)}
               </Select>
             </FormControl>
             <FormControl>
               <FormLabel>Environment</FormLabel>
-              <Select name="env" value={form.env} onChange={handleChange} textAlign="center">
+              <Select value={env} onChange={(e) => setEnv(e.target.value)} textAlign="center">
                 <option value="stage">stage</option>
                 <option value="prod">prod</option>
               </Select>

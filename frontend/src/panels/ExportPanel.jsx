@@ -1,18 +1,15 @@
-import { useEffect, useState } from 'react';
+// DEPRECATED: unused in UI
+import React, { useState } from 'react';
 import axios from 'axios';
+import { useGlobalSelection } from '../contexts/GlobalSelectionContext';
 
 export default function ExportPanel() {
-  const [projects, setProjects] = useState([]);
-  const [geoGroups, setGeoGroups] = useState({});
-  const [project, setProject] = useState('');
-  const [geo, setGeo] = useState('');
-  const [env, setEnv] = useState('stage');
   const [status, setStatus] = useState('');
 
-  useEffect(() => {
-    axios.get('/list-projects').then(res => setProjects(res.data));
-    axios.get('/geo-groups').then(res => setGeoGroups(res.data));
-  }, []);
+  const { 
+    project, geo, env, geoGroups,
+    setProject, setGeo, setEnv, projects, geoOptions
+  } = useGlobalSelection();
 
   const handleExport = async () => {
     const firstLogin = (geoGroups[geo] || [])[0];
@@ -53,7 +50,7 @@ export default function ExportPanel() {
 
         <select value={geo} onChange={(e) => setGeo(e.target.value)} className="border p-2">
           <option value="">-- select geo --</option>
-          {Object.keys(geoGroups).map(g => <option key={g} value={g}>{g}</option>)}
+          {geoOptions.map(g => <option key={g} value={g}>{g}</option>)}
         </select>
 
         <select value={env} onChange={(e) => setEnv(e.target.value)} className="border p-2 col-span-2">

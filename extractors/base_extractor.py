@@ -1,8 +1,7 @@
 # extractors/base_extractor.py
-from typing import List, Tuple, Set, Dict, Any, Optional
-import logging
 import requests
-
+import logging
+from typing import List, Dict, Any, Optional, Set, Tuple, Union
 
 class BaseExtractor:
     """
@@ -16,15 +15,19 @@ class BaseExtractor:
     DEPOSIT_URL: str  = "/api/v1/model/paysystem/deposit"
     WITHDRAW_URL: str = "/api/v1/model/paysystem/withdraw"
 
-    def __init__(self, login, password, user_agent: Optional[str] = None, base_url: Optional[str] = None):
+    def __init__(self, base_url: str, login: str, password: Union[str, Dict[str, str]], user_agent: Optional[str] = None):
+        self.base_url = base_url.rstrip("/")
         self.login = login
-        self.password = password                    # str или {login: password}
-        self.user_agent = user_agent
-        self.base_url = (base_url or "").rstrip("/")
+        self.password = password
 
         self.session = requests.Session()
         self.headers: Dict[str, str] = {"Accept": "application/json"}
-        if user_agent:
+        
+        # Определяем мобильную эмуляцию по наличию 'mobi' в логине
+        if 'mobi' in login.lower():
+            self.headers["User-Agent"] = "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1"
+            logging.info(f"[{login}] Using mobile User-Agent for 'mobi' login")
+        elif user_agent:
             self.headers["User-Agent"] = user_agent
 
         self.currency: Optional[str] = None
@@ -66,11 +69,27 @@ class BaseExtractor:
                     self.currency = cur.strip().upper()
                     break
 
-            # deposit_count
+            # deposit_count - ищем в разных полях
             for d in candidates:
-                dc = d.get("deposit_count")
-                if isinstance(dc, int):
-                    self.deposit_count = dc
+                dc = (
+                    d.get("deposit_count")
+                    or d.get("depositCount") 
+                    or d.get("deposits")
+                    or d.get("balance")
+                    or d.get("deposit_balance")
+                    or d.get("depositBalance")
+                    or d.get("real_balance")
+                    or d.get("realBalance")
+                    or d.get("money")
+                    or d.get("amount")
+                )
+                if isinstance(dc, (int, float)):
+                    self.deposit_count = int(dc)
+                    logging.debug(f"[auth] Found deposit_count: {self.deposit_count} from field in {d}")
+                    break
+                elif isinstance(dc, str) and dc.replace('.', '').replace(',', '').isdigit():
+                    self.deposit_count = int(float(dc.replace(',', '.')))
+                    logging.debug(f"[auth] Found deposit_count: {self.deposit_count} from string field in {d}")
                     break
         except Exception as e:
             logging.debug(f"[auth] harvest login json issue: {e}")
@@ -102,7 +121,9 @@ class BaseExtractor:
                     if resp.status_code < 400:
                         # Пытаемся вытащить валюту/счётчики из ответа логина
                         try:
-                            self._harvest_from_login_json(resp.json() or {})
+                            login_data = resp.json() or {}
+                            logging.info(f"[auth] Login response for {self.login}: {login_data}")
+                            self._harvest_from_login_json(login_data)
                         except Exception as je:
                             logging.debug(f"[auth] login JSON parse issue: {je}")
 

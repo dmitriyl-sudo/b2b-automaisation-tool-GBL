@@ -1,16 +1,14 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import axios from 'axios';
 import {
   Box, Heading, Text, FormControl, FormLabel, Select, Checkbox,
   Button, Table, Thead, Tbody, Tr, Th, Td, useToast, Icon, Stack, Alert, AlertIcon, Center, SimpleGrid
 } from '@chakra-ui/react';
 import { MdCheckCircle, MdWarning } from 'react-icons/md';
+import { useGlobalSelection } from '../contexts/GlobalSelectionContext';
 
 export default function AuthCheckPanel() {
-  const [form, setForm] = useState({ project: '', login: '', geo: '', env: 'stage' });
-  const [projects, setProjects] = useState([]);
-  const [geoGroups, setGeoGroups] = useState({});
-  const [logins, setLogins] = useState([]);
+  const [localLogin, setLocalLogin] = useState('');
   const [result, setResult] = useState(null);
   const [multiResults, setMultiResults] = useState([]);
   const [checkAllGeo, setCheckAllGeo] = useState(false);
@@ -20,40 +18,22 @@ export default function AuthCheckPanel() {
   const toast = useToast();
   const projectRef = useRef(null);
 
-  useEffect(() => {
-    axios.get('/list-projects').then(res => setProjects(res.data));
-    axios.get('/geo-groups').then(res => {
-      setGeoGroups(res.data);
-      if (form.geo && res.data[form.geo]) {
-        setLogins(res.data[form.geo]);
-      }
-    });
-    setTimeout(() => projectRef.current?.focus(), 300);
-  }, []);
-
-  const { geo } = form;
-  useEffect(() => {
-    if (geo && geoGroups[geo]) {
-      setLogins(geoGroups[geo]);
-    }
-  }, [geo, geoGroups]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
-  };
+  const { 
+    project, geo, env, projects, geoGroups, logins,
+    setProject, setGeo, setEnv, loading: contextLoading
+  } = useGlobalSelection();
 
   const validateSingle = () => {
     const validProjects = projects.map(p => p.name);
-    if (!validProjects.includes(form.project)) {
+    if (!validProjects.includes(project)) {
       toast({ title: 'Ошибка', description: '❗ Выберите существующий Project', status: 'error', duration: 3000 });
       return false;
     }
-    if (!geoGroups[form.geo]) {
+    if (!geoGroups[geo]) {
       toast({ title: 'Ошибка', description: '❗ GEO должен быть из списка', status: 'error', duration: 3000 });
       return false;
     }
-    if (!logins.includes(form.login)) {
+    if (!logins.includes(localLogin)) {
       toast({ title: 'Ошибка', description: '❗ Login не найден в выбранном GEO', status: 'error', duration: 3000 });
       return false;
     }
@@ -67,27 +47,27 @@ export default function AuthCheckPanel() {
     setProgressMessage("");
     setLoading(true);
 
-    if (!form.project || !form.env) {
+    if (!project || !env) {
       toast({ title: 'Ошибка', description: '❗ Укажи project и environment', status: 'error', duration: 3000 });
       setLoading(false);
       return;
     }
 
     if (checkAllProject) {
-      const geoList = Object.keys(geoGroups).filter(geo => (geoGroups[geo] || []).length > 0);
+      const geoList = Object.keys(geoGroups).filter(geoKey => (geoGroups[geoKey] || []).length > 0);
       let allResults = [];
 
       for (let i = 0; i < geoList.length; i++) {
-        const geo = geoList[i];
-        setProgressMessage(`🔄 Обработка GEO: ${geo} (${i + 1}/${geoList.length})...`);
+        const currentGeo = geoList[i];
+        setProgressMessage(`🔄 Обработка GEO: ${currentGeo} (${i + 1}/${geoList.length})...`);
 
         try {
-          const res = await axios.post('/run-multi-auth-check', { ...form, geo, mode: "geo" });
+          const res = await axios.post('/run-multi-auth-check', { project, geo: currentGeo, env, mode: "geo" });
           if (res.data?.results?.length) {
-            allResults = allResults.concat(res.data.results.map(r => ({ ...r, geo, project: form.project })));
+            allResults = allResults.concat(res.data.results.map(r => ({ ...r, geo: currentGeo, project })));
           }
         } catch {
-          allResults.push({ login: `❌ Ошибка GEO: ${geo}`, success: false, geo, project: form.project });
+          allResults.push({ login: `❌ Ошибка GEO: ${currentGeo}`, success: false, geo: currentGeo, project });
         }
       }
 
@@ -98,17 +78,17 @@ export default function AuthCheckPanel() {
     }
 
     if (checkAllGeo) {
-      if (!form.geo || !geoGroups[form.geo]) {
+      if (!geo || !geoGroups[geo]) {
         toast({ title: 'Ошибка', description: '❗ Выбери валидный GEO', status: 'error', duration: 3000 });
         setLoading(false);
         return;
       }
 
-      setProgressMessage(`🔄 Обработка GEO: ${form.geo}...`);
+      setProgressMessage(`🔄 Обработка GEO: ${geo}...`);
 
       try {
-        const res = await axios.post('/run-multi-auth-check', { ...form, mode: "geo" });
-        setMultiResults((res.data.results || []).map(r => ({ ...r, geo: form.geo, project: form.project })));
+        const res = await axios.post('/run-multi-auth-check', { project, geo, env, mode: "geo" });
+        setMultiResults((res.data.results || []).map(r => ({ ...r, geo, project })));
         setProgressMessage("✅ Завершено");
       } catch {
         toast({ title: 'Ошибка', description: 'Ошибка при проверке GEO', status: 'error', duration: 3000 });
@@ -123,7 +103,7 @@ export default function AuthCheckPanel() {
     }
 
     try {
-      const res = await axios.post('/run-login-check', form);
+      const res = await axios.post('/run-login-check', { project, geo, env, login: localLogin });
       setResult(res.data);
     } catch (err) {
       setResult({ success: false, error: err.message });
@@ -142,7 +122,7 @@ export default function AuthCheckPanel() {
               <Box w="100%">
                 <FormControl>
                   <FormLabel>Project</FormLabel>
-                  <Select ref={projectRef} placeholder="Выберите проект" name="project" value={form.project} onChange={handleChange} textAlign="center">
+                  <Select ref={projectRef} placeholder="Выберите проект" value={project} onChange={(e) => setProject(e.target.value)} textAlign="center">
                     {projects.map(p => <option key={p.name} value={p.name}>{p.name}</option>)}
                   </Select>
                 </FormControl>
@@ -150,7 +130,7 @@ export default function AuthCheckPanel() {
               <Box w="100%">
                 <FormControl>
                   <FormLabel>GEO</FormLabel>
-                  <Select placeholder="Выберите GEO" name="geo" value={form.geo} onChange={handleChange} textAlign="center">
+                  <Select placeholder="Выберите GEO" value={geo} onChange={(e) => setGeo(e.target.value)} textAlign="center">
                     {Object.keys(geoGroups).map(g => <option key={g} value={g}>{g}</option>)}
                   </Select>
                 </FormControl>
@@ -158,7 +138,7 @@ export default function AuthCheckPanel() {
               <Box w="100%">
                 <FormControl>
                   <FormLabel>Login</FormLabel>
-                  <Select placeholder="Выберите логин" name="login" value={form.login} onChange={handleChange} textAlign="center">
+                  <Select placeholder="Выберите логин" value={localLogin} onChange={(e) => setLocalLogin(e.target.value)} textAlign="center">
                     {logins.map(l => <option key={l} value={l}>{l}</option>)}
                   </Select>
                 </FormControl>
@@ -167,7 +147,7 @@ export default function AuthCheckPanel() {
 
             <FormControl maxW="sm">
               <FormLabel>Environment</FormLabel>
-              <Select name="env" value={form.env} onChange={handleChange} textAlign="center">
+              <Select value={env} onChange={(e) => setEnv(e.target.value)} textAlign="center">
                 <option value="stage">stage</option>
                 <option value="prod">prod</option>
               </Select>

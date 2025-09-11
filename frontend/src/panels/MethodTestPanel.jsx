@@ -1,49 +1,29 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import {
   Box, Button, Heading, VStack, HStack, Select, Text, Table, Thead, Tbody, Tr, Th, Td, Spinner, Link, Tooltip, Radio, RadioGroup
 } from "@chakra-ui/react";
+import { useGlobalSelection } from '../contexts/GlobalSelectionContext';
 
 export default function MethodTestPanel() {
-  const [projects, setProjects] = useState([]);
-  const [selectedProject, setSelectedProject] = useState("");
-  const [geoList, setGeoList] = useState([]);
-  const [selectedGeo, setSelectedGeo] = useState("");
-  const [logins, setLogins] = useState([]);
-  const [selectedLogin, setSelectedLogin] = useState("");
-  const [env, setEnv] = useState("stage");
+  const [localLogin, setLocalLogin] = useState("");
   const [mode, setMode] = useState("login");
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    axios.get("/list-projects").then(res => setProjects(res.data));
-  }, []);
-
-  useEffect(() => {
-    if (selectedProject) {
-      axios.get('/geo-groups').then(res => {
-        setGeoList(Object.keys(res.data));
-      });
-    }
-  }, [selectedProject]);
-
-  useEffect(() => {
-    if (selectedGeo) {
-      axios.get('/geo-groups').then(res => {
-        setLogins(res.data[selectedGeo] || []);
-      });
-    }
-  }, [selectedGeo]);
+  const { 
+    project, geo, env, projects, geoGroups, logins,
+    setProject, setGeo, setEnv, geoOptions
+  } = useGlobalSelection();
 
   const runTest = async () => {
     setLoading(true);
     setResults([]);
     try {
       const payload = {
-        project: selectedProject,
-        geo: selectedGeo,
-        login: selectedLogin,
+        project,
+        geo,
+        login: localLogin,
         mode,
         env
       };
@@ -62,12 +42,19 @@ export default function MethodTestPanel() {
 
   const exportToSheets = async () => {
     try {
-      const res = await axios.post("/export-table-to-sheets", results);
+      const payload = {
+        data: results,
+        originalOrder: []
+      };
+      const res = await axios.post("/export-table-to-sheets", payload);
       if (res.data?.sheet_url) {
         window.open(res.data.sheet_url, "_blank");
+      } else if (res.data?.detail || res.data?.message) {
+        alert(`Экспорт не выполнен: ${res.data.detail || res.data.message}`);
       }
     } catch (e) {
-      alert("Ошибка экспорта в Google Sheets");
+      const msg = e?.response?.data?.detail || e?.message || "Unknown error";
+      alert(`Ошибка экспорта в Google Sheets: ${msg}`);
     }
   };
 
@@ -77,17 +64,17 @@ export default function MethodTestPanel() {
 
       <VStack align="start" spacing={4} mb={6}>
         <HStack spacing={4} wrap="wrap">
-          <Select placeholder="Выберите проект" value={selectedProject} onChange={e => setSelectedProject(e.target.value)}>
+          <Select placeholder="Выберите проект" value={project} onChange={e => setProject(e.target.value)}>
             {projects.map(p => (
               <option key={p.name} value={p.name}>{p.name}</option>
             ))}
           </Select>
-          <Select placeholder="Выберите GEO" value={selectedGeo} onChange={e => setSelectedGeo(e.target.value)} isDisabled={mode === "project"}>
-            {geoList.map(g => (
+          <Select placeholder="Выберите GEO" value={geo} onChange={e => setGeo(e.target.value)} isDisabled={mode === "project"}>
+            {geoOptions.map(g => (
               <option key={g} value={g}>{g}</option>
             ))}
           </Select>
-          <Select placeholder="Выберите логин" value={selectedLogin} onChange={e => setSelectedLogin(e.target.value)} isDisabled={mode !== "login"}>
+          <Select placeholder="Выберите логин" value={localLogin} onChange={e => setLocalLogin(e.target.value)} isDisabled={mode !== "login"}>
             {logins.map(l => (
               <option key={l} value={l}>{l}</option>
             ))}

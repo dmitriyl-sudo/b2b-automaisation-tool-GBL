@@ -127,9 +127,10 @@ app = FastAPI()
 # --- PYDANTIC МОДЕЛИ ДЛЯ ЗАПРОСОВ ---
 class LoginTestRequest(BaseModel):
     project: str
-    login: str
+    login: Optional[str] = None
     geo: str
     env: Literal["stage", "prod"]
+    mode: Optional[str] = None
 
 class MethodTestRequest(BaseModel):
     project: str
@@ -370,6 +371,67 @@ def run_login_check_endpoint(request: LoginTestRequest):
         }
 
     return run_login_check(project=request.project, geo=request.geo, env=request.env, login=request.login)
+
+@app.post("/run-multi-auth-check")
+def run_multi_auth_check_endpoint(request: LoginTestRequest):
+    """
+    Проверяет авторизацию для всех логинов в выбранном GEO
+    """
+    if request.mode != "geo":
+        raise HTTPException(status_code=400, detail="Only 'geo' mode supported")
+    
+    if _is_geo_forbidden_for_project(request.project, request.geo):
+        return {"results": []}
+    
+    if request.project not in EXTRACTORS:
+        raise HTTPException(status_code=400, detail="Unknown project")
+    
+    # Получаем логины для GEO
+    effective_geo_groups = geo_groups
+    if request.project == "Glitchspin":
+        effective_geo_groups = {**geo_groups, **GLITCHSPIN_EXTRA_GEOS}
+    
+    logins = effective_geo_groups.get(request.geo, [])
+    if not logins:
+        return {"results": []}
+    
+    results = []
+    extractor_class, stage_url, prod_url = EXTRACTORS[request.project]
+    url = stage_url if request.env == "stage" else prod_url
+    
+    for login in logins:
+        try:
+            user_agent = (
+                "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1"
+                if "mobi" in login
+                else "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Safari/605.1.15"
+            )
+            extractor = extractor_class(login, password_data, user_agent=user_agent, base_url=url)
+            
+            if extractor.authenticate():
+                results.append({
+                    "login": login,
+                    "success": True,
+                    "currency": extractor.currency,
+                    "deposit_count": extractor.deposit_count
+                })
+            else:
+                results.append({
+                    "login": login,
+                    "success": False,
+                    "currency": None,
+                    "deposit_count": 0
+                })
+        except Exception as e:
+            results.append({
+                "login": login,
+                "success": False,
+                "currency": None,
+                "deposit_count": 0,
+                "error": str(e)
+            })
+    
+    return {"results": results}
 
 
 @app.post("/test-methods")
