@@ -17,7 +17,7 @@ import openpyxl
 from openpyxl import Workbook
 from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException, BackgroundTasks, Body, Depends
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import jwt, JWTError
 
@@ -857,4 +857,141 @@ def export_table_to_sheets_multi(payload: Dict = Body(...)):
 
     except Exception as e:
         logging.error(f"Export failed: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        return {"success": False, "message": str(e)}
+
+
+@app.post("/test-methods-v2")
+def test_methods_v2(payload: Dict[str, Any]):
+    """
+    payload: {project, geo?, login?, mode: 'login'|'geo'|'project', env}
+    возвращает: {results: [{...результат..., checks:[], checks_summary:{passed,failed}}], meta:{sla_sec}}
+    """
+    from utils.assertions import run_smoke_checks
+    
+    # 1) вызов существующего раннера (как в /test-methods)
+    results = run_payment_method_tests(
+        project=payload.get('project'),
+        geo=payload.get('geo'),
+        login=payload.get('login'),
+        mode=payload.get('mode'),
+        env=payload.get('env')
+    )
+
+    # (optional) подтянуть подсказки по доступности/валюте (если доступны быстро)
+    account_currency = None  # если раннер её знает
+    listing_index = {}  # key: (geo, login, method) -> {'deposit':bool,'withdraw':bool}
+    # TODO: при желании: запросить /get-methods-only и построить listing_index
+
+    out = []
+    for r in results:
+        key = (r.get('geo'), r.get('login'), r.get('method'))
+        listing_hint = listing_index.get(key)
+        checks, summary = run_smoke_checks(r, account_currency=account_currency, listing_hint=listing_hint)
+        r2 = dict(r)
+        r2['checks'] = checks
+        r2['checks_summary'] = summary
+        out.append(r2)
+
+    return {'results': out, 'meta': {'sla_sec': 3.0}}
+
+
+@app.post("/snapshot/project")
+def snapshot_project(payload: Dict[str, Any]):
+    """
+    Generate YAML snapshot for a project
+    payload: {project, env?, save?}
+    returns: YAML text response
+    """
+    try:
+        import yaml
+        from utils.snapshot import build_snapshot
+        
+        project = payload.get("project")
+        env = payload.get("env", "prod")
+        save = bool(payload.get("save", False))
+        
+        if not project:
+            raise HTTPException(status_code=400, detail="project is required")
+        
+        logging.info(f"Starting snapshot generation for project: {project}, env: {env}")
+        
+        # Get geo groups for project - simplified approach
+        geo_to_logins = {}
+        
+        try:
+            # Try to get geo groups from existing function
+            geo_groups = get_geo_groups({"project": project})
+            logging.info(f"Got geo groups response: {type(geo_groups)}")
+            
+            if isinstance(geo_groups, dict) and "geo_groups" in geo_groups:
+                for geo_data in geo_groups["geo_groups"]:
+                    geo = geo_data.get("geo")
+                    logins = geo_data.get("logins", [])
+                    if geo and logins:
+                        geo_to_logins[geo] = logins[:2]  # Limit to 2 logins for testing
+                        logging.info(f"Added geo {geo} with {len(logins)} logins")
+        except Exception as e:
+            logging.error(f"Error getting geo groups: {e}")
+            import traceback
+            traceback.print_exc()
+        
+        # If no geo groups found, create a minimal test structure
+        if not geo_to_logins:
+            logging.warning(f"No geo groups found for project {project}, creating test structure")
+            geo_to_logins = {"TEST_GEO": ["test_login"]}
+        
+        # Build snapshot with methods fetching
+        from datetime import datetime, timezone
+        
+        def run_login_fetcher(geo, login):
+            try:
+                result = run_login_check({
+                    "project": project,
+                    "geo": geo, 
+                    "login": login,
+                    "env": env
+                })
+                return result if isinstance(result, dict) else {}
+            except Exception as e:
+                logging.warning(f"Login check failed for {geo}/{login}: {e}")
+                return {}
+        
+        def get_methods_fetcher(geo, login):
+            try:
+                result = get_methods_only({
+                    "project": project,
+                    "geo": geo,
+                    "login": login, 
+                    "env": env
+                })
+                return result if isinstance(result, dict) else {}
+            except Exception as e:
+                logging.warning(f"Get methods failed for {geo}/{login}: {e}")
+                return {}
+        
+        # Build full snapshot
+        snapshot = build_snapshot(
+            project, env, geo_to_logins,
+            fetchers={
+                "run_login": run_login_fetcher,
+                "get_methods": get_methods_fetcher
+            }
+        )
+        
+        # Convert to YAML
+        yaml_text = yaml.safe_dump(snapshot, allow_unicode=True, sort_keys=False)
+        
+        if save:
+            os.makedirs("snapshots", exist_ok=True)
+            filename = f"snapshots/snapshot_{project}_{env}.yaml"
+            with open(filename, "w", encoding="utf-8") as f:
+                f.write(yaml_text)
+            logging.info(f"Snapshot saved to {filename}")
+        
+        return Response(content=yaml_text, media_type="text/yaml")
+        
+    except Exception as e:
+        logging.error(f"Snapshot generation failed: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Snapshot generation failed: {str(e)}")

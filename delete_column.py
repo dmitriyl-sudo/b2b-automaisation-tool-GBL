@@ -26,4 +26,4 @@ def delete_column_b_from_all_sheets(spreadsheet_id: str):
     print(f"✅ Столбец B удалён из {len(sheet_ids)} листов таблицы.")
 
 # Вызов
-delete_column_b_from_all_sheets("1B74AoYYFKLs3EIhtVbMFQyCEEc5FeWfFyMT2wuEdMkw")
+delete_column_b_from_all_sheets("1Y0RY5yStDjmH3XQbI-zmSPdDfk9u6GxDCPaZRaWmwEQ")
