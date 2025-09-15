@@ -134,14 +134,6 @@ class BaseExtractor:
                         return True
                     logging.error(f"[auth] {resp.status_code} {url} :: {resp.text}")
                 except Exception as ie:
-                    # Специальная обработка DNS ошибок для тестовых доменов
-                    if "Failed to resolve" in str(ie) or "nodename nor servname provided" in str(ie):
-                        logging.warning(f"[auth] DNS resolution failed for {url} - возможно тестовый домен. Эмулируем успешную авторизацию.")
-                        # Эмулируем успешную авторизацию для тестовых доменов
-                        self.currency = "EUR"  # Дефолтная валюта для тестов
-                        self.deposit_count = 5  # Дефолтное количество депозитов
-                        logging.info("Авторизация успешна (тестовый режим)")
-                        return True
                     logging.error(f"[auth] {type(ie).__name__} {url}: {ie}")
 
             return False
@@ -217,45 +209,11 @@ class BaseExtractor:
 
                 errors.append(f"{r.status_code} {url}")
             except Exception as e:
-                # Специальная обработка DNS ошибок для тестовых доменов
-                if "Failed to resolve" in str(e) or "nodename nor servname provided" in str(e):
-                    logging.warning(f"[fetch] DNS resolution failed for {url} - возможно тестовый домен. Возвращаем mock-данные.")
-                    return self._get_mock_payment_methods(op)
                 errors.append(f"{type(e).__name__} {url}: {e}")
 
         logging.error(f"[fetch] Не нашли рабочий эндпоинт для '{op}'. Пробовали:\n - " + "\n - ".join(errors))
-        # Если все эндпоинты недоступны, возвращаем mock-данные для тестовых доменов
-        return self._get_mock_payment_methods(op)
+        return {"success": False, "data": [], "message": f"No working endpoint found for {op}"}
 
-    def _get_mock_payment_methods(self, op: str) -> Dict[str, Any]:
-        """
-        Возвращает mock-данные для платёжных методов в случае недоступности API
-        """
-        mock_methods = {
-            "deposit": [
-                {"id": 1, "title": "Visa/Mastercard", "name": "visa_mc", "min_deposit": 10},
-                {"id": 2, "title": "Skrill", "name": "skrill", "min_deposit": 20},
-                {"id": 3, "title": "Neteller", "name": "neteller", "min_deposit": 20},
-                {"id": 4, "title": "Bitcoin", "name": "bitcoin", "min_deposit": 0.001},
-                {"id": 5, "title": "Bank Transfer", "name": "bank_transfer", "min_deposit": 50},
-            ],
-            "withdraw": [
-                {"id": 1, "title": "Visa/Mastercard", "name": "visa_mc", "min_withdraw": 20},
-                {"id": 2, "title": "Skrill", "name": "skrill", "min_withdraw": 20},
-                {"id": 3, "title": "Neteller", "name": "neteller", "min_withdraw": 20},
-                {"id": 4, "title": "Bitcoin", "name": "bitcoin", "min_withdraw": 0.001},
-                {"id": 5, "title": "Bank Transfer", "name": "bank_transfer", "min_withdraw": 100},
-            ]
-        }
-        
-        result = {
-            "success": True,
-            "data": mock_methods.get(op, []),
-            "message": f"Mock data for {op} methods"
-        }
-        
-        logging.info(f"[mock] Returning mock {op} methods for testing")
-        return result
 
     def fetch_methods(
         self,

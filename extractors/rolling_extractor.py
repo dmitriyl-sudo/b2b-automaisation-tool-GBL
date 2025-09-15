@@ -15,7 +15,7 @@ class RollingExtractor(BaseExtractor):
 
 
     def __init__(self, login, password, user_agent=None, base_url=None):
-        super().__init__(login, password, user_agent, base_url)
+        super().__init__(base_url, login, password, user_agent)
 
     def get_payment_and_withdraw_systems(self, current_geo: str):
         current_country = current_geo.split("_")[0]

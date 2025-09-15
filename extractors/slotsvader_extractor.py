@@ -96,7 +96,7 @@ class SlotsVaderExtractor(BaseExtractor):
         return self.is_geo_forbidden_static(current_geo)
 
     def __init__(self, login, password, user_agent: Optional[str] = None, base_url: Optional[str] = None):
-        super().__init__(login, password, user_agent, base_url)
+        super().__init__(base_url, login, password, user_agent)
 
     def get_payment_and_withdraw_systems(self, current_geo: str) -> Tuple[
         List[Dict[str, Any]],  # deposit_enriched: [{'title','name','min_deposit','currency','min_source'}, ...]
