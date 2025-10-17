@@ -200,8 +200,14 @@ class BaseExtractor:
                     self._resolved_endpoints[op] = rel
                     return r.json() or {}
 
-                # GET c query
+                # GET c query + fields параметр для Rolling и Vegazone
                 params = {"country": country, "operation_type": op}
+
+                # Добавляем fields параметр для Rolling, Vegazone и Ludios проектов
+                if "rolling" in self.base_url.lower() or "vegazone" in self.base_url.lower() or "ludios" in self.base_url.lower():
+                    params["fields"] = "images,name,title,display_type,show_amount,parent_paysystem,run_iframe,version"
+                    params["limit"] = 100
+
                 r = self.session.get(url, params=params, headers=self.headers, timeout=30)
                 if r.status_code == 200:
                     self._resolved_endpoints[op] = rel
@@ -261,6 +267,9 @@ class BaseExtractor:
         recommended: Set[tuple] = set()
         raw_list: List[dict] = []
 
+        # 🔧 ДЕДУПЛИКАЦИЯ: отслеживаем уникальные (title, name) пары
+        seen_methods = set()
+
         country_up = (country or "").upper()
 
         for item in filtered:
@@ -280,6 +289,13 @@ class BaseExtractor:
 
             if not title or not name:
                 continue
+
+            # 🔧 ДЕДУПЛИКАЦИЯ: проверяем уникальность по (title, name)
+            dedup_key = (title, name)
+            if dedup_key in seen_methods:
+                logging.debug(f"[BaseExtractor] Пропускаем дубликат {op}: {title} -> {name}")
+                continue
+            seen_methods.add(dedup_key)
 
             titles.append(title)
             names.append(name)
@@ -327,6 +343,33 @@ class BaseExtractor:
                 self.deposit_count = len(titles)
         except Exception:
             pass
+
+        # 🧪 ДЕБАГ: Выводим все методы которые вернул API
+        if op == "deposit" and filtered:
+            logging.info(f"[DEBUG] 📋 МЕТОДЫ ИЗ API ({self.base_url}) - ПОЛНЫЙ СПИСОК:")
+            logging.info(f"[DEBUG] Всего методов в сыром API: {len(filtered)}")
+            logging.info(f"[DEBUG] Логин: {self.login}")
+
+            for i, item in enumerate(filtered, 1):
+                title = (item.get("title") or item.get("alias") or item.get("name") or "").strip()
+                name = (
+                    item.get("name")
+                    or (item.get("paymethods") or {}).get("paymethod", {}).get("name")
+                    or (item.get("paymethods") or {}).get("paymethod", {}).get("code")
+                    or item.get("doc_id")
+                    or ""
+                ).strip()
+                display_type = item.get("display_type", "")
+                parent = item.get("parent_paysystem", "")
+                recommended_info = item.get("recomended") or item.get("recommended") or {}
+                rec_status = recommended_info.get("status", False)
+                rec_countries = recommended_info.get("countries", [])
+
+                logging.info(f"  {i:2d}. {title} ({name}) | {display_type} | parent: {parent}")
+                if rec_status:
+                    logging.info(f"       ⭐ Рекомендован для стран: {rec_countries}")
+
+            logging.info(f"[DEBUG] {'='*60}")
 
         if return_raw:
             return titles, names, recommended, raw_list

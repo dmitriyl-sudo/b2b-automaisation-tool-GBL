@@ -19,6 +19,9 @@ from extractors.spinline_extractor import SpinlineExtractor
 from extractors.glitchspin_extractor import GlitchSpinExtractor
 from extractors.azur_extractor import AzurSlotExtractor
 from extractors.slotsvader_extractor import SlotsVaderExtractor
+from extractors.vegazone_extractor import VegazoneExtractor
+from extractors.ludios_extractor import LudiosExtractor
+from extractors.spinempire_extractor import SpinEmpireExtractor
 from utils.google_drive import create_google_file
 
 # Настройка логирования
@@ -151,6 +154,24 @@ site_list = [
         "stage_url": "https://stage.slotsvader.com",
         "prod_url": "https://slotsvader.com",
         "extractor_class": SlotsVaderExtractor
+    },
+    {
+        "name": "Vegazone",
+        "stage_url": "https://stage.vegazone.com",
+        "prod_url": "https://vegazone.com",
+        "extractor_class": VegazoneExtractor
+    },
+    {
+        "name": "Ludios",
+        "stage_url": "https://stage.ludios.io",
+        "prod_url": "https://ludios.io",
+        "extractor_class": LudiosExtractor
+    },
+    {
+        "name": "SpinEmpire",
+        "stage_url": "https://stage.spinempire.com",
+        "prod_url": "https://spinempire.com",
+        "extractor_class": SpinEmpireExtractor
     }
 ]
 
@@ -279,9 +300,15 @@ def main():
 
                     # Создаем словарь для сопоставления названий методов и их отображаемых имен
                     method_title_to_payment_name = {}
-                    for idx, method_name in enumerate(deposit_methods):
+                    for idx, method_dict in enumerate(deposit_methods):
                         if idx < len(payment_names):
-                            method_title_to_payment_name[method_name] = payment_names[idx]
+                            # Используем title как ключ, если deposit_methods содержит словари
+                            if isinstance(method_dict, dict):
+                                method_title = method_dict.get('title', '')
+                            else:
+                                method_title = method_dict
+                            method_title_to_payment_name[method_title] = payment_names[idx]
+                    
                     for idx, method_name in enumerate(withdraw_methods):
                         if idx < len(withdraw_names):
                             # Добавляем только если еще нет, или обновляем если название вывода уникально
@@ -290,7 +317,15 @@ def main():
 
                     # Если это последняя итерация для текущего GEO, сохраняем порядок методов
                     if i == len(login_list) - 1:
-                        last_iteration_methods = combined_methods
+                        # Извлекаем titles из combined_methods для совместимости
+                        last_iteration_methods = []
+                        for method in combined_methods:
+                            if isinstance(method, dict):
+                                title = method.get('title', '')
+                                if title:
+                                    last_iteration_methods.append(title)
+                            else:
+                                last_iteration_methods.append(method)
 
                     # Записываем данные в текущий лист Excel
                     current_start_row = save_payment_data_to_excel(
@@ -308,16 +343,34 @@ def main():
                     )
 
                     # Сохраняем данные для объединения по всем логинам текущего GEO
-                    all_payment_data[login] = {
-                        method_title: {
-                            "Deposit": "YES" if method_title in deposit_methods else "NO",
-                            "Withdraw": "YES" if method_title in withdraw_methods else "NO",
-                            "Payment Name": method_title_to_payment_name.get(method_title, ""),
-                            "Status": f"{environment.upper()}",
-                            "Recommended": "YES" if method_title in recommended_methods else "NO"
-                        }
-                        for method_title in combined_methods
-                    }
+                    all_payment_data[login] = {}
+                    
+                    # Обрабатываем депозитные методы
+                    for method_dict in deposit_methods:
+                        if isinstance(method_dict, dict):
+                            method_title = method_dict.get('title', '')
+                        else:
+                            method_title = method_dict
+                            
+                        if method_title:
+                            all_payment_data[login][method_title] = {
+                                "Deposit": "YES",
+                                "Withdraw": "YES" if method_title in withdraw_methods else "NO",
+                                "Payment Name": method_title_to_payment_name.get(method_title, ""),
+                                "Status": f"{environment.upper()}",
+                                "Recommended": "YES" if method_title in recommended_methods else "NO"
+                            }
+                    
+                    # Обрабатываем методы вывода (если их еще нет)
+                    for method_title in withdraw_methods:
+                        if method_title not in all_payment_data[login]:
+                            all_payment_data[login][method_title] = {
+                                "Deposit": "NO",
+                                "Withdraw": "YES",
+                                "Payment Name": method_title_to_payment_name.get(method_title, ""),
+                                "Status": f"{environment.upper()}",
+                                "Recommended": "YES" if method_title in recommended_methods else "NO"
+                            }
 
                 else:
                     logging.error(f"Ошибка авторизации для логина: {login} на проекте {site_name}")

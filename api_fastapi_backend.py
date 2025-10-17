@@ -44,6 +44,11 @@ from extractors.spinlander_extractor import SpinlanderExtractor
 from extractors.slota_extractor import SlotaExtractor
 from extractors.spinline_extractor import SpinlineExtractor
 from extractors.glitchspin_extractor import GlitchSpinExtractor
+from extractors.azur_extractor import AzurSlotExtractor
+from extractors.slotsvader_extractor import SlotsVaderExtractor
+from extractors.vegazone_extractor import VegazoneExtractor
+from extractors.ludios_extractor import LudiosExtractor
+from extractors.spinempire_extractor import SpinEmpireExtractor
 
 from test_runner import run_payment_method_tests
 
@@ -231,7 +236,31 @@ def get_methods_only(project: str, geo: str, env: str, login: str):
     if not extractor.authenticate():
         return {"success": False, "error": "Authentication failed"}
     try:
+        # 🔧 ОТЛАДКА: Логируем вызов get_payment_and_withdraw_systems
+        logging.info(f"[API] 🔍 Вызываем get_payment_and_withdraw_systems для {project}/{geo}/{login}")
         deposit, withdraw, dep_names, wd_names, currency, dep_count, recommended = extractor.get_payment_and_withdraw_systems(geo)
+        
+        # 🔧 ОТЛАДКА: Логируем результаты
+        logging.info(f"[API] 📊 Получили: deposit={len(deposit) if hasattr(deposit, '__len__') else type(deposit)}, dep_names={len(dep_names) if hasattr(dep_names, '__len__') else type(dep_names)}")
+        
+        # 🔧 ОТЛАДКА: Ищем Skrill в результатах
+        skrill_count = 0
+        if hasattr(deposit, '__iter__'):
+            for item in deposit:
+                if isinstance(item, dict):
+                    title = item.get('title', '')
+                    name = item.get('name', '')
+                elif isinstance(item, str):
+                    title = item
+                    name = ''
+                else:
+                    continue
+                
+                if 'skrill' in title.lower() or 'skrill' in name.lower():
+                    skrill_count += 1
+                    logging.info(f"[API] 💰 SKRILL в deposit #{skrill_count}: \"{title}\" -> \"{name}\"")
+        
+        logging.info(f"[API] 📊 Всего Skrill в deposit: {skrill_count}")
 
         # Нормализуем оба формата
         deposit_pairs, dep_min_list = _extract_pairs_and_minlist(deposit, dep_names)
@@ -283,6 +312,273 @@ def get_methods_only(project: str, geo: str, env: str, login: str):
     except Exception as e:
         logging.exception(f"Error in get_methods_only for {project}/{geo}/{login}: {e}")
         return {"success": False, "error": str(e)}
+
+def format_data_for_sheets(project: str, geo: str, env: str):
+    """
+    🔧 НОВАЯ ФУНКЦИЯ: Формирует данные для Google Sheets напрямую из бэкенда
+    Возвращает готовую таблицу в том же формате, что ожидает фронтенд
+    """
+    # Получаем все методы
+    methods_data = get_all_methods_for_geo(project=project, geo=geo, env=env)
+    
+    if not methods_data.get("success"):
+        return {"success": False, "error": methods_data.get("error", "Unknown error")}
+    
+    deposit_methods = methods_data.get("deposit_methods", [])
+    withdraw_methods = methods_data.get("withdraw_methods", [])
+    recommended_methods = methods_data.get("recommended_methods", [])
+    min_deposit_by_key = methods_data.get("min_deposit_by_key", {})
+    currency = methods_data.get("currency", "EUR")
+    
+    # Убираем отладку для чистоты
+    
+    # Группируем методы по title
+    title_groups = {}
+    method_types = {}
+    recommended_set = set()
+    
+    # Обрабатываем рекомендованные методы
+    for title, name in recommended_methods:
+        recommended_set.add(f"{title}|||{name}")
+    
+    # 🔧 ИСПРАВЛЕННАЯ ЛОГИКА: Обрабатываем методы по типам отдельно
+    
+    # Сначала обрабатываем deposit методы
+    for title, name in deposit_methods:
+        key = f"{title}|||{name}"
+        
+        if title not in title_groups:
+            title_groups[title] = {
+                "names": set(),
+                "conditions": set(),
+                "hasDeposit": False,
+                "hasWithdraw": False,
+                "isRecommended": False
+            }
+        
+        title_groups[title]["names"].add(name)
+        title_groups[title]["hasDeposit"] = True
+        
+        # Проверяем рекомендованность
+        if key in recommended_set:
+            title_groups[title]["isRecommended"] = True
+        
+        # Извлекаем условия из name
+        conditions = extract_conditions_from_name(name)
+        title_groups[title]["conditions"].update(conditions)
+    
+    # Потом обрабатываем withdraw методы
+    for title, name in withdraw_methods:
+        key = f"{title}|||{name}"
+        
+        if title not in title_groups:
+            title_groups[title] = {
+                "names": set(),
+                "conditions": set(),
+                "hasDeposit": False,
+                "hasWithdraw": False,
+                "isRecommended": False
+            }
+        
+        title_groups[title]["names"].add(name)
+        title_groups[title]["hasWithdraw"] = True
+        
+        # Проверяем рекомендованность
+        if key in recommended_set:
+            title_groups[title]["isRecommended"] = True
+        
+        # Извлекаем условия из name
+        conditions = extract_conditions_from_name(name)
+        title_groups[title]["conditions"].update(conditions)
+    
+    # Убираем отладку
+    
+    # Формируем данные для Google Sheets
+    sheets_data = []
+    
+    for title, group_data in title_groups.items():
+        # Получаем минимальный депозит
+        min_deposit = None
+        for name in group_data["names"]:
+            key = f"{title}|||{name}"
+            if key in min_deposit_by_key:
+                dep_val = min_deposit_by_key[key]
+                if isinstance(dep_val, (int, float)) and dep_val > 0:
+                    if min_deposit is None or dep_val < min_deposit:
+                        min_deposit = dep_val
+        
+        # Формируем условия
+        conditions_str = "ALL"
+        if group_data["conditions"]:
+            conditions_str = "\n".join(sorted(group_data["conditions"]))
+        
+        # Формируем строку для Google Sheets
+        row = {
+            "Paymethod": title,
+            "Payment Name": "\n".join(sorted(group_data["names"])),
+            "Currency": currency,
+            "Deposit": "YES" if group_data["hasDeposit"] else "NO",
+            "Withdraw": "YES" if group_data["hasWithdraw"] else "NO", 
+            "Status": "PROD" if env == "prod" else "STAGE",
+            "Details": conditions_str,
+            "Min Dep": f"{min_deposit} {currency}".strip() if min_deposit else "—",
+            "Recommended": "⭐" if group_data["isRecommended"] else ""
+        }
+        
+        sheets_data.append(row)
+    
+    # Сортируем: рекомендованные сначала, потом по алфавиту
+    sheets_data.sort(key=lambda x: (not x["Recommended"], x["Paymethod"]))
+    
+    logging.info(f"[format_data_for_sheets] 📊 Сформировано {len(sheets_data)} строк для Google Sheets")
+    
+    return {
+        "success": True,
+        "data": sheets_data,
+        "currency": currency,
+        "total_methods": len(sheets_data),
+        "geo": geo,
+        "project": project,
+        "env": env
+    }
+
+def extract_conditions_from_name(name: str) -> set:
+    """Извлекает условия из имени метода"""
+    conditions = set()
+    
+    # Ищем DEP паттерны
+    if "0DEP" in name:
+        conditions.add("0DEP")
+    elif "1DEP" in name:
+        conditions.add("1DEP")
+    elif "2DEP" in name:
+        conditions.add("2DEP")
+    elif "3DEP" in name:
+        conditions.add("3DEP")
+    elif "4DEP" in name:
+        conditions.add("4DEP")
+    
+    # Ищем AFF
+    if "//aff" in name or "_aff" in name:
+        conditions.add("AFF")
+    
+    # Ищем MOB
+    if "//mob" in name or "_mob" in name or "mobi" in name.lower():
+        conditions.add("MOB")
+    
+    return conditions
+
+def get_all_methods_for_geo(project: str, geo: str, env: str):
+    """
+    🔧 НОВАЯ ФУНКЦИЯ: Собирает методы со ВСЕХ аккаунтов для указанного GEO
+    Это позволяет увидеть все возможные методы (0DEP Skrill + 1DEP Skrill + 3DEP Skrill)
+    """
+    if project not in EXTRACTORS:
+        raise HTTPException(status_code=400, detail="Unknown project")
+    
+    # Получаем список аккаунтов для данного GEO из geo_groups
+    merged_geo_groups = get_geo_groups()
+    
+    # Сначала пробуем найти точное совпадение GEO
+    if geo in merged_geo_groups:
+        login_list = merged_geo_groups[geo]
+    else:
+        # Если точного совпадения нет, пробуем базовое GEO (без _desktop/_mobile)
+        base_geo = geo.split('_')[0]
+        if base_geo in merged_geo_groups:
+            login_list = merged_geo_groups[base_geo]
+        else:
+            return {"success": False, "error": f"Unknown GEO: {geo} (base: {base_geo})"}
+    
+    
+    logging.info(f"[get_all_methods_for_geo] 🔍 Обрабатываем {len(login_list)} аккаунтов для {project}/{geo}")
+    
+    all_deposit_pairs = []
+    all_withdraw_pairs = []
+    all_recommended_pairs = []
+    all_min_deposit_list = []
+    # 🔧 УБРАНА ВСЯ ЛОГИКА ФИЛЬТРАЦИИ И ДЕДУПЛИКАЦИИ
+    
+    successful_accounts = 0
+    
+    for i, login in enumerate(login_list):
+        try:
+            logging.info(f"[get_all_methods_for_geo] 📊 Аккаунт {i+1}/{len(login_list)}: {login}")
+            
+            # Получаем методы для этого аккаунта
+            result = get_methods_only(project=project, geo=geo, env=env, login=login)
+            
+            if not result.get("success"):
+                logging.warning(f"[get_all_methods_for_geo] ❌ Аккаунт {login} не работает: {result.get('error', 'Unknown error')}")
+                continue
+            
+            successful_accounts += 1
+            
+            # 🔧 ДОБАВЛЯЕМ ВСЕ МЕТОДЫ БЕЗ КАКОЙ-ЛИБО ФИЛЬТРАЦИИ
+            deposit_methods = result.get("deposit_methods", [])
+            withdraw_methods = result.get("withdraw_methods", [])
+            recommended_methods = result.get("recommended_methods", [])
+            min_deposit_map = result.get("min_deposit_map", [])
+            
+            # Добавляем ВСЕ deposit методы
+            for method in deposit_methods:
+                if isinstance(method, (list, tuple)) and len(method) >= 2:
+                    all_deposit_pairs.append(method)
+                    
+                    # Логируем Skrill методы
+                    title, name = method[0], method[1]
+                    if 'skrill' in title.lower() or 'skrill' in name.lower():
+                        logging.info(f"[get_all_methods_for_geo] 💰 ДОБАВЛЕН SKRILL из {login}: \"{title}\" -> \"{name}\"")
+            
+            # Добавляем ВСЕ withdraw методы
+            for method in withdraw_methods:
+                if isinstance(method, (list, tuple)) and len(method) >= 2:
+                    all_withdraw_pairs.append(method)
+            
+            # Добавляем ВСЕ recommended методы
+            for method in recommended_methods:
+                if isinstance(method, (list, tuple)) and len(method) >= 2:
+                    all_recommended_pairs.append(method)
+            
+            # Добавляем ВСЕ min_deposit данные
+            all_min_deposit_list.extend(min_deposit_map)
+            
+        except Exception as e:
+            logging.error(f"[get_all_methods_for_geo] ❌ Ошибка обработки аккаунта {login}: {e}")
+            continue
+    
+    # Создаем min_deposit_by_key
+    min_deposit_by_key = {}
+    for item in all_min_deposit_list:
+        if isinstance(item, dict) and "title" in item and "name" in item:
+            key = _key_join(item["title"], item["name"])
+            if "min_deposit" in item:
+                min_deposit_by_key[key] = item["min_deposit"]
+    
+    logging.info(f"[get_all_methods_for_geo] ✅ Обработано {successful_accounts}/{len(login_list)} аккаунтов")
+    logging.info(f"[get_all_methods_for_geo] 📊 Итого: deposit={len(all_deposit_pairs)}, withdraw={len(all_withdraw_pairs)}")
+    
+    # Подсчитываем Skrill методы в итоге
+    total_skrill = sum(1 for method in all_deposit_pairs 
+                      if isinstance(method, (list, tuple)) and len(method) >= 2 
+                      and ('skrill' in method[0].lower() or 'skrill' in method[1].lower()))
+    
+    logging.info(f"[get_all_methods_for_geo] 💰 Итого Skrill методов: {total_skrill}")
+    
+    return {
+        "success": True,
+        "deposit_methods": all_deposit_pairs,
+        "withdraw_methods": all_withdraw_pairs,
+        "recommended_methods": all_recommended_pairs,
+        "min_deposit_map": all_min_deposit_list,
+        "min_deposit_by_key": min_deposit_by_key,
+        "accounts_processed": successful_accounts,
+        "total_accounts": len(login_list),
+        "debug": {
+            "total_skrill": total_skrill,
+            "accounts_used": [login for login in login_list[:successful_accounts]]
+        }
+    }
 
 def run_login_check(project: str, geo: str, env: str, login: str):
     if project not in EXTRACTORS:
@@ -343,7 +639,390 @@ def get_methods_only_endpoint(request: LoginTestRequest):
             "reason": "forbidden_geo"
         }
 
-    return get_methods_only(project=request.project, geo=request.geo, env=request.env, login=request.login)
+    # 🔧 ИСПРАВЛЕНИЕ: ВСЕГДА используем объединенную логику всех аккаунтов
+    # Игнорируем переданный login и собираем данные со всех аккаунтов для GEO
+    logging.info(f"[get_methods_only] 🔄 Используем объединенную логику для {request.project}/{request.geo} (игнорируем login={request.login})")
+    
+    # Получаем сырые данные
+    raw_data = get_all_methods_for_geo(project=request.project, geo=request.geo, env=request.env)
+    
+    if not raw_data.get("success"):
+        return raw_data
+    
+    # Преобразуем в формат фронтенда
+    deposit_methods = raw_data.get("deposit_methods", [])
+    withdraw_methods = raw_data.get("withdraw_methods", [])
+    recommended_methods = raw_data.get("recommended_methods", [])
+    min_deposit_by_key = raw_data.get("min_deposit_by_key", {})
+    
+    # Создаем объединенный список методов в формате фронтенда
+    methods = []
+    method_names = set()
+    
+    # Добавляем все deposit методы
+    for title, name in deposit_methods:
+        if name not in method_names:
+            method_names.add(name)
+            
+            # Проверяем рекомендованность
+            is_recommended = any(rt == title and rn == name for rt, rn in recommended_methods)
+            
+            # Получаем минимальный депозит
+            min_deposit = min_deposit_by_key.get(f"{title}|||{name}", 0)
+            
+            methods.append({
+                "title": title,
+                "name": name,
+                "isRecommended": is_recommended,
+                "hasDeposit": True,
+                "hasWithdraw": False,  # Пока только deposit
+                "minDeposit": min_deposit
+            })
+    
+    # Обновляем методы которые есть и в withdraw
+    withdraw_names = set(name for title, name in withdraw_methods)
+    for method in methods:
+        if method["name"] in withdraw_names:
+            method["hasWithdraw"] = True
+    
+    # Добавляем методы которые есть только в withdraw
+    for title, name in withdraw_methods:
+        if name not in method_names:
+            method_names.add(name)
+            
+            methods.append({
+                "title": title,
+                "name": name,
+                "isRecommended": False,
+                "hasDeposit": False,
+                "hasWithdraw": True,
+                "minDeposit": 0
+            })
+    
+    return {
+        "success": True,
+        "methods": methods,
+        "currency": raw_data.get("currency"),
+        "accounts_processed": raw_data.get("accounts_processed", 0),
+        "total_accounts": raw_data.get("total_accounts", 0)
+    }
+
+@app.post("/get-all-methods-for-geo")
+def get_all_methods_for_geo_endpoint(request: LoginTestRequest):
+    """
+    🔧 НОВЫЙ ENDPOINT: Получает методы со ВСЕХ аккаунтов для указанного GEO
+    Объединяет методы из всех 5 аккаунтов, чтобы показать полную картину
+    """
+    if _is_geo_forbidden_for_project(request.project, request.geo):
+        return {
+            "success": True,
+            "deposit_methods": [],
+            "withdraw_methods": [],
+            "recommended_methods": [],
+            "skipped_geo": True,
+            "reason": "forbidden_geo"
+        }
+
+    return get_all_methods_for_geo(project=request.project, geo=request.geo, env=request.env)
+
+@app.post("/get-sheets-data")
+def get_sheets_data_endpoint(request: LoginTestRequest):
+    """
+    🔧 НОВЫЙ ENDPOINT: Формирует данные напрямую для Google Sheets
+    Возвращает готовую таблицу в формате для экспорта
+    """
+    if _is_geo_forbidden_for_project(request.project, request.geo):
+        return {
+            "success": True,
+            "data": [],
+            "skipped_geo": True,
+            "reason": "forbidden_geo"
+        }
+
+    return format_data_for_sheets(project=request.project, geo=request.geo, env=request.env)
+
+@app.post("/debug-skrill")
+def debug_skrill_endpoint(request: LoginTestRequest):
+    """
+    🔧 ОТЛАДОЧНЫЙ ENDPOINT: Показывает детали обработки Skrill методов
+    """
+    # Получаем сырые данные
+    raw_data = get_all_methods_for_geo(project=request.project, geo=request.geo, env=request.env)
+    
+    if not raw_data.get("success"):
+        return {"success": False, "error": raw_data.get("error")}
+    
+    deposit_methods = raw_data.get("deposit_methods", [])
+    
+    # Ищем все Skrill методы
+    skrill_methods = []
+    for method in deposit_methods:
+        if isinstance(method, (list, tuple)) and len(method) >= 2:
+            title, name = method[0], method[1]
+            if 'skrill' in title.lower() or 'skrill' in name.lower():
+                skrill_methods.append({"title": title, "name": name})
+    
+    # Группируем по title
+    title_groups = {}
+    for item in skrill_methods:
+        title = item["title"]
+        if title not in title_groups:
+            title_groups[title] = []
+        title_groups[title].append(item["name"])
+    
+    return {
+        "success": True,
+        "total_skrill_methods": len(skrill_methods),
+        "skrill_methods": skrill_methods,
+        "title_groups": title_groups,
+        "unique_titles": list(title_groups.keys())
+    }
+
+@app.post("/debug-sheets-processing")
+def debug_sheets_processing_endpoint(request: LoginTestRequest):
+    """
+    🔧 ОТЛАДОЧНЫЙ ENDPOINT: Показывает пошаговую обработку в format_data_for_sheets
+    """
+    # Получаем сырые данные
+    raw_data = get_all_methods_for_geo(project=request.project, geo=request.geo, env=request.env)
+    
+    if not raw_data.get("success"):
+        return {"success": False, "error": raw_data.get("error")}
+    
+    deposit_methods = raw_data.get("deposit_methods", [])
+    
+    # Шаг 1: Входные данные
+    skrill_input = [(title, name) for title, name in deposit_methods 
+                   if 'skrill' in title.lower() or 'skrill' in name.lower()]
+    
+    # Шаг 2: Группировка
+    title_groups = {}
+    for title, name in skrill_input:
+        if title not in title_groups:
+            title_groups[title] = {"names": set(), "count": 0}
+        title_groups[title]["names"].add(name)
+        title_groups[title]["count"] += 1
+    
+    # Шаг 3: Финальные группы
+    final_groups = {}
+    for title, data in title_groups.items():
+        final_groups[title] = {
+            "names": list(data["names"]),
+            "count": data["count"]
+        }
+    
+    return {
+        "success": True,
+        "step1_input": {
+            "total_skrill": len(skrill_input),
+            "methods": [{"title": title, "name": name} for title, name in skrill_input],
+            "unique_titles": list(set(title for title, name in skrill_input))
+        },
+        "step2_grouping": final_groups,
+        "step3_should_create": len(final_groups)
+    }
+
+@app.post("/debug-minimal-sheets")
+def debug_minimal_sheets_endpoint(request: LoginTestRequest):
+    """
+    🔧 МИНИМАЛЬНАЯ ВЕРСИЯ format_data_for_sheets только для Skrill
+    """
+    # Получаем сырые данные
+    raw_data = get_all_methods_for_geo(project=request.project, geo=request.geo, env=request.env)
+    
+    if not raw_data.get("success"):
+        return {"success": False, "error": raw_data.get("error")}
+    
+    deposit_methods = raw_data.get("deposit_methods", [])
+    
+    # Фильтруем только Skrill
+    skrill_methods = [(title, name) for title, name in deposit_methods 
+                     if 'skrill' in title.lower() or 'skrill' in name.lower()]
+    
+    # Группируем по title (как в оригинальной функции)
+    title_groups = {}
+    for title, name in skrill_methods:
+        if title not in title_groups:
+            title_groups[title] = {"names": set()}
+        title_groups[title]["names"].add(name)
+    
+    # Формируем результат
+    sheets_data = []
+    for title, group_data in title_groups.items():
+        row = {
+            "Paymethod": title,
+            "Payment Name": "\\n".join(sorted(group_data["names"])),
+            "Details": "TEST"
+        }
+        sheets_data.append(row)
+    
+    return {
+        "success": True,
+        "input_skrill_count": len(skrill_methods),
+        "input_unique_titles": list(set(title for title, name in skrill_methods)),
+        "groups_created": len(title_groups),
+        "final_rows": len(sheets_data),
+        "sheets_data": sheets_data
+    }
+
+@app.post("/get-sheets-data-fixed")
+def get_sheets_data_fixed_endpoint(request: LoginTestRequest):
+    """
+    🔧 ИСПРАВЛЕННАЯ ВЕРСИЯ: Использует рабочую логику из минимальной версии
+    """
+    if _is_geo_forbidden_for_project(request.project, request.geo):
+        return {
+            "success": True,
+            "data": [],
+            "skipped_geo": True,
+            "reason": "forbidden_geo"
+        }
+
+    # Получаем сырые данные
+    raw_data = get_all_methods_for_geo(project=request.project, geo=request.geo, env=request.env)
+    
+    if not raw_data.get("success"):
+        return {"success": False, "error": raw_data.get("error", "Unknown error")}
+    
+    deposit_methods = raw_data.get("deposit_methods", [])
+    withdraw_methods = raw_data.get("withdraw_methods", [])
+    recommended_methods = raw_data.get("recommended_methods", [])
+    min_deposit_by_key = raw_data.get("min_deposit_by_key", {})
+    currency = raw_data.get("currency", "EUR")
+    
+    # Убираем отладку - endpoint готов к использованию
+    
+    # Создаем set рекомендованных методов
+    recommended_set = set()
+    for title, name in recommended_methods:
+        recommended_set.add(f"{title}|||{name}")
+    
+    # 🔧 ИСПОЛЬЗУЕМ РАБОЧУЮ ЛОГИКУ: Группируем методы по title
+    title_groups = {}
+    
+    # Обрабатываем deposit методы
+    for title, name in deposit_methods:
+        if title not in title_groups:
+            title_groups[title] = {
+                "names": set(),
+                "conditions": set(),
+                "hasDeposit": False,
+                "hasWithdraw": False,
+                "isRecommended": False
+            }
+        
+        title_groups[title]["names"].add(name)
+        title_groups[title]["hasDeposit"] = True
+        
+        # Проверяем рекомендованность
+        key = f"{title}|||{name}"
+        if key in recommended_set:
+            title_groups[title]["isRecommended"] = True
+        
+        # Извлекаем условия
+        conditions = extract_conditions_from_name(name)
+        title_groups[title]["conditions"].update(conditions)
+    
+    # Обрабатываем withdraw методы
+    for title, name in withdraw_methods:
+        if title not in title_groups:
+            title_groups[title] = {
+                "names": set(),
+                "conditions": set(),
+                "hasDeposit": False,
+                "hasWithdraw": False,
+                "isRecommended": False
+            }
+        
+        title_groups[title]["names"].add(name)
+        title_groups[title]["hasWithdraw"] = True
+        
+        # Проверяем рекомендованность
+        key = f"{title}|||{name}"
+        if key in recommended_set:
+            title_groups[title]["isRecommended"] = True
+        
+        # Извлекаем условия
+        conditions = extract_conditions_from_name(name)
+        title_groups[title]["conditions"].update(conditions)
+    
+    # Формируем результат
+    sheets_data = []
+    
+    for title, group_data in title_groups.items():
+        # Получаем минимальный депозит
+        min_deposit = None
+        for name in group_data["names"]:
+            key = f"{title}|||{name}"
+            if key in min_deposit_by_key:
+                dep_val = min_deposit_by_key[key]
+                if isinstance(dep_val, (int, float)) and dep_val > 0:
+                    if min_deposit is None or dep_val < min_deposit:
+                        min_deposit = dep_val
+        
+        # Формируем условия
+        conditions_str = "ALL"
+        if group_data["conditions"]:
+            conditions_str = "\\n".join(sorted(group_data["conditions"]))
+        
+        # Формируем строку
+        row = {
+            "Paymethod": title,
+            "Payment Name": "\\n".join(sorted(group_data["names"])),
+            "Currency": currency,
+            "Deposit": "YES" if group_data["hasDeposit"] else "NO",
+            "Withdraw": "YES" if group_data["hasWithdraw"] else "NO", 
+            "Status": "PROD" if request.env == "prod" else "STAGE",
+            "Details": conditions_str,
+            "Min Dep": f"{min_deposit} {currency}".strip() if min_deposit else "—",
+            "Recommended": "⭐" if group_data["isRecommended"] else ""
+        }
+        
+        sheets_data.append(row)
+    
+    # Сортируем с правильной группировкой криптовалют
+    def is_crypto(title):
+        title_lower = title.lower()
+        crypto_keywords = ['btc', 'eth', 'ltc', 'usdt', 'usdc', 'trx', 'doge', 'ada', 'sol', 'xrp', 'bch', 'ton']
+        return 'crypto' in title_lower or any(crypto in title_lower for crypto in crypto_keywords)
+    
+    def is_withdraw_only(row):
+        return row["Deposit"] == "NO" and row["Withdraw"] == "YES"
+    
+    def get_base_crypto_name(title):
+        # Убираем " - описание" для группировки криптовалют
+        return title.replace(' - ', ' ').strip()
+    
+    # Получаем оригинальный порядок из сырых данных
+    original_order = {}
+    all_methods = deposit_methods + withdraw_methods
+    for i, (title, name) in enumerate(all_methods):
+        if title not in original_order:
+            original_order[title] = i
+    
+    def get_crypto_sort_key(paymethod):
+        # "Crypto" всегда первая в криптоблоке
+        if paymethod == "Crypto":
+            return (0, paymethod)
+        else:
+            return (1, get_base_crypto_name(paymethod))
+    
+    sheets_data.sort(key=lambda x: (
+        is_withdraw_only(x),           # Withdraw-only методы в самый конец
+        is_crypto(x["Paymethod"]),     # Криптовалюты после обычных методов
+        not x["Recommended"] if not is_crypto(x["Paymethod"]) else False,  # Рекомендованные вперед только для не-крипто
+        get_crypto_sort_key(x["Paymethod"]) if is_crypto(x["Paymethod"]) else (original_order.get(x["Paymethod"], 999), x["Paymethod"])  # Оригинальный порядок для не-крипто, специальный для крипто
+    ))
+    
+    return {
+        "success": True,
+        "data": sheets_data,
+        "currency": currency,
+        "total_methods": len(sheets_data),
+        "geo": request.geo,
+        "project": request.project,
+        "env": request.env
+    }
 
 # ЭНДПОИНТ ДЛЯ ПОЛУЧЕНИЯ МИНИМАЛЬНЫХ ДЕПОЗИТОВ
 @app.post("/get-min-deposits")

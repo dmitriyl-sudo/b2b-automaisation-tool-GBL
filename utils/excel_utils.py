@@ -4,8 +4,14 @@ import logging
 from typing import List, Dict, OrderedDict
 
 # Функция нормализации методов оплаты (удаляет лишние пробелы)
-def normalize_method(method: str) -> str:
-    return method.strip()
+def normalize_method(method) -> str:
+    if isinstance(method, dict):
+        # Если это словарь, извлекаем title
+        return method.get('title', '').strip()
+    elif isinstance(method, str):
+        return method.strip()
+    else:
+        return str(method).strip()
 
 # Основная функция для сохранения данных в Excel
 def save_payment_data_to_excel(payment_systems: List[str],

@@ -1,11 +1,23 @@
 import { useState, useEffect } from 'react';
 import {
-  Box, Heading, Text, FormControl, FormLabel, Select, Button,
-  Table, Thead, Tbody, Tr, Th, Td, Stack, Center, HStack
+  Box, Button, Table, Thead, Tbody, Tr, Th, Td, Text, HStack, VStack, Stack,
+  FormControl, FormLabel, Select, useToast, Center, Heading
 } from '@chakra-ui/react';
 import * as XLSX from "xlsx";
 
 /* ---------------- helpers ---------------- */
+// 🔧 ВРЕМЕННОЕ РЕШЕНИЕ: Binance Pay
+// 🔧 ВРЕМЕННОЕ РЕШЕНИЕ: Binance Pay
+// Добавляет "Binance Pay - EUR - YES - YES - STATUS - prod - ALL - 50 EUR" в самый низ
+// (но выше методов только для вывода)
+// ❗ ЧТОБЫ ОТКЛЮЧИТЬ: поставить ENABLE_BINANCE_PAY_TEMP = false
+const ENABLE_BINANCE_PAY_TEMP = false;
+
+// 🔧 ВРЕМЕННОЕ РЕШЕНИЕ: Jeton
+// Добавляет "Jeton - EUR - YES - YES - STATUS - prod - ALL - 20 EUR" в самый низ
+// ❗ ЧТОБЫ ОТКЛЮЧИТЬ: поставить ENABLE_JETON_TEMP = false
+const ENABLE_JETON_TEMP = false;
+
 const normalizeText = (s) => (s || '').trim().toLowerCase();
 const normKey = (t, n) =>
   `${(t||'').toLowerCase().replace(/\s+/g,'').replace(/[^a-z0-9/+-]/g,'')}` +
@@ -16,7 +28,8 @@ const normKey = (t, n) =>
 const titleAlias = (t) => {
   const s = (t || '').trim();
   if (/^apple\s*pay$/i.test(s)) return 'Applepay';
-  if (/^skrl$/i.test(s))       return 'Skrill';
+  // 🔧 УБИРАЕМ ПРЕОБРАЗОВАНИЕ SKRL -> Skrill чтобы они были отдельными группами
+  // if (/^skrl$/i.test(s))       return 'Skrill';
   if (/^visa\/?mc$/i.test(s))  return 'Visa/Mastercard';
   return s;
 };
@@ -34,21 +47,98 @@ const isCryptoTitle = (t) => {
 const isCryptoName = (n) =>
   /Coinspaid|Crypto(pay)?|Tether|Bitcoin|Ethereum|Litecoin|Ripple|Tron|USDT|USDC|BTC|ETH|LTC|TRX|XRP|SOL|ADA|BCH|TON|DOGE/i.test(n || '');
 
+// Функции для хардкод методов
+const getCurrencyFromGeoName = (geoName) => {
+  if (!geoName) return 'EUR';
+  const geoUpper = geoName.toUpperCase();
+  
+  // Проверяем локальные валюты в названии GEO
+  if (geoUpper.includes('_PLN')) return 'PLN';
+  if (geoUpper.includes('_DKK')) return 'DKK';
+  if (geoUpper.includes('_CHF')) return 'CHF';
+  if (geoUpper.includes('_NOK')) return 'NOK';
+  if (geoUpper.includes('_HUF')) return 'HUF';
+  if (geoUpper.includes('_AUD')) return 'AUD';
+  if (geoUpper.includes('_CAD')) return 'CAD';
+  if (geoUpper.includes('_USD')) return 'USD';
+  
+  // Если локальная валюта не указана - EUR по умолчанию
+  return 'EUR';
+};
+
+const getHardcodedMethodsForGeo = (geoName, currency) => {
+  const methods = [];
+  const geoUpper = (geoName || '').toUpperCase();
+  
+  // Zimpler для Финляндии
+  if (geoUpper.startsWith('FI')) {
+    methods.push({
+      title: 'Zimpler',
+      names: new Set(['Zimpler_Zimpler_Wallet_0DEP']),
+      conditions: new Set(['0DEP']),
+      isRecommended: true,
+      hasDeposit: true,
+      hasWithdraw: true,
+      isCrypto: false,
+      isHardcoded: true,
+      currency: currency,
+      minDeposit: 10
+    });
+  }
+  
+  // Blik для Польши
+  if (geoUpper.startsWith('PL')) {
+    methods.push({
+      title: 'Blik',
+      names: new Set(['Blik_Blik_Wallet']),
+      conditions: new Set(['ALL']),
+      isRecommended: false,
+      hasDeposit: true,
+      hasWithdraw: false,
+      isCrypto: false,
+      isHardcoded: true,
+      currency: currency,
+      minDeposit: 10
+    });
+  }
+  
+  // ApplePay Visa (Gumballpay) для всех GEO
+  methods.push({
+    title: 'ApplePay Visa',
+    names: new Set(['Applepay_Gumballpay_Cards_1DEP']),
+    conditions: new Set(['1DEP']),
+    isRecommended: false,
+    hasDeposit: true,
+    hasWithdraw: false,
+    isCrypto: false,
+    isHardcoded: true,
+    currency: currency,
+    minDeposit: 20
+  });
+  
+  return methods;
+};
+
 export default function GeoMethodsPanel({
   methodsOnly,
   groupedIds,
   conditionsMap,
   recommendedPairs,
+  methodTypes,
   originalOrder,
-  hidePaymentName,
-  isFullProject,
   geo,
-  currency,          // 👈 GEO currency after login
+  currency,
+  hidePaymentName = false,
+  isFullProject = false,
+  env,
   project,
-  env
+  globalAddHardcodedMethods = false
 }) {
   const [filter, setFilter] = useState('all');
   const [isExporting, setIsExporting] = useState(false);
+  // Используем глобальное состояние вместо локального
+  const addHardcodedMethods = globalAddHardcodedMethods;
+  
 
   /* ---------- группировка текущего GEO (UI) ---------- */
   const extractTag = (name) => {
@@ -107,7 +197,8 @@ export default function GeoMethodsPanel({
     if (isRec) group.isRecommended = true;
   });
 
-  const filteredGroups = (originalOrder || [])
+  // 🔧 ВРЕМЕННОЕ РЕШЕНИЕ: добавляем Binance Pay (флаг в начале файла)
+  let baseFilteredGroups = (originalOrder || [])
     .map(t => groupedMap.get(titleAlias(t)))
     .filter(Boolean)
     .filter(group => {
@@ -115,6 +206,98 @@ export default function GeoMethodsPanel({
       if (filter === 'recommended') return group.isRecommended;
       return Array.from(group.conditions).some(tag => tag.includes(filter));
     });
+
+  // Добавляем временный Binance Pay если включен флаг
+  if (false) {
+    const binancePayGroup = {
+      title: 'Binance Pay',
+      names: new Set(['Binancepay_Binancepay_Crypto']),
+      conditions: new Set(['ALL']),
+      isRecommended: false,
+      hasDeposit: true,
+      hasWithdraw: true,
+      isCrypto: true,
+      isTemp: true // маркер что это временный метод
+    };
+
+    // Добавляем в самый низ списка
+    baseFilteredGroups.push(binancePayGroup);
+  }
+
+  // Добавляем временный Jeton если включен флаг
+  if (false) {
+    const jetonGroup = {
+      title: 'Jeton',
+      names: new Set(['Jeton_Jeton_Wallet']),
+      conditions: new Set(['ALL']),
+      isRecommended: false,
+      hasDeposit: true,
+      hasWithdraw: true,
+      isCrypto: false, // Jeton НЕ криптовалюта
+      isTemp: true // маркер что это временный метод
+    };
+
+    // Добавляем в самый низ списка
+    baseFilteredGroups.push(jetonGroup);
+  }
+
+  // Добавляем хардкод методы если включен чекбокс
+  if (addHardcodedMethods && env === 'prod' && baseFilteredGroups.length > 0) {
+    console.log('Добавляем хардкод методы в непустое GEO');
+    
+    const geoCurrency = getCurrencyFromGeoName(geo);
+    const hardcodedMethods = getHardcodedMethodsForGeo(geo, geoCurrency);
+    
+    // Удаляем существующие хардкод методы чтобы избежать дубликатов
+    baseFilteredGroups = baseFilteredGroups.filter(group => !group.isHardcoded);
+    
+    // Проверяем существующие методы чтобы избежать дубликатов
+    const existingTitles = new Set(baseFilteredGroups.map(group => group.title.toLowerCase()));
+    
+    // Разделяем методы на ApplePay и остальные
+    const nonApplePayMethods = [];
+    const applePayMethods = [];
+    
+    hardcodedMethods.forEach(method => {
+      // Проверяем что метод еще не существует
+      if (existingTitles.has(method.title.toLowerCase())) {
+        console.log(`Метод ${method.title} уже существует, пропускаем`);
+        return;
+      }
+      
+      // Проверяем фильтр
+      const passesFilter = (() => {
+        if (filter === 'all') return true;
+        if (filter === 'recommended') return method.isRecommended;
+        return Array.from(method.conditions).some(tag => tag.includes(filter));
+      })();
+      
+      if (passesFilter) {
+        if (method.title === 'ApplePay Visa') {
+          applePayMethods.push(method);
+        } else {
+          nonApplePayMethods.push(method);
+        }
+      }
+    });
+    
+    // Добавляем не-ApplePay методы в обычном порядке
+    nonApplePayMethods.forEach(method => {
+      baseFilteredGroups.push(method);
+    });
+    
+    // Вставляем ApplePay точно на 11-е место (индекс 10)
+    const targetIndex = 10;
+    applePayMethods.forEach(applePayMethod => {
+      if (baseFilteredGroups.length >= targetIndex) {
+        baseFilteredGroups.splice(targetIndex, 0, applePayMethod);
+      } else {
+        baseFilteredGroups.push(applePayMethod);
+      }
+    });
+  }
+
+  const filteredGroups = baseFilteredGroups;
 
   /* ---------- min-deps (число) ---------- */
   const [minByKey, setMinByKey] = useState(new Map());
@@ -150,9 +333,30 @@ export default function GeoMethodsPanel({
       md.min_deposits.forEach(r => put(r?.Title, r?.Name, Number(r?.MinDeposit)));
     }
 
+    // 🔧 ВРЕМЕННОЕ РЕШЕНИЕ: добавляем минимальный депозит для Binance Pay
+    if (false) {
+      put('Binance Pay', 'Binancepay_Binancepay_Crypto', 50);
+    }
+
+    // 🔧 ВРЕМЕННОЕ РЕШЕНИЕ: добавляем минимальный депозит для Jeton
+    if (false) {
+      put('Jeton', 'Jeton_Jeton_Wallet', 20);
+    }
+
+    // Добавляем минимальные депозиты для хардкод методов
+    if (addHardcodedMethods && env === 'prod' && methodsOnly && methodsOnly.length > 0) {
+      const geoCurrency = getCurrencyFromGeoName(geo);
+      const hardcodedMethods = getHardcodedMethodsForGeo(geo, geoCurrency);
+      
+      hardcodedMethods.forEach(method => {
+        const methodName = Array.from(method.names)[0];
+        put(method.title, methodName, method.minDeposit);
+      });
+    }
+
     setMinByKey(m);
     setMinByKeyNorm(mNorm);
-  }, [methodsOnly]);
+  }, [methodsOnly, env, addHardcodedMethods, geo]);
 
   const getMinDepositForGroup = (group) => {
     let minVal = Infinity;
@@ -171,10 +375,84 @@ export default function GeoMethodsPanel({
   const handleExportFrontendGeo = () => {
     if (!filteredGroups || filteredGroups.length === 0) return;
 
-    const sorted = [...filteredGroups].sort((a, b) => {
-      if (a.isRecommended !== b.isRecommended) return a.isRecommended ? -1 : 1;
-      return (originalOrder || []).indexOf(a.title) - (originalOrder || []).indexOf(b.title);
+    // Специальная сортировка с размещением ApplePay на 11-м месте
+    const groups = [...filteredGroups];
+    
+    // Отделяем ApplePay от остальных
+    const applePayGroups = groups.filter(group => group.title === 'ApplePay Visa' && group.isHardcoded);
+    const otherGroups = groups.filter(group => !(group.title === 'ApplePay Visa' && group.isHardcoded));
+    
+    // Сортируем остальные группы по стандартной логике
+    const sortedOthers = otherGroups.sort((a, b) => {
+      // Временные методы всегда в самый низ
+      if (a.isTemp !== b.isTemp) return a.isTemp ? 1 : -1;
+      
+      // Определяем является ли метод криптовалютой
+      const isCryptoA = a.title.toLowerCase().includes('crypto') || 
+                       ['btc', 'eth', 'ltc', 'usdt', 'usdc', 'trx', 'doge', 'ada', 'sol', 'xrp', 'bch', 'ton'].some(crypto => 
+                         a.title.toLowerCase().includes(crypto.toLowerCase()));
+      const isCryptoB = b.title.toLowerCase().includes('crypto') || 
+                       ['btc', 'eth', 'ltc', 'usdt', 'usdc', 'trx', 'doge', 'ada', 'sol', 'xrp', 'bch', 'ton'].some(crypto => 
+                         b.title.toLowerCase().includes(crypto.toLowerCase()));
+      
+      // Определяем является ли метод только withdraw
+      const isWithdrawOnlyA = !a.hasDeposit && a.hasWithdraw;
+      const isWithdrawOnlyB = !b.hasDeposit && b.hasWithdraw;
+      
+      // Специальная логика для Binance Pay и Jeton - размещаем выше "Crypto"
+      const isSpecialA = (a.title === 'Binance Pay' || a.title === 'Jeton');
+      const isSpecialB = (b.title === 'Binance Pay' || b.title === 'Jeton');
+      const isCryptoMethodA = (a.title === 'Crypto');
+      const isCryptoMethodB = (b.title === 'Crypto');
+      
+      // Если один из методов - Binance Pay/Jeton, а другой - именно "Crypto"
+      if (isSpecialA && isCryptoMethodB) return -1; // Binance Pay/Jeton выше Crypto
+      if (isCryptoMethodA && isSpecialB) return 1;  // Crypto ниже Binance Pay/Jeton
+      
+      // Сортировка по категориям:
+      // 1. Рекомендованные не-крипто методы (в оригинальном порядке)
+      // 2. Обычные не-крипто методы (в оригинальном порядке)
+      // 3. Binance Pay и Jeton (выше "Crypto")
+      // 4. Криптовалюты: "Crypto" первая, остальные по алфавиту
+      // 5. Withdraw-only методы (в оригинальном порядке)
+      
+      if (isWithdrawOnlyA !== isWithdrawOnlyB) return isWithdrawOnlyA ? 1 : -1;
+      if (isCryptoA !== isCryptoB) return isCryptoA ? 1 : -1;
+      
+      // Для не-крипто методов: рекомендованные вперед, потом оригинальный порядок
+      if (!isCryptoA && !isCryptoB) {
+        if (a.isRecommended !== b.isRecommended) return a.isRecommended ? -1 : 1;
+        return (originalOrder || []).indexOf(a.title) - (originalOrder || []).indexOf(b.title);
+      }
+      
+      // Внутри криптовалют: "Crypto" всегда первая, остальные по алфавиту
+      if (isCryptoA && isCryptoB) {
+        // "Crypto" всегда первая
+        if (a.title === "Crypto" && b.title !== "Crypto") return -1;
+        if (b.title === "Crypto" && a.title !== "Crypto") return 1;
+        
+        // Остальные криптовалюты по базовому названию
+        const baseNameA = a.title.replace(/\s*-\s*.*$/, '').trim();
+        const baseNameB = b.title.replace(/\s*-\s*.*$/, '').trim();
+        return baseNameA.localeCompare(baseNameB);
+      }
+      
+      return 0;
     });
+    
+    // Вставляем ApplePay на 11-е место (индекс 10)
+    const targetIndex = 10;
+    const finalGroups = [...sortedOthers];
+    
+    applePayGroups.forEach(applePayGroup => {
+      if (finalGroups.length >= targetIndex) {
+        finalGroups.splice(targetIndex, 0, applePayGroup);
+      } else {
+        finalGroups.push(applePayGroup);
+      }
+    });
+    
+    const sorted = finalGroups;
 
     const exportData = sorted.map(row => {
       const minVal = getMinDepositForGroup(row);
@@ -199,36 +477,37 @@ export default function GeoMethodsPanel({
 
   /* ---------- экспорт: один GEO в Google Sheets ---------- */
   const handleExportSingleGeoToSheets = async () => {
-    if (!filteredGroups || filteredGroups.length === 0) return;
+    if (!project || !geo || !env) return;
     setIsExporting(true);
 
-    const sorted = [...filteredGroups].sort((a, b) => {
-      if (a.isRecommended !== b.isRecommended) return a.isRecommended ? -1 : 1;
-      return (originalOrder || []).indexOf(a.title) - (originalOrder || []).indexOf(b.title);
-    });
-
-    const data = sorted.map(row => {
-      const minVal = getMinDepositForGroup(row);
-      return {
-        Paymethod: row.title,
-        "Payment Name": Array.from(row.names).join('\n'),
-        Currency: currency || '-',                                // 👈 GEO-level currency
-        Deposit: row.hasDeposit ? "YES" : "NO",
-        Withdraw: row.hasWithdraw ? "YES" : "NO",
-        Status: env === "prod" ? "PROD" : "STAGE",
-        Details: conditionsMap?.[row.title] || (row.conditions.size > 0 ? Array.from(row.conditions).sort().join('\n') : "ALL"),
-        "Min Dep": Number.isFinite(minVal) ? `${minVal} ${currency || ''}`.trim() : '—' // 👈
-      };
-    });
-
     try {
-      const res = await fetch('/export-table-to-sheets', {
+      // 🔧 НОВАЯ ЛОГИКА: Получаем готовые данные от бэкенда
+      const sheetsDataRes = await fetch('/get-sheets-data-fixed', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ data, originalOrder: originalOrder || [] })
+        body: JSON.stringify({ project, geo, env })
       });
-      const json = await res.json();
-      if (json.success && json.sheet_url) window.open(json.sheet_url, '_blank');
+      
+      const sheetsDataJson = await sheetsDataRes.json();
+      
+      if (!sheetsDataJson.success) {
+        console.error('Ошибка получения данных для Google Sheets:', sheetsDataJson.error);
+        return;
+      }
+      
+      const data = sheetsDataJson.data || [];
+      
+      // Экспортируем готовые данные в Google Sheets
+      const exportRes = await fetch('/export-table-to-sheets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data, originalOrder: [] })
+      });
+      
+      const exportJson = await exportRes.json();
+      if (exportJson.success && exportJson.sheet_url) {
+        window.open(exportJson.sheet_url, '_blank');
+      }
     } catch (e) {
       console.error('Export single GEO error:', e);
     } finally {
@@ -305,9 +584,152 @@ export default function GeoMethodsPanel({
         if (data.recommendedPairs?.some(([rt, rn]) => norm(titleAlias(rt)) === norm(title) && norm(rn) === norm(name))) g.isRecommended = true;
       });
 
-      const rows = (data.originalOrder || [])
-        .map(t => groupedLocal.get(titleAlias(t)))
-        .filter(Boolean)
+      // 🔧 ВРЕМЕННОЕ РЕШЕНИЕ: добавляем Binance Pay в groupedLocal для экспорта
+      if (false) {
+        if (!groupedLocal.has('Binance Pay')) {
+          groupedLocal.set('Binance Pay', {
+            title: 'Binance Pay',
+            names: new Set(['Binancepay_Binancepay_Crypto']),
+            conditions: new Set(['ALL']),
+            isRecommended: false,
+            hasDeposit: true,
+            hasWithdraw: true,
+            isCrypto: true,
+            isTemp: true
+          });
+        }
+        // Добавляем минимальный депозит для Binance Pay
+        putLocal('Binance Pay', 'Binancepay_Binancepay_Crypto', 50);
+      }
+
+      // 🔧 ВРЕМЕННОЕ РЕШЕНИЕ: добавляем Jeton в groupedLocal для экспорта
+      if (false) {
+        if (!groupedLocal.has('Jeton')) {
+          groupedLocal.set('Jeton', {
+            title: 'Jeton',
+            names: new Set(['Jeton_Jeton_Wallet']),
+            conditions: new Set(['ALL']),
+            isRecommended: false,
+            hasDeposit: true,
+            hasWithdraw: true,
+            isCrypto: false, // Jeton НЕ криптовалюта
+            isTemp: true
+          });
+        }
+        // Добавляем минимальный депозит для Jeton
+        putLocal('Jeton', 'Jeton_Jeton_Wallet', 20);
+      }
+
+      // Добавляем хардкод методы если включен чекбокс (для All Projects Mode)
+      if (addHardcodedMethods && env === 'prod' && groupedLocal.size > 0) {
+        console.log(`Добавляем хардкод методы в непустое GEO: ${geoKey}`);
+        
+        const geoCurrency = getCurrencyFromGeoName(geoKey);
+        const hardcodedMethods = getHardcodedMethodsForGeo(geoKey, geoCurrency);
+        
+        hardcodedMethods.forEach(method => {
+          // Проверяем что метод еще не существует в этом GEO
+          if (!groupedLocal.has(method.title)) {
+            groupedLocal.set(method.title, {
+              title: method.title,
+              names: method.names,
+              conditions: method.conditions,
+              isRecommended: method.isRecommended,
+              hasDeposit: method.hasDeposit,
+              hasWithdraw: method.hasWithdraw,
+              isCrypto: method.isCrypto,
+              isHardcoded: true,
+              sortOrder: method.title === 'ApplePay Visa' ? 11 : undefined // 11-е место для ApplePay
+            });
+            
+            // Добавляем минимальный депозит для хардкод метода
+            putLocal(method.title, Array.from(method.names)[0], method.minDeposit);
+          }
+        });
+      }
+
+      // Собираем все группы и размещаем ApplePay на 11-м месте
+      const allGroups = Array.from(groupedLocal.values());
+      
+      // Специальная сортировка для размещения ApplePay на 11-м месте
+      const methodsWithoutApplePay = allGroups.filter(group => group.title !== 'ApplePay Visa');
+      const applePayMethods = allGroups.filter(group => group.title === 'ApplePay Visa');
+      
+      // Сначала сортируем остальные методы по стандартной логике
+      const sortedOtherGroups = methodsWithoutApplePay.sort((a, b) => {
+        // Временные методы всегда в самый низ
+        if (a.isTemp !== b.isTemp) return a.isTemp ? 1 : -1;
+        
+        // Определяем является ли метод криптовалютой
+        const isCryptoA = a.title.toLowerCase().includes('crypto') || 
+                         ['btc', 'eth', 'ltc', 'usdt', 'usdc', 'trx', 'doge', 'ada', 'sol', 'xrp', 'bch', 'ton'].some(crypto => 
+                           a.title.toLowerCase().includes(crypto.toLowerCase()));
+        const isCryptoB = b.title.toLowerCase().includes('crypto') || 
+                         ['btc', 'eth', 'ltc', 'usdt', 'usdc', 'trx', 'doge', 'ada', 'sol', 'xrp', 'bch', 'ton'].some(crypto => 
+                           b.title.toLowerCase().includes(crypto.toLowerCase()));
+        
+        // Определяем является ли метод только withdraw
+        const isWithdrawOnlyA = !a.hasDeposit && a.hasWithdraw;
+        const isWithdrawOnlyB = !b.hasDeposit && b.hasWithdraw;
+        
+        // Специальная логика для Binance Pay и Jeton - размещаем выше "Crypto"
+        const isSpecialA = (a.title === 'Binance Pay' || a.title === 'Jeton');
+        const isSpecialB = (b.title === 'Binance Pay' || b.title === 'Jeton');
+        const isCryptoMethodA = (a.title === 'Crypto');
+        const isCryptoMethodB = (b.title === 'Crypto');
+        
+        // Если один из методов - Binance Pay/Jeton, а другой - именно "Crypto"
+        if (isSpecialA && isCryptoMethodB) return -1; // Binance Pay/Jeton выше Crypto
+        if (isCryptoMethodA && isSpecialB) return 1;  // Crypto ниже Binance Pay/Jeton
+        
+        // Сортировка по категориям:
+        // 1. Рекомендованные не-крипто методы (в оригинальном порядке)
+        // 2. Обычные не-крипто методы (в оригинальном порядке)
+        // 3. Binance Pay и Jeton (выше "Crypto")
+        // 4. Криптовалюты: "Crypto" первая, остальные по алфавиту
+        // 5. Withdraw-only методы (в оригинальном порядке)
+        
+        if (isWithdrawOnlyA !== isWithdrawOnlyB) return isWithdrawOnlyA ? 1 : -1;
+        if (isCryptoA !== isCryptoB) return isCryptoA ? 1 : -1;
+        
+        // Для не-крипто методов: рекомендованные вперед, потом оригинальный порядок
+        if (!isCryptoA && !isCryptoB) {
+          if (a.isRecommended !== b.isRecommended) return a.isRecommended ? -1 : 1;
+          const aIndex = (data.originalOrder || []).indexOf(a.title);
+          const bIndex = (data.originalOrder || []).indexOf(b.title);
+          return aIndex - bIndex;
+        }
+        
+        // Внутри криптовалют: "Crypto" всегда первая, остальные по алфавиту
+        if (isCryptoA && isCryptoB) {
+          // "Crypto" всегда первая
+          if (a.title === "Crypto" && b.title !== "Crypto") return -1;
+          if (b.title === "Crypto" && a.title !== "Crypto") return 1;
+          
+          // Остальные криптовалюты по базовому названию
+          const baseNameA = a.title.replace(/\s*-\s*.*$/, '').trim();
+          const baseNameB = b.title.replace(/\s*-\s*.*$/, '').trim();
+          return baseNameA.localeCompare(baseNameB);
+        }
+        
+        return 0;
+      });
+      
+      // Вставляем ApplePay на 11-е место (индекс 10)
+      const targetIndex = 10; // 11-е место (индекс с 0)
+      const finalGroups = [...sortedOtherGroups];
+      
+      applePayMethods.forEach(applePayMethod => {
+        if (finalGroups.length >= targetIndex) {
+          finalGroups.splice(targetIndex, 0, applePayMethod);
+        } else {
+          finalGroups.push(applePayMethod);
+        }
+      });
+      
+      const sortedGroups = finalGroups;
+
+      const rows = sortedGroups
         .map(row => {
           const minVal = getMinForGroupLocal(row);
           const geoCurrency = data.currency || '-';        // 👈 листовая валюта от логина
@@ -397,7 +819,51 @@ export default function GeoMethodsPanel({
                 </Tr>
               </Thead>
               <Tbody>
-                {filteredGroups.map(group => {
+                {(() => {
+                  // Специальная сортировка с размещением ApplePay на 11-м месте
+                  const groups = [...filteredGroups];
+                  
+                  // Отделяем ApplePay от остальных
+                  const applePayGroups = groups.filter(group => group.title === 'ApplePay Visa' && group.isHardcoded);
+                  const otherGroups = groups.filter(group => !(group.title === 'ApplePay Visa' && group.isHardcoded));
+                  
+                  // Сортируем остальные группы по стандартной логике
+                  const sortedOthers = otherGroups.sort((a, b) => {
+                    // Временные методы всегда в самый низ
+                    if (a.isTemp !== b.isTemp) return a.isTemp ? 1 : -1;
+                    
+                    // Специальная логика для Binance Pay и Jeton - размещаем выше "Crypto"
+                    const isSpecialA = (a.title === 'Binance Pay' || a.title === 'Jeton');
+                    const isSpecialB = (b.title === 'Binance Pay' || b.title === 'Jeton');
+                    const isCryptoA = (a.title === 'Crypto');
+                    const isCryptoB = (b.title === 'Crypto');
+                    
+                    // Если один из методов - Binance Pay/Jeton, а другой - Crypto
+                    if (isSpecialA && isCryptoB) return -1; // Binance Pay/Jeton выше Crypto
+                    if (isCryptoA && isSpecialB) return 1;  // Crypto ниже Binance Pay/Jeton
+                    
+                    // Рекомендованные методы идут вверх
+                    if (a.isRecommended !== b.isRecommended) return a.isRecommended ? -1 : 1;
+                    // Остальные по исходному порядку
+                    const aIndex = (originalOrder || []).indexOf(a.title);
+                    const bIndex = (originalOrder || []).indexOf(b.title);
+                    return aIndex - bIndex;
+                  });
+                  
+                  // Вставляем ApplePay на 11-е место (индекс 10)
+                  const targetIndex = 10;
+                  const finalGroups = [...sortedOthers];
+                  
+                  applePayGroups.forEach(applePayGroup => {
+                    if (finalGroups.length >= targetIndex) {
+                      finalGroups.splice(targetIndex, 0, applePayGroup);
+                    } else {
+                      finalGroups.push(applePayGroup);
+                    }
+                  });
+                  
+                  return finalGroups;
+                })().map(group => {
                   const minVal = getMinDepositForGroup(group);
                   return (
                     <Tr key={group.title} bg={group.isRecommended ? 'green.50' : undefined} fontWeight={group.isRecommended ? 'semibold' : 'normal'}>

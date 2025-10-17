@@ -25,6 +25,7 @@ function AppContent() {
   const [isFullProject, setIsFullProject] = useState(false);
   const [perGeoData, setPerGeoData] = useState({});
   const [loadingMessage, setLoadingMessage] = useState("");
+  const [globalAddHardcodedMethods, setGlobalAddHardcodedMethods] = useState(false);
   
   const { 
     project, geo, env, projects, geoGroups, 
@@ -81,7 +82,7 @@ function AppContent() {
       const conditionMap = {};
       const methodTypeMap = {};
       const recommendedSet = new Set();
-      const seen = new Set();
+      // 🔧 УБРАНА ПЕРЕМЕННАЯ seen - больше не нужна
       const order = [];
       const currencySet = new Set();
 
@@ -105,14 +106,19 @@ function AppContent() {
         }
       };
 
-      for (let i = 0; i < allLogins.length; i++) {
-        const login = allLogins[i];
-        setLoadingMessage(`🔄 GEO: ${currentGeo} (${i + 1}/${allLogins.length}) — ${login}`);
+      // 🔧 ИСПРАВЛЕНИЕ: Используем новый endpoint для получения ВСЕХ методов со всех аккаунтов
+      setLoadingMessage(`🔄 GEO: ${currentGeo} - получаем ВСЕ методы со всех аккаунтов...`);
+      try {
+        // Используем новый endpoint который собирает методы со ВСЕХ аккаунтов
+        const res = await axios.post('/get-all-methods-for-geo', { project, geo: currentGeo, env });
+        
+        // Получаем валюту из первого логина
         try {
-          const authRes = await axios.post('/run-login-check', { project, geo: currentGeo, env, login });
+          const authRes = await axios.post('/run-login-check', { project, geo: currentGeo, env, login: allLogins[0] });
           if (authRes.data?.currency) currencySet.add(authRes.data.currency);
-
-          const res = await axios.post('/get-methods-only', { project, geo: currentGeo, env, login });
+        } catch (authErr) {
+          console.warn('Auth check failed:', authErr);
+        }
 
           // рекомендации
           res.data?.recommended_methods?.forEach(([title, name]) => {
@@ -123,7 +129,9 @@ function AppContent() {
           const wdr = res.data?.withdraw_methods || [];
           [...dep, ...wdr].forEach(([title, name]) => {
             const key = `${title}|||${name}`;
-            const isCrypto = /Coinspaid|Crypto|Tether|Bitcoin|Ethereum|Litecoin|Ripple|Tron|USDC|USDT|DOGE|Cardano|Solana|Toncoin|Binance|Jeton/i.test(name);
+            // Jeton и Binance Pay НЕ являются криптовалютами - они должны показываться отдельно
+            const isCrypto = /Coinspaid|Crypto|Tether|Bitcoin|Ethereum|Litecoin|Ripple|Tron|USDC|USDT|DOGE|Cardano|Solana|Toncoin/i.test(name) && 
+                            !/Jeton|Binance.*Pay/i.test(name) && !/Jeton|Binance.*Pay/i.test(title);
 
             methodTypeMap[key] = methodTypeMap[key] || {};
             if (dep.some(([t, n]) => t === title && n === name)) methodTypeMap[key].deposit = true;
@@ -139,33 +147,25 @@ function AppContent() {
               conditionMap[title].add(tag);
             }
 
-            if (!seen.has(title)) {
-              order.push(title);
-              seen.add(title);
-            }
+            // 🔧 УБРАНА ДЕДУПЛИКАЦИЯ - показываем ВСЕ методы
+            order.push(title);
           });
 
-          // ⬇️ АККУМУЛИРУЕМ MIN-DEPOSITS ПО ВСЕМ ЛОГИНАМ GEO
-          const acc = newData[currentGeo].methodsOnly;
+        // ⬇️ СОХРАНЯЕМ MIN-DEPOSITS 
+        const acc = newData[currentGeo].methodsOnly;
 
-          // 1) by_key — берём минимум среди логинов
-          const mdByKey = res.data?.min_deposit_by_key || {};
-          for (const [k, v] of Object.entries(mdByKey)) {
-            const num = Number(v);
-            if (!Number.isFinite(num)) continue;
-            acc.min_deposit_by_key[k] = Math.min(
-              Number.isFinite(acc.min_deposit_by_key[k]) ? acc.min_deposit_by_key[k] : Infinity,
-              num
-            );
-          }
-          // 2) новый список dict — добавляем как есть (дедуп будет на чтении)
-          (res.data?.min_deposit_map || []).forEach(row => acc.min_deposit_map.push(row));
-          // 3) легаси — тоже добавляем
-          (res.data?.min_deposits || []).forEach(row => acc.min_deposits.push(row));
+        // 1) by_key — сохраняем как есть
+        const mdByKey = res.data?.min_deposit_by_key || {};
+        acc.min_deposit_by_key = { ...mdByKey };
+        
+        // 2) новый список dict — сохраняем как есть
+        acc.min_deposit_map = [...(res.data?.min_deposit_map || [])];
+        
+        // 3) легаси — сохраняем как есть
+        acc.min_deposits = [...(res.data?.min_deposits || [])];
 
-        } catch (err) {
-          console.warn(`❌ Ошибка логина ${login}:`, err);
-        }
+      } catch (err) {
+        console.warn(`❌ Ошибка получения методов для GEO ${currentGeo}:`, err);
       }
 
       const groupedIds = Object.fromEntries(Object.entries(titleMap).map(([t, s]) => [t, Array.from(s).join('\n')]));
@@ -189,16 +189,30 @@ function AppContent() {
       };
       const minDepFromConditions = (title) => getMinDEP(conditionsMap[title] || '');
       
-      // финальная сортировка заголовков
-      const sortedOrder = Array.from(seen).sort((a, b) => {
+      // финальная сортировка заголовков - СОХРАНЯЕМ API ПОРЯДОК для обычных методов
+      // 🔧 ИСПОЛЬЗУЕМ order вместо seen
+      const sortedOrder = Array.from(new Set(order)).sort((a, b) => {
         const ga = titleGroup(a);
         const gb = titleGroup(b);
+        
+        // Криптовалюты идут в конец
         if (ga !== gb) return ga === 'crypto' ? 1 : -1;
 
+        // Для криптовалют используем специальную сортировку
         if (ga === 'crypto' && gb === 'crypto') {
           return getCryptoSortIndex(a) - getCryptoSortIndex(b);
         }
 
+        // Для обычных методов СОХРАНЯЕМ API ПОРЯДОК
+        if (ga === 'regular' && gb === 'regular') {
+          const indexA = order.indexOf(a);
+          const indexB = order.indexOf(b);
+          if (indexA !== -1 && indexB !== -1) {
+            return indexA - indexB; // Сохраняем API порядок!
+          }
+        }
+
+        // Фолбэк на старую логику если порядок не найден
         const ra = titleIsRecommended(a);
         const rb = titleIsRecommended(b);
         if (ra !== rb) return ra ? -1 : 1;
@@ -301,6 +315,38 @@ function AppContent() {
 
       {activeTab === "Geo" && Object.keys(perGeoData).length > 0 && (
         <>
+          {/* Глобальный чекбокс хардкод методов */}
+          {env === 'prod' && (
+            <Box 
+              mb={6} 
+              p={4} 
+              bg="green.50" 
+              borderRadius="lg" 
+              border="2px solid" 
+              borderColor="green.200"
+              boxShadow="sm"
+            >
+              <Checkbox 
+                isChecked={globalAddHardcodedMethods} 
+                onChange={(e) => setGlobalAddHardcodedMethods(e.target.checked)}
+                colorScheme="green"
+                size="lg"
+              >
+                <VStack align="start" spacing={1}>
+                  <Text fontSize="lg" fontWeight="bold" color="green.800">
+                    🌍 Глобальные хардкод методы для всех GEO
+                  </Text>
+                  <Text fontSize="sm" color="green.600" fontWeight="semibold">
+                    🔧 Zimpler (FI) • Blik (PL) • ApplePay Gumballpay (все GEO, 11-е место)
+                  </Text>
+                  <Text fontSize="xs" color="gray.600">
+                    ⚡ Одним кликом применяется ко всем непустым GEO. Пустые GEO пропускаются автоматически.
+                  </Text>
+                </VStack>
+              </Checkbox>
+            </Box>
+          )}
+
           {Object.entries(perGeoData).map(([geoKey, data]) => (
             <GeoMethodsPanel
               key={geoKey}
@@ -316,6 +362,7 @@ function AppContent() {
               isFullProject={isFullProject}
               env={env}
               project={project}
+              globalAddHardcodedMethods={globalAddHardcodedMethods}
             />
           ))}
         </>
