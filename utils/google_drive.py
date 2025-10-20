@@ -45,7 +45,7 @@ def get_credentials():
 
     return creds
 
-def upload_table_to_sheets(table_data: List[Dict], original_order: Optional[List[str]] = None):
+def upload_table_to_sheets(table_data: List[Dict], original_order: Optional[List[str]] = None, project: str = "Unknown", geo: str = "Unknown", env: str = "prod"):
     """
     Загружает табличные данные в новую Google Sheet.
     Поддерживает сортировку данных по original_order, если он предоставлен.
@@ -55,6 +55,9 @@ def upload_table_to_sheets(table_data: List[Dict], original_order: Optional[List
         original_order (list[str], optional): Список названий платежных методов
                                               в желаемом порядке. Если предоставлен,
                                               данные будут отсортированы по этому порядку.
+        project (str): Название проекта для включения в имя файла.
+        geo (str): GEO для включения в имя файла.
+        env (str): Окружение (prod/stage) для включения в имя файла.
     Returns:
         str: ID созданной Google Sheet.
     """
@@ -82,8 +85,10 @@ def upload_table_to_sheets(table_data: List[Dict], original_order: Optional[List
     drive_service = build("drive", "v3", credentials=creds)
 
     # Метаданные для нового файла Google Sheet
+    # Формируем название файла с проектом в конце
+    file_name = f"Geo Methods Export {geo} {env} - {project}"
     file_metadata = {
-        "name": "Geo Methods Export", # Имя файла в Google Drive
+        "name": file_name, # Имя файла в Google Drive с названием проекта
         "mimeType": "application/vnd.google-apps.spreadsheet" # Тип файла: Google Sheet
     }
 
@@ -101,8 +106,38 @@ def upload_table_to_sheets(table_data: List[Dict], original_order: Optional[List
 
     # Применяем стили, сортировку и заморозку
     finalize_google_sheet_formatting(uploaded_file.get("id"))
+    
+    # Устанавливаем права доступа
+    set_sheet_permissions(uploaded_file.get("id"))
 
     return uploaded_file.get("id")
+
+def set_sheet_permissions(file_id):
+    """
+    Устанавливает права доступа для Google Sheets файла.
+    Дает права на редактирование для группы "Ramtinar Techconsult Limited".
+    """
+    try:
+        creds = get_credentials()
+        drive_service = build("drive", "v3", credentials=creds)
+        
+        # Устанавливаем права для группы
+        permission_body = {
+            'type': 'domain',
+            'role': 'writer',
+            'domain': 'gbl-factory.com'  # Домен группы
+        }
+        
+        drive_service.permissions().create(
+            fileId=file_id,
+            body=permission_body,
+            fields='id'
+        ).execute()
+        
+        logging.info(f"✅ Права доступа установлены для файла {file_id}")
+        
+    except Exception as e:
+        logging.error(f"❌ Ошибка установки прав доступа для файла {file_id}: {e}")
 
 def create_google_file(output_filename):
     """

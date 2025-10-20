@@ -337,7 +337,7 @@ function AppContent() {
                     🌍 Глобальные хардкод методы для всех GEO
                   </Text>
                   <Text fontSize="sm" color="green.600" fontWeight="semibold">
-                    🔧 Zimpler (FI) • Blik (PL) • ApplePay Gumballpay (все GEO, 11-е место)
+                    🔧 Zimpler (FI) • ApplePay Gumballpay (все GEO, 11-е место)
                   </Text>
                   <Text fontSize="xs" color="gray.600">
                     ⚡ Одним кликом применяется ко всем непустым GEO. Пустые GEO пропускаются автоматически.

@@ -86,21 +86,22 @@ const getHardcodedMethodsForGeo = (geoName, currency) => {
     });
   }
   
+  // 🔧 BLIK ВРЕМЕННО ОТКЛЮЧЕН - для включения раскомментируйте блок ниже
   // Blik для Польши
-  if (geoUpper.startsWith('PL')) {
-    methods.push({
-      title: 'Blik',
-      names: new Set(['Blik_Blik_Wallet']),
-      conditions: new Set(['ALL']),
-      isRecommended: false,
-      hasDeposit: true,
-      hasWithdraw: false,
-      isCrypto: false,
-      isHardcoded: true,
-      currency: currency,
-      minDeposit: 10
-    });
-  }
+  // if (geoUpper.startsWith('PL')) {
+  //   methods.push({
+  //     title: 'Blik',
+  //     names: new Set(['Blik_Blik_Wallet']),
+  //     conditions: new Set(['ALL']),
+  //     isRecommended: false,
+  //     hasDeposit: true,
+  //     hasWithdraw: false,
+  //     isCrypto: false,
+  //     isHardcoded: true,
+  //     currency: currency,
+  //     minDeposit: 10
+  //   });
+  // }
   
   // ApplePay Visa (Gumballpay) для всех GEO
   methods.push({
@@ -501,7 +502,7 @@ export default function GeoMethodsPanel({
       const exportRes = await fetch('/export-table-to-sheets', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ data, originalOrder: [] })
+        body: JSON.stringify({ data, originalOrder: [], project, geo, env })
       });
       
       const exportJson = await exportRes.json();

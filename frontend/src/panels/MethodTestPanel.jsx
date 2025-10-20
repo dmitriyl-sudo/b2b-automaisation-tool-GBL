@@ -149,7 +149,10 @@ export default function MethodTestPanel() {
     try {
       const payload = {
         data: sortedResults,
-        originalOrder: []
+        originalOrder: [],
+        project: project || "MethodTest",
+        geo: geo || "Unknown",
+        env: env || "prod"
       };
       const res = await axios.post("/export-table-to-sheets", payload);
       if (res.data?.sheet_url) {

@@ -31,7 +31,7 @@ from google.auth.transport.requests import Request
 from main import geo_groups, password_data, site_list, GLITCHSPIN_EXTRA_GEOS
 from utils.excel_utils import save_payment_data_to_excel, merge_payment_data
 from utils.google_drive import create_google_file, upload_table_to_sheets, get_credentials
-from utils.google_drive import finalize_google_sheet_formatting
+from utils.google_drive import finalize_google_sheet_formatting, set_sheet_permissions
 
 from extractors.ritzo_extractor import RitzoExtractor
 from extractors.rolling_extractor import RollingExtractor
@@ -1128,8 +1128,11 @@ async def test_methods(req: MethodTestRequest):
 def export_table_to_sheets(payload: Dict = Body(...)):
     data: List[Dict] = payload.get("data", [])
     original_order: Optional[List[str]] = payload.get("originalOrder")
+    project: str = payload.get("project", "Unknown")
+    geo: str = payload.get("geo", "Unknown")
+    env: str = payload.get("env", "prod")
     try:
-        file_id = upload_table_to_sheets(data, original_order=original_order)
+        file_id = upload_table_to_sheets(data, original_order=original_order, project=project, geo=geo, env=env)
         return {
             "success": True,
             "message": "Таблица экспортирована в Google Sheets",
@@ -1453,6 +1456,9 @@ def export_full_project_to_google_sheet(data: FullProjectExportRequest):
     except Exception:
         logging.warning("Could not delete default 'Sheet1'. It may not have existed.")
 
+    # Устанавливаем права доступа
+    set_sheet_permissions(file_id)
+
     return {"success": True, "sheet_url": f"https://docs.google.com/spreadsheets/d/{file_id}"}
 
 
@@ -1464,15 +1470,19 @@ def export_table_to_sheets_multi(payload: Dict = Body(...)):
     """
     try:
         sheets = payload.get("sheets", [])
+        project = payload.get("project", "Unknown")
+        env = payload.get("env", "prod")
         if not sheets or not isinstance(sheets, list):
             raise HTTPException(status_code=400, detail="Invalid or missing 'sheets'")
 
         creds = get_credentials()
         sheets_service = build("sheets", "v4", credentials=creds)
 
+        # Формируем название с проектом в начале
+        title = f"{project} - 📊 Multi-GEO Export {datetime.now().strftime('%Y-%m-%d %H:%M')}"
         spreadsheet_body = {
             "properties": {
-                "title": f"📊 Multi-GEO Export {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+                "title": title
             }
         }
         spreadsheet = sheets_service.spreadsheets().create(body=spreadsheet_body).execute()
@@ -1528,6 +1538,9 @@ def export_table_to_sheets_multi(payload: Dict = Body(...)):
             logging.warning(f"Не удалось удалить стандартный лист 'Sheet1': {e}")
 
         finalize_google_sheet_formatting(file_id, delete_columns_by_header=["RecommendedSort"])
+        
+        # Устанавливаем права доступа
+        set_sheet_permissions(file_id)
 
         return {
             "success": True,
