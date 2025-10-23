@@ -28,10 +28,19 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 
 # --- ВАЖНО: Импорты из вашего проекта ---
-from main import geo_groups, password_data, site_list, GLITCHSPIN_EXTRA_GEOS
+from main import geo_groups, password_data, site_list, GLITCHSPIN_EXTRA_GEOS, VEGASZONE_EXTRA_GEOS
 from utils.excel_utils import save_payment_data_to_excel, merge_payment_data
 from utils.google_drive import create_google_file, upload_table_to_sheets, get_credentials
 from utils.google_drive import finalize_google_sheet_formatting, set_sheet_permissions
+
+# Опциональный импорт Telegram бота
+try:
+    from telegram_bot import send_sheet_notification_sync, init_telegram_bot
+    from telegram_config import TelegramConfig
+    TELEGRAM_AVAILABLE = True
+except ImportError:
+    TELEGRAM_AVAILABLE = False
+    logging.warning("⚠️ Telegram модули не найдены. Уведомления отключены.")
 
 from extractors.ritzo_extractor import RitzoExtractor
 from extractors.rolling_extractor import RollingExtractor
@@ -49,8 +58,6 @@ from extractors.slotsvader_extractor import SlotsVaderExtractor
 from extractors.vegazone_extractor import VegazoneExtractor
 from extractors.ludios_extractor import LudiosExtractor
 from extractors.spinempire_extractor import SpinEmpireExtractor
-
-from test_runner import run_payment_method_tests
 
 
 # --- КОНФИГУРАЦИЯ ЛОГГИРОВАНИЯ ---
@@ -128,6 +135,36 @@ def extract_conditions_from_name(name: str) -> str:
 # --- ИНИЦИАЛИЗАЦИЯ FastAPI ---
 app = FastAPI()
 
+# Инициализация Telegram бота при запуске
+@app.on_event("startup")
+async def startup_event():
+    """Инициализация при запуске приложения"""
+    if TELEGRAM_AVAILABLE:
+        if TelegramConfig.is_configured():
+            bot_token = TelegramConfig.get_bot_token()
+            chat_id = TelegramConfig.get_chat_id()
+            init_telegram_bot(bot_token, chat_id)
+            logging.info("✅ Telegram бот инициализирован")
+        else:
+            logging.warning("⚠️ Telegram бот не настроен. Уведомления отключены.")
+    else:
+        logging.info("ℹ️ Telegram модули не установлены. Уведомления недоступны.")
+
+def safe_send_telegram_notification(sheet_url: str, project: str, geo: str = None, env: str = "prod", export_type: str = "single"):
+    """Безопасная отправка Telegram уведомления"""
+    if TELEGRAM_AVAILABLE:
+        try:
+            send_sheet_notification_sync(
+                sheet_url=sheet_url,
+                project=project,
+                geo=geo,
+                env=env,
+                export_type=export_type
+            )
+        except Exception as e:
+            logging.error(f"❌ Ошибка отправки Telegram уведомления: {e}")
+    else:
+        logging.debug("ℹ️ Telegram уведомления недоступны")
 
 # --- PYDANTIC МОДЕЛИ ДЛЯ ЗАПРОСОВ ---
 class LoginTestRequest(BaseModel):
@@ -622,8 +659,8 @@ def list_projects():
 
 @app.get("/geo-groups")
 def get_geo_groups():
-    # Возвращаем базовые GEO + доп. GEO для Glitchspin, чтобы фронт их видел
-    merged = {**geo_groups, **GLITCHSPIN_EXTRA_GEOS}
+    # Возвращаем базовые GEO + доп. GEO для Glitchspin и Vegazone, чтобы фронт их видел
+    merged = {**geo_groups, **GLITCHSPIN_EXTRA_GEOS, **VEGASZONE_EXTRA_GEOS}
     return merged
 
 @app.post("/get-methods-only")
@@ -641,7 +678,7 @@ def get_methods_only_endpoint(request: LoginTestRequest):
 
     # 🔧 ИСПРАВЛЕНИЕ: ВСЕГДА используем объединенную логику всех аккаунтов
     # Игнорируем переданный login и собираем данные со всех аккаунтов для GEO
-    logging.info(f"[get_methods_only] 🔄 Используем объединенную логику для {request.project}/{request.geo} (игнорируем login={request.login})")
+    logging.info(f"[get_methods_only] Используем объединенную логику для {request.project}/{request.geo} (игнорируем login={request.login})")
     
     # Получаем сырые данные
     raw_data = get_all_methods_for_geo(project=request.project, geo=request.geo, env=request.env)
@@ -1069,6 +1106,8 @@ def run_multi_auth_check_endpoint(request: LoginTestRequest):
     effective_geo_groups = geo_groups
     if request.project == "Glitchspin":
         effective_geo_groups = {**geo_groups, **GLITCHSPIN_EXTRA_GEOS}
+    elif request.project == "Vegazone":
+        effective_geo_groups = {**geo_groups, **VEGASZONE_EXTRA_GEOS}
     
     logins = effective_geo_groups.get(request.geo, [])
     if not logins:
@@ -1115,13 +1154,16 @@ def run_multi_auth_check_endpoint(request: LoginTestRequest):
 
 @app.post("/test-methods")
 async def test_methods(req: MethodTestRequest):
-    results = run_payment_method_tests(
-        project=req.project,
-        geo=req.geo,
-        login=req.login,
-        mode=req.mode,
-        env=req.env
-    )
+    # TODO: Реализовать тестирование методов
+    results = {
+        "status": "not_implemented",
+        "message": "Функция тестирования методов временно недоступна",
+        "project": req.project,
+        "geo": req.geo,
+        "login": req.login,
+        "mode": req.mode,
+        "env": req.env
+    }
     return JSONResponse(content={"results": results})
 
 @app.post("/export-table-to-sheets")
@@ -1133,10 +1175,21 @@ def export_table_to_sheets(payload: Dict = Body(...)):
     env: str = payload.get("env", "prod")
     try:
         file_id = upload_table_to_sheets(data, original_order=original_order, project=project, geo=geo, env=env)
+        sheet_url = f"https://docs.google.com/spreadsheets/d/{file_id}"
+        
+        # Отправляем уведомление в Telegram
+        safe_send_telegram_notification(
+            sheet_url=sheet_url,
+            project=project,
+            geo=geo,
+            env=env,
+            export_type="single"
+        )
+        
         return {
             "success": True,
             "message": "Таблица экспортирована в Google Sheets",
-            "sheet_url": f"https://docs.google.com/spreadsheets/d/{file_id}"
+            "sheet_url": sheet_url
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -1458,8 +1511,17 @@ def export_full_project_to_google_sheet(data: FullProjectExportRequest):
 
     # Устанавливаем права доступа
     set_sheet_permissions(file_id)
+    
+    # Отправляем уведомление в Telegram
+    sheet_url = f"https://docs.google.com/spreadsheets/d/{file_id}"
+    safe_send_telegram_notification(
+        sheet_url=sheet_url,
+        project=req.project,
+        env=req.env,
+        export_type="full"
+    )
 
-    return {"success": True, "sheet_url": f"https://docs.google.com/spreadsheets/d/{file_id}"}
+    return {"success": True, "sheet_url": sheet_url}
 
 
 # ЭКСПОРТ НЕСКОЛЬКИХ ТАБЛИЦ В GOOGLE SHEETS (ПО ФРОНТУ)
@@ -1493,7 +1555,13 @@ def export_table_to_sheets_multi(payload: Dict = Body(...)):
         data_to_update = [] 
 
         for sheet_data_item in sheets:
-            title = sheet_data_item.get("geo", "Sheet")[:100]
+            geo = sheet_data_item.get("geo", "Sheet")
+            # Специальная обработка для NZ - добавляем валюту NZD
+            if geo == "NZ":
+                title = "NZ_NZD"
+            else:
+                title = geo
+            title = title[:100]  # Ограничиваем длину названия
             rows = sheet_data_item.get("rows", [])
             if not rows:
                 continue
@@ -1541,10 +1609,19 @@ def export_table_to_sheets_multi(payload: Dict = Body(...)):
         
         # Устанавливаем права доступа
         set_sheet_permissions(file_id)
+        
+        # Отправляем уведомление в Telegram
+        sheet_url = f"https://docs.google.com/spreadsheets/d/{file_id}"
+        safe_send_telegram_notification(
+            sheet_url=sheet_url,
+            project=project,
+            env=env,
+            export_type="multi"
+        )
 
         return {
             "success": True,
-            "sheet_url": f"https://docs.google.com/spreadsheets/d/{file_id}"
+            "sheet_url": sheet_url
         }
 
     except Exception as e:
@@ -1561,13 +1638,16 @@ def test_methods_v2(payload: Dict[str, Any]):
     from utils.assertions import run_smoke_checks
     
     # 1) вызов существующего раннера (как в /test-methods)
-    results = run_payment_method_tests(
-        project=payload.get('project'),
-        geo=payload.get('geo'),
-        login=payload.get('login'),
-        mode=payload.get('mode'),
-        env=payload.get('env')
-    )
+    # TODO: Реализовать тестирование методов
+    results = [{
+        "status": "not_implemented",
+        "message": "Функция тестирования методов временно недоступна",
+        "project": payload.get('project'),
+        "geo": payload.get('geo'),
+        "login": payload.get('login'),
+        "mode": payload.get('mode'),
+        "env": payload.get('env')
+    }]
 
     # (optional) подтянуть подсказки по доступности/валюте (если доступны быстро)
     account_currency = None  # если раннер её знает
@@ -1687,3 +1767,7 @@ def snapshot_project(payload: Dict[str, Any]):
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Snapshot generation failed: {str(e)}")
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

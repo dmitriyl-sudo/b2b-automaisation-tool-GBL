@@ -1,0 +1,236 @@
+[
+  {
+    "timestamp": "2025-10-20T14:24:54.420666",
+    "date": "2025-10-20",
+    "project": "Rolling",
+    "geo": "DE",
+    "env": "prod",
+    "export_type": "single",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/test1"
+  },
+  {
+    "timestamp": "2025-10-20T14:24:54.420942",
+    "date": "2025-10-20",
+    "project": "SpinEmpire",
+    "geo": null,
+    "env": "stage",
+    "export_type": "multi",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/test2"
+  },
+  {
+    "timestamp": "2025-10-20T14:24:54.421120",
+    "date": "2025-10-20",
+    "project": "Ritzo",
+    "geo": null,
+    "env": "prod",
+    "export_type": "full",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/test3"
+  },
+  {
+    "timestamp": "2025-10-20T14:24:54.421282",
+    "date": "2025-10-20",
+    "project": "Rolling",
+    "geo": "IT",
+    "env": "prod",
+    "export_type": "single",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/test4"
+  },
+  {
+    "timestamp": "2025-10-20T14:24:54.421433",
+    "date": "2025-10-20",
+    "project": "Hugo",
+    "geo": "FI",
+    "env": "stage",
+    "export_type": "single",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/test5"
+  },
+  {
+    "timestamp": "2025-10-20T14:24:54.421882",
+    "date": "2025-10-20",
+    "project": "Rolling",
+    "geo": "DE",
+    "env": "prod",
+    "export_type": "single",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/activity_1"
+  },
+  {
+    "timestamp": "2025-10-20T14:24:54.422030",
+    "date": "2025-10-20",
+    "project": "Rolling",
+    "geo": "IT",
+    "env": "prod",
+    "export_type": "single",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/activity_2"
+  },
+  {
+    "timestamp": "2025-10-20T14:24:54.422191",
+    "date": "2025-10-20",
+    "project": "SpinEmpire",
+    "geo": null,
+    "env": "stage",
+    "export_type": "multi",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/activity_3"
+  },
+  {
+    "timestamp": "2025-10-20T14:24:54.422337",
+    "date": "2025-10-20",
+    "project": "Ritzo",
+    "geo": null,
+    "env": "prod",
+    "export_type": "full",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/activity_4"
+  },
+  {
+    "timestamp": "2025-10-20T14:24:54.422481",
+    "date": "2025-10-20",
+    "project": "Hugo",
+    "geo": "FI",
+    "env": "stage",
+    "export_type": "single",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/activity_5"
+  },
+  {
+    "timestamp": "2025-10-20T14:24:54.422628",
+    "date": "2025-10-20",
+    "project": "Winshark",
+    "geo": "SE",
+    "env": "prod",
+    "export_type": "single",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/activity_6"
+  },
+  {
+    "timestamp": "2025-10-20T14:24:54.423140",
+    "date": "2025-10-20",
+    "project": "Rolling",
+    "geo": "AT",
+    "env": "prod",
+    "export_type": "single",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/activity_7"
+  },
+  {
+    "timestamp": "2025-10-20T14:24:54.423703",
+    "date": "2025-10-20",
+    "project": "SpinEmpire",
+    "geo": null,
+    "env": "prod",
+    "export_type": "multi",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/activity_8"
+  },
+  {
+    "timestamp": "2025-10-21T15:28:30.143538",
+    "date": "2025-10-21",
+    "project": "TestProject",
+    "geo": "DE",
+    "env": "stage",
+    "export_type": "single",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/1FgzISR6LkkDphS51h0aInSYu0sNWig13qfahIr3nERk"
+  },
+  {
+    "timestamp": "2025-10-21T15:45:50.156913",
+    "date": "2025-10-21",
+    "project": "Rolling",
+    "geo": "DE",
+    "env": "prod",
+    "export_type": "single",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/1n0oDdjEq8mIyuMNmjeinC06BUzCNdvCle8B7RogKVuA"
+  },
+  {
+    "timestamp": "2025-10-21T16:16:07.644040",
+    "date": "2025-10-21",
+    "project": "Rolling",
+    "geo": null,
+    "env": "prod",
+    "export_type": "multi",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/1aRp5kfDTlmtAhtvyHyzjRV8rmF5kuj_soYK0DKoEZAM"
+  },
+  {
+    "timestamp": "2025-10-21T16:17:42.190179",
+    "date": "2025-10-21",
+    "project": "Rolling",
+    "geo": null,
+    "env": "prod",
+    "export_type": "multi",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/1NS-W8kXdWdygBJfK_hIbhFS0LzIFPX8_xvQ7l__ilQM"
+  },
+  {
+    "timestamp": "2025-10-22T12:19:45.223799",
+    "date": "2025-10-22",
+    "project": "SpinEmpire",
+    "geo": null,
+    "env": "prod",
+    "export_type": "multi",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/1hbavw_beZ3VtzEg2cdsQbM189ILEn_vSDtIpg-1iAMI"
+  },
+  {
+    "timestamp": "2025-10-22T12:50:16.580647",
+    "date": "2025-10-22",
+    "project": "SpinEmpire",
+    "geo": null,
+    "env": "prod",
+    "export_type": "multi",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/16a1OADsN0OAxhninOUY_t6fLI82BqhqpxaocRzzJCvI"
+  },
+  {
+    "timestamp": "2025-10-22T13:01:22.710038",
+    "date": "2025-10-22",
+    "project": "SpinEmpire",
+    "geo": null,
+    "env": "prod",
+    "export_type": "multi",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/1bD9CQUsjU2D0i3F8xRPEhZ-wOeXrXkzgEM-Uf1caY70"
+  },
+  {
+    "timestamp": "2025-10-22T13:32:20.422438",
+    "date": "2025-10-22",
+    "project": "SpinEmpire",
+    "geo": "DE",
+    "env": "prod",
+    "export_type": "single",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/1_Sg1om_4JHZM37jcuggzApH6CW6VMPd_rVTmv2DYA2U"
+  },
+  {
+    "timestamp": "2025-10-22T15:26:02.822576",
+    "date": "2025-10-22",
+    "project": "SpinEmpire",
+    "geo": "AT",
+    "env": "prod",
+    "export_type": "single",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/1GAkm74pO5_-Z4VMwo9E7G3LJeTZHYxfXS6w2YrwN-lw"
+  },
+  {
+    "timestamp": "2025-10-22T16:13:26.018663",
+    "date": "2025-10-22",
+    "project": "SpinEmpire",
+    "geo": null,
+    "env": "prod",
+    "export_type": "multi",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/1DifZ1i7BtAao0mdQz80PNNJJVeMzhnQcdrcbViv49yY"
+  },
+  {
+    "timestamp": "2025-10-22T16:16:51.643120",
+    "date": "2025-10-22",
+    "project": "SpinEmpire",
+    "geo": null,
+    "env": "prod",
+    "export_type": "multi",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/120j7nxNAVeH8X0O5NihHbJWtMlvrk7c1-zemIdq3yH8"
+  },
+  {
+    "timestamp": "2025-10-22T16:39:14.921117",
+    "date": "2025-10-22",
+    "project": "Vegazone",
+    "geo": null,
+    "env": "prod",
+    "export_type": "multi",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/1Qxmc5okYYZ4uiGzxEDN22Bixr6GWq5N9NoP9hPOuvGQ"
+  },
+  {
+    "timestamp": "2025-10-22T16:51:05.800533",
+    "date": "2025-10-22",
+    "project": "Vegazone",
+    "geo": "IT",
+    "env": "prod",
+    "export_type": "single",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/1S-u4WrcW_F2SpuCilh55ymLAzquQHN_Ke_zPLRXzs3U"
+  }
+]

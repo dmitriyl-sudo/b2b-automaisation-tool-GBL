@@ -73,6 +73,17 @@ GLITCHSPIN_EXTRA_GEOS = {
     ],
 }
 
+# >>> ДОП. GEO только для проекта Vegaszone (NZ)
+VEGASZONE_EXTRA_GEOS = {
+    "NZ": [
+        "0depnoaffnznzdmobi",
+        "0depaffilnznzdmobi",
+        "0depaffilnznzddesk",
+        "0depnoaffnznzddesk",
+        "4depaffilnznzdmobi1",
+    ],
+}
+
 password_data = "123123123"
 
 # Данные для каждого проекта, включая URL для stage и prod
@@ -240,10 +251,13 @@ def main():
         base_url, environment = get_base_url(site_name, args.env)
         logging.info(f"Используем URL: {base_url} и окружение: {environment}")
 
-        # >>> НОВОЕ: для Glitchspin расширяем список GEO только в рамках этого проекта
+        # >>> НОВОЕ: для Glitchspin и Vegaszone расширяем список GEO только в рамках этих проектов
         if site_name == "Glitchspin":
             effective_geo_groups = {**geo_groups, **GLITCHSPIN_EXTRA_GEOS}
             logging.info(f"[Glitchspin] Активировано {len(GLITCHSPIN_EXTRA_GEOS)} дополнительных GEO: {', '.join(GLITCHSPIN_EXTRA_GEOS.keys())}")
+        elif site_name == "Vegazone":
+            effective_geo_groups = {**geo_groups, **VEGASZONE_EXTRA_GEOS}
+            logging.info(f"[Vegazone] Активировано {len(VEGASZONE_EXTRA_GEOS)} дополнительных GEO: {', '.join(VEGASZONE_EXTRA_GEOS.keys())}")
         else:
             effective_geo_groups = geo_groups
 

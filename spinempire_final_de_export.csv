@@ -1,0 +1,125 @@
+geo|account_currency|login|paymethod|payment_name|currency|deposit|withdraw|status|conditions|min_dep|is_recommended
+DE|EUR|0depaffildeeurdesk|Carrier Billing|Bizum_Rastpay_Carrierbilling_2DEP|EUR|YES|NO|PROD|2DEP|20 EUR|YES
+DE|EUR|0depaffildeeurdesk|Carrier Billing|Dimoco_Dimoco_Carrierbilling|EUR|YES|NO|PROD||20 EUR|YES
+DE|EUR|0depaffildeeurdesk|Carrier Billing|SiruV3_Siru_Carrierbilling_SE|EUR|YES|NO|PROD||20 EUR|YES
+DE|EUR|0depaffildeeurdesk|Carrier Billing|SiruV3_Siru_Carrierbilling_FI|EUR|YES|NO|PROD||20 EUR|YES
+DE|EUR|0depaffildeeurdesk|EPS|EPS_Utorg_Banks_1DEP|EUR|YES|NO|PROD|1DEP|20 EUR|YES
+DE|EUR|0depaffildeeurdesk|Interac®|Interac_Gigadat_Banks|CAD|YES|NO|PROD||20 CAD|YES
+DE|EUR|0depaffildeeurdesk|MBway|MBway_Impaya_Banks_0DEP//mob//aff|EUR|YES|NO|PROD|0DEP+AFF+MOB|20 EUR|YES
+DE|EUR|0depaffildeeurdesk|MBway|MBway_Utorg_Banks_0DEP//desktop|EUR|YES|NO|PROD|0DEP+DESKTOP|20 EUR|YES
+DE|EUR|0depaffildeeurdesk|MBway|MBway_Colibrix_Banks_0DEP//desktop|EUR|YES|NO|PROD|0DEP+DESKTOP|20 EUR|YES
+DE|EUR|0depaffildeeurdesk|MBway|MBway_Utorg_Banks_0DEP//mob//noaff|EUR|YES|NO|PROD|0DEP+MOB+NOAFF|20 EUR|YES
+DE|EUR|0depaffildeeurdesk|MBway|MBway_Colibrix_Banks_0DEP//noaff|EUR|YES|NO|PROD|0DEP+NOAFF|20 EUR|YES
+DE|EUR|0depaffildeeurdesk|MBway|MBway_Exactly_Banks_1DEP|EUR|YES|NO|PROD|1DEP|20 EUR|YES
+DE|EUR|0depaffildeeurdesk|MBway|MBway_Exactly_Banks_0DEP//aff|EUR|YES|NO|PROD|0DEP+AFF|20 EUR|YES
+DE|EUR|0depaffildeeurdesk|MBway|MBway_Colibrix_Banks|EUR|YES|NO|PROD||20 EUR|YES
+DE|EUR|0depaffildeeurdesk|MuchBetter|Muchbetter_Muchbetter_Wallet|CAD|YES|YES|PROD||20 CAD|YES
+DE|EUR|0depaffildeeurdesk|Multibanco|Multibanco_Impaya_Banks_0DEP//mob//aff|EUR|YES|NO|PROD|0DEP+AFF+MOB|20 EUR|YES
+DE|EUR|0depaffildeeurdesk|Multibanco|Multibanco_Impaya_Banks_1DEP|EUR|YES|NO|PROD|1DEP|20 EUR|YES
+DE|EUR|0depaffildeeurdesk|Multibanco|Multibanco_Colibrix_Banks_0DEP//desktop|EUR|YES|NO|PROD|0DEP+DESKTOP|20 EUR|YES
+DE|EUR|0depaffildeeurdesk|Multibanco|Multibanco_Colibrix_Banks_0DEP//mob//noaff|EUR|YES|NO|PROD|0DEP+MOB+NOAFF|20 EUR|YES
+DE|EUR|0depaffildeeurdesk|Multibanco|Multibanco_Colibrix_Banks|EUR|YES|NO|PROD||20 EUR|YES
+DE|EUR|0depaffildeeurdesk|Neosurf|Neosurf_Neosurf_Voucher|CAD|YES|NO|PROD||20 CAD|YES
+DE|EUR|0depaffildeeurdesk|Neosurf|Neosurf_Payop_Voucher|EUR|YES|NO|PROD||20 EUR|YES
+DE|EUR|0depaffildeeurdesk|Pay via Bank|Openbanking_Impaya_Banks|EUR|YES|NO|PROD||20 EUR|YES
+DE|EUR|0depaffildeeurdesk|Pay via Bank|Nodapay_nodapay_Banks_EU|EUR|YES|NO|PROD||20 EUR|YES
+DE|EUR|0depaffildeeurdesk|Pay via Bank|Nodapay_nodapay_Banks_IT|EUR|YES|NO|PROD||20 EUR|YES
+DE|EUR|0depaffildeeurdesk|Pay via Bank|Nodapay_nodapay_Banks_LU|EUR|YES|NO|PROD||20 EUR|YES
+DE|EUR|0depaffildeeurdesk|Pay via Bank|Nodapay_nodapay_Banks_IE|EUR|YES|NO|PROD||20 EUR|YES
+DE|EUR|0depaffildeeurdesk|Pay via Bank|Openbanking_Rillpay_Banks_1DEP|EUR|YES|NO|PROD|1DEP|20 EUR|YES
+DE|EUR|0depaffildeeurdesk|Pay via Bank|Openbanking_Rillpay_Banks_0DEP//noaff//mob|EUR|YES|NO|PROD|0DEP+MOB+NOAFF|20 EUR|YES
+DE|EUR|0depaffildeeurdesk|Pay via Bank|Openbanking_Rillpay_Banks_0DEP//desktop|EUR|YES|NO|PROD|0DEP+DESKTOP|20 EUR|YES
+DE|EUR|0depaffildeeurdesk|PayID|Payler_PayID_Banks_2DEP|AUD|YES|NO|PROD|2DEP|20 AUD|YES
+DE|EUR|0depaffildeeurdesk|PaySafeCard|Paysafecard_Gate2WayVip_Voucher_3DEP//DE|EUR|YES|NO|PROD|3DEP|15 EUR|YES
+DE|EUR|0depaffildeeurdesk|Per Bank Einzahlen|Nodapay_Nodapay_Banks_0DEP//DE//FTD|EUR|YES|NO|PROD|0DEP|20 EUR|YES
+DE|EUR|0depaffildeeurdesk|Per Bank Einzahlen|Nodapay_nodapay_Banks_1DEP//DE|EUR|YES|NO|PROD|1DEP|20 EUR|YES
+DE|EUR|0depaffildeeurdesk|RapidTransfer|Rapidtransfer_Utorg_Banks_1DEP//colorlogo|EUR|YES|NO|PROD|1DEP|20 EUR|YES
+DE|EUR|0depaffildeeurdesk|RapidTransfer|Rapidtransfer_Utorg_Banks_4DEP//DE|EUR|YES|NO|PROD|4DEP|20 EUR|YES
+DE|EUR|0depaffildeeurdesk|RapidTransfer|Rapidtransfer_Skrill_Banks|EUR|YES|NO|PROD||20 EUR|YES
+DE|EUR|0depaffildeeurdesk|RapidTransfer|Rapidtransfer_Gate2WayVip_Banks_3DEP|EUR|YES|NO|PROD|3DEP|20 EUR|YES
+DE|EUR|0depaffildeeurdesk|RapidTransfer|Rapidtransfer_Utorg_Banks_0DEP//sofortlogo|EUR|YES|NO|PROD|0DEP|20 EUR|YES
+DE|EUR|0depaffildeeurdesk|RapidTransfer|Rapidtransfer_Utorg_Banks_0DEP//greylogo|EUR|YES|NO|PROD|0DEP|20 EUR|YES
+DE|EUR|0depaffildeeurdesk|Visa/Mastercard|V/M_Corefy_Cards_1DEP|EUR|YES|NO|PROD|1DEP|20 EUR|YES
+DE|EUR|0depaffildeeurdesk|Visa/Mastercard|V/M_Corefy_Cards_0DEP//mob//aff|EUR|YES|NO|PROD|0DEP+AFF+MOB|20 EUR|YES
+DE|EUR|0depaffildeeurdesk|Visa/Mastercard|V/M_Directcorefy_Cards_0DEP//desktop|EUR|YES|NO|PROD|0DEP+DESKTOP|20 EUR|YES
+DE|EUR|0depaffildeeurdesk|Visa/Mastercard|V/M_Directcorefy_Cards_0DEP//mob//noaff|EUR|YES|NO|PROD|0DEP+MOB+NOAFF|20 EUR|YES
+DE|EUR|0depaffildeeurdesk|Zimpler|Openbanking_Zimpler_Banks//zimplerlogo|EUR|YES|NO|PROD||20 EUR|YES
+DE|EUR|0depaffildeeurdesk|Zimpler Välitön pankkisiirto|Openbanking_Zimpler_Banks//bankslogo|EUR|YES|NO|PROD||20 EUR|YES
+DE|EUR|0depaffildeeurdesk|ADA - Cardano|ADA_Coinspaid_Cryptopay_Cardano|EUR|YES|YES|PROD||—|NO
+DE|EUR|0depaffildeeurdesk|Apple pay|Applepay_Rastpay_Cards_0DEP//AFF//MC|EUR|YES|NO|PROD|0DEP+AFF|20 EUR|NO
+DE|EUR|0depaffildeeurdesk|Apple pay|Applepay_Rastpay_Cards_3DEP//MC|EUR|YES|NO|PROD|3DEP|20 EUR|NO
+DE|EUR|0depaffildeeurdesk|Apple pay|Applepay_Rastpay_Cards_2DEP//MC//new|EUR|YES|NO|PROD|2DEP|20 EUR|NO
+DE|EUR|0depaffildeeurdesk|ApplePay|Applepay_Impaya_Cards_3DEP|EUR|YES|NO|PROD|3DEP|20 EUR|NO
+DE|EUR|0depaffildeeurdesk|Applepay|Applepay_Rampnow_Cards_3DEP|EUR|YES|NO|PROD|3DEP|20 EUR|NO
+DE|EUR|0depaffildeeurdesk|Applepay|Applepay_Rampnow_Cards_3DEP//LocalCur|CAD|YES|NO|PROD|3DEP|20 CAD|NO
+DE|EUR|0depaffildeeurdesk|ApplePay Mastercard|Applepay_Rastpay_Cards_3DEP//Localcurr|CHF|YES|NO|PROD|3DEP|20 CHF|NO
+DE|EUR|0depaffildeeurdesk|ApplePay Mastercard|Applepay_Rastpay_Cards_0DEP//aff//mob|EUR|YES|NO|PROD|0DEP+AFF+MOB|20 EUR|NO
+DE|EUR|0depaffildeeurdesk|ApplePay Mastercard|Applepay_Rastpay_Cards_3DEP|EUR|YES|NO|PROD|3DEP|20 EUR|NO
+DE|EUR|0depaffildeeurdesk|ApplePay Visa|Applepay_Gumballpay_Cards_1DEP|EUR|YES|NO|PROD|1DEP|20 EUR|NO
+DE|EUR|0depaffildeeurdesk|ApplePay Visa/MC|Applepay_Gumballpay_Cards_1DEP//SE|EUR|YES|NO|PROD|1DEP|20 EUR|NO
+DE|EUR|0depaffildeeurdesk|ApplePay Visa/MC|Applepay_Lancelot_Cards_3DEP|EUR|YES|NO|PROD|3DEP|20 EUR|NO
+DE|EUR|0depaffildeeurdesk|Bank Transfer|Openbanking_Gumballpay_Banks|EUR|YES|NO|PROD||20 EUR|NO
+DE|EUR|0depaffildeeurdesk|Bank Transfer|Banktransfer_Payop_Banks|EUR|YES|NO|PROD||20 EUR|NO
+DE|EUR|0depaffildeeurdesk|BCH - Bitcoin Cash|BCH_Coinspaid_Cryptopay_Bitcoincash|EUR|YES|YES|PROD||—|NO
+DE|EUR|0depaffildeeurdesk|BTC - Bitcoin|BTC_Coinspaid_Cryptopay_Bitcoin|EUR|YES|YES|PROD||50 EUR|NO
+DE|EUR|0depaffildeeurdesk|CASHlib|CASHlib_CASHlib_Voucher|EUR|YES|NO|PROD||5 EUR|NO
+DE|EUR|0depaffildeeurdesk|CashtoCode|Cashtocode_Cashtocode_Voucher|AUD|YES|NO|PROD||20 AUD|NO
+DE|EUR|0depaffildeeurdesk|Commerzbank|commerzbank_nodapay_Banks_0DEP//DE|EUR|YES|NO|PROD|0DEP|20 EUR|NO
+DE|EUR|0depaffildeeurdesk|Crypto|Crypto|EUR|YES|YES|PROD||20 EUR|NO
+DE|EUR|0depaffildeeurdesk|Deutsche Bank|deutsche_nodapay_Banks_0DEP//DE|EUR|YES|NO|PROD|0DEP|20 EUR|NO
+DE|EUR|0depaffildeeurdesk|DOGE - Dogecoin|DOGE_Coinspaid_Cryptopay_Dogecoin|EUR|YES|YES|PROD||—|NO
+DE|EUR|0depaffildeeurdesk|ETH -  Ethereum (ERC20)|ETH_Coinspaid_Cryptopay_Etherium|EUR|YES|YES|PROD||—|NO
+DE|EUR|0depaffildeeurdesk|eZeeWallet|Ezeewallet_Ezeewallet_Wallet|EUR|YES|YES|PROD||20 EUR|NO
+DE|EUR|0depaffildeeurdesk|Flexepin|Flexepin_Flexepin_Voucher|NZD|YES|NO|PROD||20 NZD|NO
+DE|EUR|0depaffildeeurdesk|Google Pay|Googlepay_Rastpay_Cards_3DEP//MC|EUR|YES|NO|PROD|3DEP|20 EUR|NO
+DE|EUR|0depaffildeeurdesk|Google Pay|Googlepay_Rastpay_Cards_2DEP//MC//new|EUR|YES|NO|PROD|2DEP|20 EUR|NO
+DE|EUR|0depaffildeeurdesk|Google Pay|Googlepay_Rastpay_Cards_0DEP//AFF//MC|EUR|YES|NO|PROD|0DEP+AFF|20 EUR|NO
+DE|EUR|0depaffildeeurdesk|GooglePay|Googlepay_Impaya_Cards_3DEP|EUR|YES|NO|PROD|3DEP|20 EUR|NO
+DE|EUR|0depaffildeeurdesk|Googlepay|Googlepay_Rampnow_Cards_3DEP|EUR|YES|NO|PROD|3DEP|20 EUR|NO
+DE|EUR|0depaffildeeurdesk|Googlepay|Googlepay_Rampnow_Cards_3DEP//LocalCur|CAD|YES|NO|PROD|3DEP|20 CAD|NO
+DE|EUR|0depaffildeeurdesk|GooglePay Mastercard|Googlepay_Rastpay_Cards_3DEP//Localcurr|CHF|YES|NO|PROD|3DEP|20 CHF|NO
+DE|EUR|0depaffildeeurdesk|GooglePay Mastercard|Googlepay_Rastpay_Cards_0DEP//aff//mob|EUR|YES|NO|PROD|0DEP+AFF+MOB|20 EUR|NO
+DE|EUR|0depaffildeeurdesk|GooglePay Visa|Googlepay_Gumballpay_Cards_1DEP|EUR|YES|NO|PROD|1DEP|20 EUR|NO
+DE|EUR|0depaffildeeurdesk|GooglePay Visa/MC|Googlepay_Gumballpay_Cards_1DEP//SE|EUR|YES|NO|PROD|1DEP|20 EUR|NO
+DE|EUR|0depaffildeeurdesk|GooglePay Visa/MC|Googlepay_Lancelot_Cards_3DEP|EUR|YES|NO|PROD|3DEP|20 EUR|NO
+DE|EUR|0depaffildeeurdesk|Jeton|Jeton_Jeton_Wallet|EUR|YES|YES|PROD||20 EUR|NO
+DE|EUR|0depaffildeeurdesk|LTC - Litecoin|LTC_Coinspaid_Cryptopay_Litecoin|EUR|YES|YES|PROD||—|NO
+DE|EUR|0depaffildeeurdesk|LuxonPay|Luxonpay_Luxonpay_Wallet|EUR|YES|YES|PROD||20 EUR|NO
+DE|EUR|0depaffildeeurdesk|MBway2|MBway_Impaya_Banks_1DEP|EUR|YES|NO|PROD|1DEP|20 EUR|NO
+DE|EUR|0depaffildeeurdesk|Mifinity|Mifinity_Mifinity_Wallet|EUR|YES|YES|PROD||20 EUR|NO
+DE|EUR|0depaffildeeurdesk|N26 Bank|N26_Impaya_Banks|EUR|YES|NO|PROD||20 EUR|NO
+DE|EUR|0depaffildeeurdesk|Neteller|Neteller_Utorg_Wallet_1DEP//colorlogo|EUR|YES|YES|PROD|1DEP|15 EUR|NO
+DE|EUR|0depaffildeeurdesk|Neteller|Neteller_Utorg_Wallet_3DEP|EUR|YES|YES|PROD|3DEP|15 EUR|NO
+DE|EUR|0depaffildeeurdesk|Neteller|Neteller_Skrill_Wallet|EUR|YES|YES|PROD||15 EUR|NO
+DE|EUR|0depaffildeeurdesk|NTLR|Neteller_Utorg_Wallet_0DEP//greylogo|EUR|YES|NO|PROD|0DEP|20 EUR|NO
+DE|EUR|0depaffildeeurdesk|Pay by Bank|Paybybank_Payop_Banks_AT|EUR|YES|NO|PROD||20 EUR|NO
+DE|EUR|0depaffildeeurdesk|Pay by Bank|Openbanking_Rillpay_Banks_EU|EUR|YES|NO|PROD||20 EUR|NO
+DE|EUR|0depaffildeeurdesk|paymentTest|paymentTest//delete|EUR|YES|NO|PROD||20 EUR|NO
+DE|EUR|0depaffildeeurdesk|paymentTest|paymentTest|EUR|YES|NO|PROD||20 EUR|NO
+DE|EUR|0depaffildeeurdesk|paymentTestDummy|PaymentTestDummy|EUR|YES|NO|PROD||20 EUR|NO
+DE|EUR|0depaffildeeurdesk|Paysafecard|Paysafecard_Utorg_Voucher_1DEP//colorlogo|EUR|YES|NO|PROD|1DEP|15 EUR|NO
+DE|EUR|0depaffildeeurdesk|Paysafecard|Paysafecard_Utorg_Voucher_3DEP|EUR|YES|NO|PROD|3DEP|15 EUR|NO
+DE|EUR|0depaffildeeurdesk|Paysafecard|Paysafecard_Utorg_Voucher_0DEP//greylogo|EUR|YES|NO|PROD|0DEP|15 EUR|NO
+DE|EUR|0depaffildeeurdesk|Paysafecard|Paysafecard_Skrill_Voucher|EUR|YES|NO|PROD||15 EUR|NO
+DE|EUR|0depaffildeeurdesk|Raiffeisenbanken|raiffeisenbanken_nodapay_Banks_0DEP//DE|EUR|YES|NO|PROD|0DEP|20 EUR|NO
+DE|EUR|0depaffildeeurdesk|Revolut|Revolut_Payop_Banks|EUR|YES|NO|PROD||20 EUR|NO
+DE|EUR|0depaffildeeurdesk|Revolut|Revolut_Impaya_Banks_1DEP//DE|EUR|YES|NO|PROD|1DEP|20 EUR|NO
+DE|EUR|0depaffildeeurdesk|Revolut|Revolut_Impaya_Banks|EUR|YES|NO|PROD||20 EUR|NO
+DE|EUR|0depaffildeeurdesk|Skrill|Skrill_Skrill_Wallet|EUR|YES|YES|PROD||15 EUR|NO
+DE|EUR|0depaffildeeurdesk|Skrill|Skrill_Utorg_Wallet_1DEP//colorlogo|EUR|YES|YES|PROD|1DEP|15 EUR|NO
+DE|EUR|0depaffildeeurdesk|Skrill|Skrill_Utorg_Wallet_3DEP|EUR|YES|YES|PROD|3DEP|15 EUR|NO
+DE|EUR|0depaffildeeurdesk|SKRL|Skrill_Utorg_Wallet_0DEP//greylogo|EUR|YES|NO|PROD|0DEP|20 EUR|NO
+DE|EUR|0depaffildeeurdesk|Sofort|Sofort_Gate2Wayvip_Banks_3DEP|EUR|YES|NO|PROD|3DEP|20 EUR|NO
+DE|EUR|0depaffildeeurdesk|SOL - Solana|SOL_Coinspaid_Cryptopay_Solana|EUR|YES|YES|PROD||—|NO
+DE|EUR|0depaffildeeurdesk|Sparkasse|sparkasse_nodapay_Banks_0DEP//DE|EUR|YES|NO|PROD|0DEP|20 EUR|NO
+DE|EUR|0depaffildeeurdesk|SticPay|Sticpay_Sticpay_Wallet|EUR|YES|YES|PROD||20 EUR|NO
+DE|EUR|0depaffildeeurdesk|TON - Toncoin|TON_Coinspaid_Cryptopay_Toncoin|EUR|YES|YES|PROD||—|NO
+DE|EUR|0depaffildeeurdesk|Trustly|Trustly_Rizonpay_Banks_3DEP|EUR|YES|NO|PROD|3DEP|20 EUR|NO
+DE|EUR|0depaffildeeurdesk|Trustly|Trustly_Rizonpay_Banks_0DEP//mob//aff|EUR|YES|NO|PROD|0DEP+AFF+MOB|20 EUR|NO
+DE|EUR|0depaffildeeurdesk|Trustly|Trustly_Rizonpay_Banks|EUR|YES|NO|PROD||20 EUR|NO
+DE|EUR|0depaffildeeurdesk|TRX - Tron|TRX_Coinspaid_Cryptopay_Tron|EUR|YES|YES|PROD||—|NO
+DE|EUR|0depaffildeeurdesk|USDC - USD Coin|USDC_Coinspaid_Cryptopay_USD Coin|EUR|YES|YES|PROD||—|NO
+DE|EUR|0depaffildeeurdesk|USDT  -  Tether USD (ERC20)|USDTE_Coinspaid_Cryptopay_TetherERC20|EUR|YES|YES|PROD||—|NO
+DE|EUR|0depaffildeeurdesk|USDT -  Tether USD (TRC20)|USDTT_Coinspaid_Cryptopay_TetherTRC20|EUR|YES|YES|PROD||20 EUR|NO
+DE|EUR|0depaffildeeurdesk|Wise|Wise_Impaya_Banks|EUR|YES|NO|PROD||20 EUR|NO
+DE|EUR|0depaffildeeurdesk|XRP - Ripple|Ripple_Coinspaid_Cryptopay_XRP|EUR|YES|YES|PROD||—|NO

@@ -1,0 +1,133 @@
+Position,Title,Name,Category,Traffic Level,Device,Affiliate,Additional Settings,Min Deposit,Currency,Display Type,Parent System,Recommended,Full Name
+1,paymentTest,paymentTest//delete,Regular,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,paymentTest//delete
+2,paymentTestDummy,PaymentTestDummy,Regular,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,PaymentTestDummy
+3,Interac®,Interac_Gigadat_Banks,Regular,No Settings,Any,Any,None,Not Set,CAD,unknown,None,Yes,Interac_Gigadat_Banks
+4,paymentTest,paymentTest,Regular,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,paymentTest
+5,Visa/Mastercard,V/M_Corefy_Cards_1DEP,Regular,1DEP,Any,Any,None,Not Set,EUR,unknown,None,Yes,V/M_Corefy_Cards_1DEP
+6,Visa/Mastercard,V/M_Corefy_Cards_0DEP//mob//aff,Regular,0DEP,Mobile,Affiliate,None,Not Set,EUR,unknown,None,Yes,V/M_Corefy_Cards_0DEP//mob//aff
+7,Visa/Mastercard,V/M_Directcorefy_Cards_0DEP//desktop,Regular,0DEP,Desktop,Any,None,Not Set,EUR,unknown,None,Yes,V/M_Directcorefy_Cards_0DEP//desktop
+8,Visa/Mastercard,V/M_Directcorefy_Cards_0DEP//mob//noaff,Regular,0DEP,Mobile,No Affiliate,None,Not Set,EUR,unknown,None,Yes,V/M_Directcorefy_Cards_0DEP//mob//noaff
+9,BLIK2,Blik_Gate2WayVip_Banks_1DEP,Regular,1DEP,Any,Any,None,Not Set,PLN,unknown,None,No,Blik_Gate2WayVip_Banks_1DEP
+10,MBway,MBway_Impaya_Banks_0DEP//mob//aff,Regular,0DEP,Mobile,Affiliate,None,Not Set,EUR,unknown,None,No,MBway_Impaya_Banks_0DEP//mob//aff
+11,MBway,MBway_Utorg_Banks_0DEP//desktop,Regular,0DEP,Desktop,Any,None,Not Set,EUR,unknown,None,Yes,MBway_Utorg_Banks_0DEP//desktop
+12,MBway2,MBway_Impaya_Banks_1DEP,Regular,1DEP,Any,Any,None,Not Set,EUR,unknown,None,No,MBway_Impaya_Banks_1DEP
+13,MBway,MBway_Colibrix_Banks_0DEP//desktop,Regular,0DEP,Desktop,Any,None,Not Set,EUR,unknown,None,Yes,MBway_Colibrix_Banks_0DEP//desktop
+14,MBway,MBway_Utorg_Banks_0DEP//mob//noaff,Regular,0DEP,Mobile,No Affiliate,None,Not Set,EUR,unknown,None,Yes,MBway_Utorg_Banks_0DEP//mob//noaff
+15,MBway,MBway_Colibrix_Banks_0DEP//noaff,Regular,0DEP,Any,No Affiliate,None,Not Set,EUR,unknown,None,Yes,MBway_Colibrix_Banks_0DEP//noaff
+16,MBway,MBway_Exactly_Banks_1DEP,Regular,1DEP,Any,Any,None,Not Set,EUR,unknown,None,Yes,MBway_Exactly_Banks_1DEP
+17,Zimpler,Openbanking_Zimpler_Banks//zimplerlogo,Regular,No Settings,Any,Any,None,Not Set,EUR,unknown,None,Yes,Openbanking_Zimpler_Banks//zimplerlogo
+18,MBway,MBway_Exactly_Banks_0DEP//aff,Regular,0DEP,Any,Affiliate,None,Not Set,EUR,unknown,None,Yes,MBway_Exactly_Banks_0DEP//aff
+19,Zimpler Välitön pankkisiirto,Openbanking_Zimpler_Banks//bankslogo,Regular,No Settings,Any,Any,None,Not Set,EUR,unknown,None,Yes,Openbanking_Zimpler_Banks//bankslogo
+20,Paysafecard,Paysafecard_Utorg_Voucher_1DEP//colorlogo,Regular,1DEP,Any,Any,Color Logo,Not Set,EUR,unknown,None,No,Paysafecard_Utorg_Voucher_1DEP//colorlogo
+21,Multibanco,Multibanco_Impaya_Banks_0DEP//mob//aff,Regular,0DEP,Mobile,Affiliate,None,Not Set,EUR,unknown,None,No,Multibanco_Impaya_Banks_0DEP//mob//aff
+22,Paysafecard,Paysafecard_Utorg_Voucher_3DEP,Regular,3DEP,Any,Any,None,Not Set,EUR,unknown,None,No,Paysafecard_Utorg_Voucher_3DEP
+23,Multibanco,Multibanco_Impaya_Banks_1DEP,Regular,1DEP,Any,Any,None,Not Set,EUR,unknown,None,No,Multibanco_Impaya_Banks_1DEP
+24,PaySafeCard,Paysafecard_Gate2WayVip_Voucher_3DEP//DE,Regular,3DEP,Any,Any,Germany,Not Set,EUR,unknown,None,Yes,Paysafecard_Gate2WayVip_Voucher_3DEP//DE
+25,Multibanco,Multibanco_Colibrix_Banks_0DEP//desktop,Regular,0DEP,Desktop,Any,None,Not Set,EUR,unknown,None,Yes,Multibanco_Colibrix_Banks_0DEP//desktop
+26,Multibanco,Multibanco_Colibrix_Banks_0DEP//mob//noaff,Regular,0DEP,Mobile,No Affiliate,None,Not Set,EUR,unknown,None,Yes,Multibanco_Colibrix_Banks_0DEP//mob//noaff
+27,BLIK2,Blik_Utorg_Banks_3DEP,Regular,3DEP,Any,Any,None,Not Set,PLN,unknown,None,No,Blik_Utorg_Banks_3DEP
+28,Carrier Billing,Bizum_Rastpay_Carrierbilling_2DEP,Regular,2DEP,Any,Any,None,Not Set,EUR,unknown,None,Yes,Bizum_Rastpay_Carrierbilling_2DEP
+29,Paysafecard,Paysafecard_Utorg_Voucher_0DEP//greylogo,Regular,0DEP,Any,Any,Grey Logo,Not Set,EUR,unknown,None,No,Paysafecard_Utorg_Voucher_0DEP//greylogo
+30,Paysafecard,Paysafecard_Skrill_Voucher,Regular,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,Paysafecard_Skrill_Voucher
+31,Carrier Billing,Dimoco_Dimoco_Carrierbilling,Regular,No Settings,Any,Any,None,Not Set,EUR,unknown,None,Yes,Dimoco_Dimoco_Carrierbilling
+32,RapidTransfer,Rapidtransfer_Utorg_Banks_1DEP//colorlogo,Regular,1DEP,Any,Any,Color Logo,Not Set,EUR,unknown,None,No,Rapidtransfer_Utorg_Banks_1DEP//colorlogo
+33,EPS,EPS_Utorg_Banks_1DEP,Regular,1DEP,Any,Any,None,Not Set,EUR,unknown,None,Yes,EPS_Utorg_Banks_1DEP
+34,Per Bank Einzahlen,Nodapay_Nodapay_Banks_0DEP//DE//FTD,Regular,0DEP,Any,Any,Germany,Not Set,EUR,unknown,None,Yes,Nodapay_Nodapay_Banks_0DEP//DE//FTD
+35,PayID,Payler_PayID_Banks_2DEP,Regular,2DEP,Any,Any,None,Not Set,AUD,unknown,None,Yes,Payler_PayID_Banks_2DEP
+36,BLIK2,Blik_Utorg_Banks_0DEP//aff//nonseo,Regular,0DEP,Any,Affiliate,None,Not Set,PLN,unknown,None,No,Blik_Utorg_Banks_0DEP//aff//nonseo
+37,Per Bank Einzahlen,Nodapay_nodapay_Banks_1DEP//DE,Regular,1DEP,Any,Any,Germany,Not Set,EUR,unknown,None,Yes,Nodapay_nodapay_Banks_1DEP//DE
+38,Sparkasse,sparkasse_nodapay_Banks_0DEP//DE,Regular,0DEP,Any,Any,Germany,Not Set,EUR,unknown,None,No,sparkasse_nodapay_Banks_0DEP//DE
+39,BLIK,Blik_Gate2WayVip_Banks_0DEP,Regular,0DEP,Any,Any,None,Not Set,PLN,unknown,None,Yes,Blik_Gate2WayVip_Banks_0DEP
+40,BLIK2,Blik_Rizonpay_Banks_0DEP//mob//affseo,Regular,0DEP,Mobile,Affiliate,None,Not Set,PLN,unknown,None,No,Blik_Rizonpay_Banks_0DEP//mob//affseo
+41,RapidTransfer,Rapidtransfer_Utorg_Banks_4DEP//DE,Regular,4DEP,Any,Any,Germany,Not Set,EUR,unknown,None,No,Rapidtransfer_Utorg_Banks_4DEP//DE
+42,Deutsche Bank,deutsche_nodapay_Banks_0DEP//DE,Regular,0DEP,Any,Any,Germany,Not Set,EUR,unknown,None,No,deutsche_nodapay_Banks_0DEP//DE
+43,Raiffeisenbanken,raiffeisenbanken_nodapay_Banks_0DEP//DE,Regular,0DEP,Any,Any,Germany,Not Set,EUR,unknown,None,No,raiffeisenbanken_nodapay_Banks_0DEP//DE
+44,N26 Bank,N26_Impaya_Banks,Regular,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,N26_Impaya_Banks
+45,Commerzbank,commerzbank_nodapay_Banks_0DEP//DE,Regular,0DEP,Any,Any,Germany,Not Set,EUR,unknown,None,No,commerzbank_nodapay_Banks_0DEP//DE
+46,Trustly,Trustly_Rizonpay_Banks_3DEP,Regular,3DEP,Any,Any,None,Not Set,EUR,unknown,None,No,Trustly_Rizonpay_Banks_3DEP
+47,Trustly,Trustly_Rizonpay_Banks_0DEP//mob//aff,Regular,0DEP,Mobile,Affiliate,None,Not Set,EUR,unknown,None,No,Trustly_Rizonpay_Banks_0DEP//mob//aff
+48,Pay by Bank,Paybybank_Payop_Banks_AT,Regular,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,Paybybank_Payop_Banks_AT
+49,Trustly,Trustly_Rizonpay_Banks,Regular,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,Trustly_Rizonpay_Banks
+50,BLIK,Blik_Colibrix_Banks_1DEP,Regular,1DEP,Any,Any,None,Not Set,PLN,unknown,None,Yes,Blik_Colibrix_Banks_1DEP
+51,ApplePay Mastercard,Applepay_Rastpay_Cards_3DEP//Localcurr,Regular,3DEP,Any,Any,None,Not Set,CHF,unknown,None,No,Applepay_Rastpay_Cards_3DEP//Localcurr
+52,Revolut,Revolut_Payop_Banks,Regular,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,Revolut_Payop_Banks
+53,Skrill,Skrill_Skrill_Wallet,Regular,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,Skrill_Skrill_Wallet
+54,RapidTransfer,Rapidtransfer_Skrill_Banks,Regular,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,Rapidtransfer_Skrill_Banks
+55,Pay via Bank,Openbanking_Impaya_Banks,Regular,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,Openbanking_Impaya_Banks
+56,BLIK,Blik_Colibrix_Banks_0DEP//mob//aff,Regular,0DEP,Mobile,Affiliate,None,Not Set,PLN,unknown,None,Yes,Blik_Colibrix_Banks_0DEP//mob//aff
+57,RapidTransfer,Rapidtransfer_Gate2WayVip_Banks_3DEP,Regular,3DEP,Any,Any,None,Not Set,EUR,unknown,None,No,Rapidtransfer_Gate2WayVip_Banks_3DEP
+58,Wise,Wise_Impaya_Banks,Regular,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,Wise_Impaya_Banks
+59,Pay via Bank,Nodapay_nodapay_Banks_EU,Regular,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,Nodapay_nodapay_Banks_EU
+60,Pay via Bank,Nodapay_nodapay_Banks_IT,Regular,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,Nodapay_nodapay_Banks_IT
+61,Pay via Bank,Nodapay_nodapay_Banks_LU,Regular,No Settings,Any,Any,None,Not Set,EUR,unknown,None,Yes,Nodapay_nodapay_Banks_LU
+62,Pay via Bank,Nodapay_nodapay_Banks_IE,Regular,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,Nodapay_nodapay_Banks_IE
+63,ApplePay,Applepay_Impaya_Cards_3DEP,Regular,3DEP,Any,Any,None,Not Set,EUR,unknown,None,No,Applepay_Impaya_Cards_3DEP
+64,Sofort,Sofort_Gate2Wayvip_Banks_3DEP,Regular,3DEP,Any,Any,None,Not Set,EUR,unknown,None,No,Sofort_Gate2Wayvip_Banks_3DEP
+65,RapidTransfer,Rapidtransfer_Utorg_Banks_0DEP//sofortlogo,Regular,0DEP,Any,Any,None,Not Set,EUR,unknown,None,Yes,Rapidtransfer_Utorg_Banks_0DEP//sofortlogo
+66,Pay by Bank,Openbanking_Rillpay_Banks_EU,Regular,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,Openbanking_Rillpay_Banks_EU
+67,Applepay,Applepay_Rampnow_Cards_3DEP,Regular,3DEP,Any,Any,None,Not Set,EUR,unknown,None,No,Applepay_Rampnow_Cards_3DEP
+68,Pay via Bank,Openbanking_Rillpay_Banks_1DEP,Regular,1DEP,Any,Any,None,Not Set,EUR,unknown,None,No,Openbanking_Rillpay_Banks_1DEP
+69,Applepay,Applepay_Rampnow_Cards_3DEP//LocalCur,Regular,3DEP,Any,Any,None,Not Set,CAD,unknown,None,No,Applepay_Rampnow_Cards_3DEP//LocalCur
+70,Pay via Bank,Openbanking_Rillpay_Banks_0DEP//noaff//mob,Regular,0DEP,Mobile,No Affiliate,None,Not Set,EUR,unknown,None,Yes,Openbanking_Rillpay_Banks_0DEP//noaff//mob
+71,Apple pay,Applepay_Rastpay_Cards_0DEP//AFF//MC,Regular,0DEP,Any,Any,None,Not Set,EUR,unknown,None,No,Applepay_Rastpay_Cards_0DEP//AFF//MC
+72,Pay via Bank,Openbanking_Rillpay_Banks_0DEP//desktop,Regular,0DEP,Desktop,Any,None,Not Set,EUR,unknown,None,Yes,Openbanking_Rillpay_Banks_0DEP//desktop
+73,Apple pay,Applepay_Rastpay_Cards_3DEP//MC,Regular,3DEP,Any,Any,None,Not Set,EUR,unknown,None,No,Applepay_Rastpay_Cards_3DEP//MC
+74,CASHlib,CASHlib_CASHlib_Voucher,Regular,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,CASHlib_CASHlib_Voucher
+75,Neteller,Neteller_Utorg_Wallet_1DEP//colorlogo,Regular,1DEP,Any,Any,Color Logo,Not Set,EUR,unknown,None,No,Neteller_Utorg_Wallet_1DEP//colorlogo
+76,Apple pay,Applepay_Rastpay_Cards_2DEP//MC//new,Regular,2DEP,Any,Any,New Version,Not Set,EUR,unknown,None,No,Applepay_Rastpay_Cards_2DEP//MC//new
+77,Neteller,Neteller_Utorg_Wallet_3DEP,Regular,3DEP,Any,Any,None,Not Set,EUR,unknown,None,No,Neteller_Utorg_Wallet_3DEP
+78,Revolut,Revolut_Impaya_Banks_1DEP//DE,Regular,1DEP,Any,Any,Germany,Not Set,EUR,unknown,None,No,Revolut_Impaya_Banks_1DEP//DE
+79,Revolut,Revolut_Impaya_Banks,Regular,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,Revolut_Impaya_Banks
+80,Neosurf,Neosurf_Neosurf_Voucher,Regular,No Settings,Any,Any,None,Not Set,CAD,unknown,None,Yes,Neosurf_Neosurf_Voucher
+81,Neosurf,Neosurf_Payop_Voucher,Regular,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,Neosurf_Payop_Voucher
+82,ApplePay Visa,Applepay_Gumballpay_Cards_1DEP,Regular,1DEP,Any,Any,None,Not Set,EUR,unknown,None,No,Applepay_Gumballpay_Cards_1DEP
+83,RapidTransfer,Rapidtransfer_Utorg_Banks_0DEP//greylogo,Regular,0DEP,Any,Any,Grey Logo,Not Set,EUR,unknown,None,No,Rapidtransfer_Utorg_Banks_0DEP//greylogo
+84,ApplePay Visa/MC,Applepay_Gumballpay_Cards_1DEP//SE,Regular,1DEP,Any,Any,Sweden,Not Set,EUR,unknown,None,No,Applepay_Gumballpay_Cards_1DEP//SE
+85,ApplePay Visa/MC,Applepay_Lancelot_Cards_3DEP,Regular,3DEP,Any,Any,None,Not Set,EUR,unknown,None,No,Applepay_Lancelot_Cards_3DEP
+86,Bank Transfer,Openbanking_Gumballpay_Banks,Regular,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,Openbanking_Gumballpay_Banks
+87,NTLR,Neteller_Utorg_Wallet_0DEP//greylogo,Regular,0DEP,Any,Any,Grey Logo,Not Set,EUR,unknown,None,No,Neteller_Utorg_Wallet_0DEP//greylogo
+88,Bank Transfer,Banktransfer_Payop_Banks,Regular,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,Banktransfer_Payop_Banks
+89,Skrill,Skrill_Utorg_Wallet_1DEP//colorlogo,Regular,1DEP,Any,Any,Color Logo,Not Set,EUR,unknown,None,No,Skrill_Utorg_Wallet_1DEP//colorlogo
+90,CashtoCode,Cashtocode_Cashtocode_Voucher,Regular,No Settings,Any,Any,None,Not Set,AUD,unknown,None,No,Cashtocode_Cashtocode_Voucher
+91,SticPay,Sticpay_Sticpay_Wallet,Regular,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,Sticpay_Sticpay_Wallet
+92,GooglePay,Googlepay_Impaya_Cards_3DEP,Regular,3DEP,Any,Any,None,Not Set,EUR,unknown,None,No,Googlepay_Impaya_Cards_3DEP
+93,ApplePay Mastercard,Applepay_Rastpay_Cards_0DEP//aff//mob,Regular,0DEP,Mobile,Affiliate,None,Not Set,EUR,unknown,None,No,Applepay_Rastpay_Cards_0DEP//aff//mob
+94,Skrill,Skrill_Utorg_Wallet_3DEP,Regular,3DEP,Any,Any,None,Not Set,EUR,unknown,None,No,Skrill_Utorg_Wallet_3DEP
+95,ApplePay Mastercard,Applepay_Rastpay_Cards_3DEP,Regular,3DEP,Any,Any,None,Not Set,EUR,unknown,None,No,Applepay_Rastpay_Cards_3DEP
+96,Googlepay,Googlepay_Rampnow_Cards_3DEP,Regular,3DEP,Any,Any,None,Not Set,EUR,unknown,None,No,Googlepay_Rampnow_Cards_3DEP
+97,Mifinity,Mifinity_Mifinity_Wallet,Regular,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,Mifinity_Mifinity_Wallet
+98,SKRL,Skrill_Utorg_Wallet_0DEP//greylogo,Regular,0DEP,Any,Any,Grey Logo,Not Set,EUR,unknown,None,No,Skrill_Utorg_Wallet_0DEP//greylogo
+99,Googlepay,Googlepay_Rampnow_Cards_3DEP//LocalCur,Regular,3DEP,Any,Any,None,Not Set,CAD,unknown,None,No,Googlepay_Rampnow_Cards_3DEP//LocalCur
+100,Neteller,Neteller_Skrill_Wallet,Regular,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,Neteller_Skrill_Wallet
+101,Google Pay,Googlepay_Rastpay_Cards_3DEP//MC,Regular,3DEP,Any,Any,None,Not Set,EUR,unknown,None,No,Googlepay_Rastpay_Cards_3DEP//MC
+102,Google Pay,Googlepay_Rastpay_Cards_2DEP//MC//new,Regular,2DEP,Any,Any,New Version,Not Set,EUR,unknown,None,No,Googlepay_Rastpay_Cards_2DEP//MC//new
+103,MuchBetter,Muchbetter_Muchbetter_Wallet,Regular,No Settings,Any,Any,None,Not Set,CAD,unknown,None,Yes,Muchbetter_Muchbetter_Wallet
+104,Google Pay,Googlepay_Rastpay_Cards_0DEP//AFF//MC,Regular,0DEP,Any,Any,None,Not Set,EUR,unknown,None,No,Googlepay_Rastpay_Cards_0DEP//AFF//MC
+105,eZeeWallet,Ezeewallet_Ezeewallet_Wallet,Regular,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,Ezeewallet_Ezeewallet_Wallet
+106,GooglePay Visa/MC,Googlepay_Gumballpay_Cards_1DEP//SE,Regular,1DEP,Any,Any,Sweden,Not Set,EUR,unknown,None,No,Googlepay_Gumballpay_Cards_1DEP//SE
+107,GooglePay Visa,Googlepay_Gumballpay_Cards_1DEP,Regular,1DEP,Any,Any,None,Not Set,EUR,unknown,None,No,Googlepay_Gumballpay_Cards_1DEP
+108,GooglePay Visa/MC,Googlepay_Lancelot_Cards_3DEP,Regular,3DEP,Any,Any,None,Not Set,EUR,unknown,None,No,Googlepay_Lancelot_Cards_3DEP
+109,GooglePay Mastercard,Googlepay_Rastpay_Cards_3DEP//Localcurr,Regular,3DEP,Any,Any,None,Not Set,CHF,unknown,None,No,Googlepay_Rastpay_Cards_3DEP//Localcurr
+110,GooglePay Mastercard,Googlepay_Rastpay_Cards_0DEP//aff//mob,Regular,0DEP,Mobile,Affiliate,None,Not Set,EUR,unknown,None,No,Googlepay_Rastpay_Cards_0DEP//aff//mob
+111,Carrier Billing,SiruV3_Siru_Carrierbilling_SE,Regular,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,SiruV3_Siru_Carrierbilling_SE
+112,Flexepin,Flexepin_Flexepin_Voucher,Regular,No Settings,Any,Any,None,Not Set,NZD,unknown,None,No,Flexepin_Flexepin_Voucher
+113,Carrier Billing,SiruV3_Siru_Carrierbilling_FI,Regular,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,SiruV3_Siru_Carrierbilling_FI
+114,Jeton,Jeton_Jeton_Wallet,Special Crypto,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,Jeton_Jeton_Wallet
+115,Crypto,Crypto,Crypto,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,Crypto
+116,USDT -  Tether USD (TRC20),USDTT_Coinspaid_Cryptopay_TetherTRC20,Crypto,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,USDTT_Coinspaid_Cryptopay_TetherTRC20
+117,LTC - Litecoin,LTC_Coinspaid_Cryptopay_Litecoin,Crypto,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,LTC_Coinspaid_Cryptopay_Litecoin
+118,ETH -  Ethereum (ERC20),ETH_Coinspaid_Cryptopay_Etherium,Crypto,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,ETH_Coinspaid_Cryptopay_Etherium
+119,TRX - Tron,TRX_Coinspaid_Cryptopay_Tron,Crypto,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,TRX_Coinspaid_Cryptopay_Tron
+120,BTC - Bitcoin,BTC_Coinspaid_Cryptopay_Bitcoin,Crypto,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,BTC_Coinspaid_Cryptopay_Bitcoin
+121,SOL - Solana,SOL_Coinspaid_Cryptopay_Solana,Crypto,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,SOL_Coinspaid_Cryptopay_Solana
+122,XRP - Ripple,Ripple_Coinspaid_Cryptopay_XRP,Crypto,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,Ripple_Coinspaid_Cryptopay_XRP
+123,USDT  -  Tether USD (ERC20),USDTE_Coinspaid_Cryptopay_TetherERC20,Crypto,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,USDTE_Coinspaid_Cryptopay_TetherERC20
+124,DOGE - Dogecoin,DOGE_Coinspaid_Cryptopay_Dogecoin,Crypto,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,DOGE_Coinspaid_Cryptopay_Dogecoin
+125,MBway,MBway_Colibrix_Banks,Regular,No Settings,Any,Any,None,Not Set,EUR,unknown,None,Yes,MBway_Colibrix_Banks
+126,Multibanco,Multibanco_Colibrix_Banks,Regular,No Settings,Any,Any,None,Not Set,EUR,unknown,None,Yes,Multibanco_Colibrix_Banks
+127,ADA - Cardano,ADA_Coinspaid_Cryptopay_Cardano,Crypto,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,ADA_Coinspaid_Cryptopay_Cardano
+128,USDC - USD Coin,USDC_Coinspaid_Cryptopay_USD Coin,Crypto,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,USDC_Coinspaid_Cryptopay_USD Coin
+129,BCH - Bitcoin Cash,BCH_Coinspaid_Cryptopay_Bitcoincash,Crypto,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,BCH_Coinspaid_Cryptopay_Bitcoincash
+130,TON - Toncoin,TON_Coinspaid_Cryptopay_Toncoin,Crypto,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,TON_Coinspaid_Cryptopay_Toncoin
+131,LuxonPay,Luxonpay_Luxonpay_Wallet,Regular,No Settings,Any,Any,None,Not Set,EUR,unknown,None,No,Luxonpay_Luxonpay_Wallet
+132,Binance Pay,Binancepay_Binancepay_Crypto,Crypto,No Settings,Any,Any,None,Not Set,PLN,unknown,None,No,Binancepay_Binancepay_Crypto

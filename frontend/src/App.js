@@ -61,6 +61,9 @@ function AppContent() {
   };
 
   const getCryptoSortIndex = (title) => {
+    // Binance Pay и Jeton идут перед Crypto
+    if (title === 'Binance Pay') return -3;
+    if (title === 'Jeton') return -2;
     if (title === 'Crypto') return -1;
     const order = ['USDTT','LTC','ETH','TRX','BTC','SOL','XRP','USDTE','DOGE','ADA','USDC','BCH','TON'];
     for (let i = 0; i < order.length; i++) if (title.toUpperCase().startsWith(order[i])) return i;
@@ -129,9 +132,9 @@ function AppContent() {
           const wdr = res.data?.withdraw_methods || [];
           [...dep, ...wdr].forEach(([title, name]) => {
             const key = `${title}|||${name}`;
-            // Jeton и Binance Pay НЕ являются криптовалютами - они должны показываться отдельно
-            const isCrypto = /Coinspaid|Crypto|Tether|Bitcoin|Ethereum|Litecoin|Ripple|Tron|USDC|USDT|DOGE|Cardano|Solana|Toncoin/i.test(name) && 
-                            !/Jeton|Binance.*Pay/i.test(name) && !/Jeton|Binance.*Pay/i.test(title);
+            // Jeton и Binance Pay теперь считаются криптовалютами для правильной сортировки (идут перед Crypto)
+            const isCrypto = /Coinspaid|Crypto|Tether|Bitcoin|Ethereum|Litecoin|Ripple|Tron|USDC|USDT|DOGE|Cardano|Solana|Toncoin|Jeton|Binance.*Pay/i.test(name) || 
+                            /Jeton|Binance.*Pay/i.test(title);
 
             methodTypeMap[key] = methodTypeMap[key] || {};
             if (dep.some(([t, n]) => t === title && n === name)) methodTypeMap[key].deposit = true;
@@ -169,7 +172,7 @@ function AppContent() {
       }
 
       const groupedIds = Object.fromEntries(Object.entries(titleMap).map(([t, s]) => [t, Array.from(s).join('\n')]));
-      const conditionsMap = Object.fromEntries(Object.entries(conditionMap).map(([t, s]) => [t, s.size ? Array.from(s).sort().join('\n') : 'ALL']));
+      const conditionsMap = Object.fromEntries(Object.entries(conditionMap).map(([t, s]) => [t, s.size ? Array.from(s).join('\n') : 'ALL']));
 
       // подготовим быстрые проверки по title
       const recommendedKeySet = new Set(Array.from(recommendedSet)); // "title|||name"
@@ -226,6 +229,20 @@ function AppContent() {
         if (wa !== wb) return wa ? -1 : 1;
 
         return a.localeCompare(b);
+      });
+
+      // Добавляем хардкод методы в правильном порядке
+      const hardcodedMethods = ['Zimpler', 'ApplePay Visa', 'GooglePay Visa'];
+      hardcodedMethods.forEach(method => {
+        if (!sortedOrder.includes(method)) {
+          // Вставляем хардкод методы в конец обычных методов (перед криптовалютами)
+          const firstCryptoIndex = sortedOrder.findIndex(title => titleGroup(title) === 'crypto');
+          if (firstCryptoIndex !== -1) {
+            sortedOrder.splice(firstCryptoIndex, 0, method);
+          } else {
+            sortedOrder.push(method);
+          }
+        }
       });
 
       // итоговая сборка по GEO
@@ -337,7 +354,7 @@ function AppContent() {
                     🌍 Глобальные хардкод методы для всех GEO
                   </Text>
                   <Text fontSize="sm" color="green.600" fontWeight="semibold">
-                    🔧 Zimpler (FI) • ApplePay Gumballpay (все GEO, 11-е место)
+                    🔧 Zimpler (FI) • ApplePay Gumballpay (только EUR GEO, 11-е место)
                   </Text>
                   <Text fontSize="xs" color="gray.600">
                     ⚡ Одним кликом применяется ко всем непустым GEO. Пустые GEO пропускаются автоматически.

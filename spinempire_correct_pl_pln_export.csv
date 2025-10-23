@@ -1,0 +1,16 @@
+geo|account_currency|login|paymethod|payment_name|currency|deposit|withdraw|status|conditions|min_dep|is_recommended
+PL_PLN|PLN|0depnoaffplplnmobi|BLIK|Blik_Gate2WayVip_Banks_0DEP|PLN|YES|NO|PROD|0DEP|20 PLN|YES
+PL_PLN|PLN|0depnoaffplplnmobi|Visa/Mastercard|V/M_Directcorefy_Cards_0DEP//mob//noaff|PLN|YES|NO|PROD|0DEP+MOB+NOAFF|20 PLN|YES
+PL_PLN|PLN|0depnoaffplplnmobi|ADA - Cardano|ADA_Coinspaid_Cryptopay_Cardano|PLN|YES|YES|PROD||—|NO
+PL_PLN|PLN|0depnoaffplplnmobi|BTC - Bitcoin|BTC_Coinspaid_Cryptopay_Bitcoin|PLN|YES|YES|PROD||50 PLN|NO
+PL_PLN|PLN|0depnoaffplplnmobi|CASHlib|CASHlib_CASHlib_Voucher|PLN|YES|NO|PROD||5 PLN|NO
+PL_PLN|PLN|0depnoaffplplnmobi|Crypto|Crypto|PLN|YES|YES|PROD||20 PLN|NO
+PL_PLN|PLN|0depnoaffplplnmobi|DOGE - Dogecoin|DOGE_Coinspaid_Cryptopay_Dogecoin|PLN|YES|YES|PROD||—|NO
+PL_PLN|PLN|0depnoaffplplnmobi|ETH -  Ethereum (ERC20)|ETH_Coinspaid_Cryptopay_Etherium|PLN|YES|YES|PROD||—|NO
+PL_PLN|PLN|0depnoaffplplnmobi|LTC - Litecoin|LTC_Coinspaid_Cryptopay_Litecoin|PLN|YES|YES|PROD||—|NO
+PL_PLN|PLN|0depnoaffplplnmobi|Mifinity|Mifinity_Mifinity_Wallet|PLN|YES|YES|PROD||20 PLN|NO
+PL_PLN|PLN|0depnoaffplplnmobi|SOL - Solana|SOL_Coinspaid_Cryptopay_Solana|PLN|YES|YES|PROD||—|NO
+PL_PLN|PLN|0depnoaffplplnmobi|TRX - Tron|TRX_Coinspaid_Cryptopay_Tron|PLN|YES|YES|PROD||—|NO
+PL_PLN|PLN|0depnoaffplplnmobi|USDT  -  Tether USD (ERC20)|USDTE_Coinspaid_Cryptopay_TetherERC20|PLN|YES|YES|PROD||—|NO
+PL_PLN|PLN|0depnoaffplplnmobi|USDT -  Tether USD (TRC20)|USDTT_Coinspaid_Cryptopay_TetherTRC20|PLN|YES|YES|PROD||20 PLN|NO
+PL_PLN|PLN|0depnoaffplplnmobi|XRP - Ripple|Ripple_Coinspaid_Cryptopay_XRP|PLN|YES|YES|PROD||—|NO
