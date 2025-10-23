@@ -232,5 +232,23 @@
     "env": "prod",
     "export_type": "single",
     "sheet_url": "https://docs.google.com/spreadsheets/d/1S-u4WrcW_F2SpuCilh55ymLAzquQHN_Ke_zPLRXzs3U"
+  },
+  {
+    "timestamp": "2025-10-23T09:22:13.322463",
+    "date": "2025-10-23",
+    "project": "Vegazone",
+    "geo": null,
+    "env": "prod",
+    "export_type": "multi",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/1F5bI9Mg6OkAcuvDT5Q6DV01xuB3_rNb71SVDKmBfvFc"
+  },
+  {
+    "timestamp": "2025-10-23T09:45:51.332569",
+    "date": "2025-10-23",
+    "project": "Vegazone",
+    "geo": null,
+    "env": "prod",
+    "export_type": "multi",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/1fmuAnHg_96JROPmJDl4EuRvd6BX5wzoMGJcZIcJUHhg"
   }
 ]

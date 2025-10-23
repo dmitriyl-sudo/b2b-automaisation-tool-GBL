@@ -1459,7 +1459,12 @@ def export_full_project_to_google_sheet(data: FullProjectExportRequest):
             headers = list(rows[0].keys())
             values = [headers] + [[r.get(h, "") for h in headers] for r in rows]
             
-            sheet_title = geo[:100]
+            # Специальная обработка для NZ - добавляем валюту NZD
+            if geo == "NZ":
+                sheet_title = "NZ_NZD"
+            else:
+                sheet_title = geo
+            sheet_title = sheet_title[:100]
             sheets_to_add.append({"addSheet": {"properties": {"title": sheet_title}}})
             all_sheets_data[sheet_title] = values
 
