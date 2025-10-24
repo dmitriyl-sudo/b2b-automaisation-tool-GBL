@@ -44,6 +44,11 @@ logs/
 bot_updated.log
 exports_log.json
 
+# CSV and Excel files
+*.csv
+*.xlsx
+*.xls
+
 # Credentials and sensitive files
 *.pem
 *.key
