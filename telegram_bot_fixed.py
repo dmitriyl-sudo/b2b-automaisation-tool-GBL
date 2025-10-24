@@ -77,59 +77,31 @@ async def projects_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Команда /projects - список проектов с последними ссылками на Google Sheets"""
     try:
         export_logger = ExportLogger()
-        stats = export_logger.get_today_summary()
         latest_sheets = export_logger.get_latest_sheets_by_project()
         
-        if stats["total"] == 0:
-            message = "🏢 <b>Проекты за сегодня</b>\n\n❌ Сегодня экспортов не было"
+        if not latest_sheets:
+            message = "🏢 <b>Все проекты</b>\n\n❌ Экспортов еще не было"
         else:
-            message = f"🏢 <b>Проекты с последними Google Sheets</b>\n\n"
+            message = f"🏢 <b>Все проекты с последними Google Sheets</b>\n\n"
             
-            for project in stats["projects"]:
-                project_exports = [exp for exp in stats["exports"] if exp["project"] == project]
-                count = len(project_exports)
+            for project, sheet_info in latest_sheets.items():
+                sheet_url = sheet_info["sheet_url"]
+                geo = sheet_info.get("geo", "N/A")
+                env = sheet_info.get("env", "N/A")
+                export_type = sheet_info.get("export_type", "N/A")
+                date = sheet_info.get("date", "N/A")
                 
-                # Типы экспортов для проекта
-                types = {}
-                envs = {}
-                
-                for exp in project_exports:
-                    exp_type = exp.get("export_type", "unknown")
-                    env = exp.get("env", "unknown")
-                    types[exp_type] = types.get(exp_type, 0) + 1
-                    envs[env] = envs.get(env, 0) + 1
-                
-                message += f"📁 <b>{project}</b> ({count} экспортов)\n"
-                
-                # Добавляем ссылку на последний Google Sheets
-                if project in latest_sheets:
-                    sheet_info = latest_sheets[project]
-                    sheet_url = sheet_info["sheet_url"]
-                    geo = sheet_info.get("geo", "N/A")
-                    env = sheet_info.get("env", "N/A")
-                    export_type = sheet_info.get("export_type", "N/A")
-                    
-                    # Создаем короткую ссылку для отображения
-                    if "spreadsheets/d/" in sheet_url:
-                        sheet_id = sheet_url.split("spreadsheets/d/")[1].split("/")[0]
-                        short_id = sheet_id[:8] + "..."
-                    else:
-                        short_id = "sheet"
-                    
-                    message += f"   🔗 <a href='{sheet_url}'>Последний лист ({short_id})</a>\n"
-                    message += f"   📊 {geo} | {env} | {export_type}\n"
+                # Создаем короткую ссылку для отображения
+                if "spreadsheets/d/" in sheet_url:
+                    sheet_id = sheet_url.split("spreadsheets/d/")[1].split("/")[0]
+                    short_id = sheet_id[:8] + "..."
                 else:
-                    message += f"   ❌ Нет ссылок на Google Sheets\n"
+                    short_id = "sheet"
                 
-                if types:
-                    type_str = ", ".join([f"{k}({v})" for k, v in types.items()])
-                    message += f"   📋 Типы: {type_str}\n"
-                
-                if envs:
-                    env_str = ", ".join([f"{k}({v})" for k, v in envs.items()])
-                    message += f"   🌍 Окружения: {env_str}\n"
-                
-                message += "\n"
+                message += f"📁 <b>{project}</b>\n"
+                message += f"   🔗 <a href='{sheet_url}'>Последний лист ({short_id})</a>\n"
+                message += f"   📊 {geo} | {env} | {export_type}\n"
+                message += f"   📅 {date}\n\n"
         
         await update.message.reply_text(message, parse_mode='HTML', disable_web_page_preview=True)
         
