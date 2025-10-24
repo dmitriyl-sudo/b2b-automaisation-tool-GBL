@@ -44,6 +44,9 @@ logs/
 bot_updated.log
 exports_log.json
 
+# Bot user data
+bot_users.json
+
 # CSV and Excel files
 *.csv
 *.xlsx

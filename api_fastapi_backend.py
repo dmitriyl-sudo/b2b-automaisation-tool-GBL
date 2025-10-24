@@ -35,7 +35,7 @@ from utils.google_drive import finalize_google_sheet_formatting, set_sheet_permi
 
 # Опциональный импорт Telegram бота
 try:
-    from telegram_bot import send_sheet_notification_sync, init_telegram_bot
+    from telegram_bot_fixed import send_sheet_notification_to_all_sync, init_bot_instance
     from telegram_config import TelegramConfig
     TELEGRAM_AVAILABLE = True
 except ImportError:
@@ -142,29 +142,29 @@ async def startup_event():
     if TELEGRAM_AVAILABLE:
         if TelegramConfig.is_configured():
             bot_token = TelegramConfig.get_bot_token()
-            chat_id = TelegramConfig.get_chat_id()
-            init_telegram_bot(bot_token, chat_id)
-            logging.info("✅ Telegram бот инициализирован")
+            init_bot_instance(bot_token)
+            logging.info("✅ Telegram бот инициализирован для массовых уведомлений")
         else:
             logging.warning("⚠️ Telegram бот не настроен. Уведомления отключены.")
     else:
         logging.info("ℹ️ Telegram модули не установлены. Уведомления недоступны.")
 
 def safe_send_telegram_notification(sheet_url: str, project: str, geo: str = None, env: str = "prod", export_type: str = "single"):
-    """Безопасная отправка Telegram уведомления"""
+    """Безопасная отправка Telegram уведомления всем пользователям"""
     if TELEGRAM_AVAILABLE:
         try:
-            send_sheet_notification_sync(
+            send_sheet_notification_to_all_sync(
                 sheet_url=sheet_url,
                 project=project,
                 geo=geo,
                 env=env,
                 export_type=export_type
             )
+            logging.info(f"✅ Telegram уведомления отправлены всем пользователям: {project} - {export_type}")
         except Exception as e:
-            logging.error(f"❌ Ошибка отправки Telegram уведомления: {e}")
+            logging.error(f"❌ Ошибка отправки Telegram уведомлений: {e}")
     else:
-        logging.debug("ℹ️ Telegram уведомления недоступны")
+        logging.info("📱 Telegram уведомления отключены")
 
 # --- PYDANTIC МОДЕЛИ ДЛЯ ЗАПРОСОВ ---
 class LoginTestRequest(BaseModel):
