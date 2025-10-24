@@ -250,5 +250,140 @@
     "env": "prod",
     "export_type": "multi",
     "sheet_url": "https://docs.google.com/spreadsheets/d/1fmuAnHg_96JROPmJDl4EuRvd6BX5wzoMGJcZIcJUHhg"
+  },
+  {
+    "timestamp": "2025-10-23T10:50:37.303768",
+    "date": "2025-10-23",
+    "project": "Vegazone",
+    "geo": "CH_CHF",
+    "env": "prod",
+    "export_type": "single",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/1pgkqyl7-WtIaoa0hF3QHL_XnbUoue8RReQUU1D0PjA4"
+  },
+  {
+    "timestamp": "2025-10-23T10:52:38.898451",
+    "date": "2025-10-23",
+    "project": "Vegazone",
+    "geo": null,
+    "env": "prod",
+    "export_type": "multi",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/1xMZY6doVegND_g5zTj3HKKrnP7CeidZqRP8ugm-pMqU"
+  },
+  {
+    "timestamp": "2025-10-23T11:32:19.417005",
+    "date": "2025-10-23",
+    "project": "Ritzo",
+    "geo": null,
+    "env": "prod",
+    "export_type": "multi",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/1ny6k_Gr21iBuxegY-rarBCZx4CskCSpCHiQaJNO-Ms0"
+  },
+  {
+    "timestamp": "2025-10-23T11:51:15.433509",
+    "date": "2025-10-23",
+    "project": "Rolling",
+    "geo": null,
+    "env": "prod",
+    "export_type": "multi",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/1pQaLpv5o6CUmHOc-TzeOqv5i9pjk3fAxKMLRDhsTKcY"
+  },
+  {
+    "timestamp": "2025-10-23T12:03:53.022912",
+    "date": "2025-10-23",
+    "project": "Needforspin",
+    "geo": null,
+    "env": "prod",
+    "export_type": "multi",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/1WbbXScLeUSGsJgtbdHdQSFOeIwis-vDx3x-IAtwDtZI"
+  },
+  {
+    "timestamp": "2025-10-23T14:40:23.544149",
+    "date": "2025-10-23",
+    "project": "Wildtokyo",
+    "geo": null,
+    "env": "prod",
+    "export_type": "multi",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/1OeK-RTP9ySpBkdvPjjpzRrHSh0vY_SO_EK9cuqpKAsg"
+  },
+  {
+    "timestamp": "2025-10-23T14:56:07.693588",
+    "date": "2025-10-23",
+    "project": "Godofwins",
+    "geo": null,
+    "env": "prod",
+    "export_type": "multi",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/1Kms1DtrhO0LLdmeN_5vfeKZTF73CdPRDMMsdm71tH2Y"
+  },
+  {
+    "timestamp": "2025-10-23T15:11:59.282752",
+    "date": "2025-10-23",
+    "project": "Hugo",
+    "geo": null,
+    "env": "prod",
+    "export_type": "multi",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/1s20KMeHrjMmVP2kNpgwPENACSeOzx8_Dpg_dNMHEEGI"
+  },
+  {
+    "timestamp": "2025-10-23T16:00:01.709251",
+    "date": "2025-10-23",
+    "project": "Winshark",
+    "geo": null,
+    "env": "prod",
+    "export_type": "multi",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/1RNx5gDqXo2Cv1oz-cpP9dGRs3mYPQ6Mm1jpx-I-oEB8"
+  },
+  {
+    "timestamp": "2025-10-23T16:24:49.643366",
+    "date": "2025-10-23",
+    "project": "Spinlander",
+    "geo": null,
+    "env": "prod",
+    "export_type": "multi",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/1WXoQsPZ4qdqWEe0qQJNagzakySX3WBYaDXrD4BGXa14"
+  },
+  {
+    "timestamp": "2025-10-23T16:37:21.307007",
+    "date": "2025-10-23",
+    "project": "Winshark",
+    "geo": null,
+    "env": "prod",
+    "export_type": "multi",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/1fe2tQSbHsRfV26CwZDG8nYQUfrEi9bILRtlm-mizOJI"
+  },
+  {
+    "timestamp": "2025-10-23T16:50:05.210470",
+    "date": "2025-10-23",
+    "project": "Slota",
+    "geo": null,
+    "env": "prod",
+    "export_type": "multi",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/1IGX9pS_VibYhqVMu2BsMolzvsWv4Sm9U8KNAO2ZxRsk"
+  },
+  {
+    "timestamp": "2025-10-23T17:02:54.892940",
+    "date": "2025-10-23",
+    "project": "Spinline",
+    "geo": null,
+    "env": "prod",
+    "export_type": "multi",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/10IHCUL79-KL8HQDSJC-O_oPBiOs8wM3j09ZlgHIaX-I"
+  },
+  {
+    "timestamp": "2025-10-23T17:17:08.737221",
+    "date": "2025-10-23",
+    "project": "Glitchspin",
+    "geo": null,
+    "env": "prod",
+    "export_type": "multi",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/1qbmPwEwC--Py1ZMDqHt7WPUIGKx5_Ru2Ee1O6RDHOpM"
+  },
+  {
+    "timestamp": "2025-10-23T17:31:18.631593",
+    "date": "2025-10-23",
+    "project": "Azurslot",
+    "geo": null,
+    "env": "prod",
+    "export_type": "multi",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/10MhHW2vMe-yGeIbT04rgXA27_ExkA_2R0E6ihpbh6Ig"
   }
 ]

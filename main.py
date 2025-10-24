@@ -73,7 +73,7 @@ GLITCHSPIN_EXTRA_GEOS = {
     ],
 }
 
-# >>> ДОП. GEO только для проекта Vegaszone (NZ)
+# >>> ДОП. GEO только для проекта Vegaszone (NZ и CH_CHF)
 VEGASZONE_EXTRA_GEOS = {
     "NZ": [
         "0depnoaffnznzdmobi",
@@ -81,6 +81,13 @@ VEGASZONE_EXTRA_GEOS = {
         "0depaffilnznzddesk",
         "0depnoaffnznzddesk",
         "4depaffilnznzdmobi1",
+    ],
+    "CH_CHF": [
+        "0depnoaffchchfdesk1",
+        "0depaffilchchfmobi1",
+        "0depnoaffchchfmobi1",
+        "0depaffilchchfdesk1",
+        "4depaffilchchfmobi2",
     ],
 }
 

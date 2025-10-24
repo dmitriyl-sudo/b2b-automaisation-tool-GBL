@@ -513,8 +513,13 @@ def get_all_methods_for_geo(project: str, geo: str, env: str):
     if project not in EXTRACTORS:
         raise HTTPException(status_code=400, detail="Unknown project")
     
-    # Получаем список аккаунтов для данного GEO из geo_groups
-    merged_geo_groups = get_geo_groups()
+    # Получаем список аккаунтов для данного GEO с учетом проекта
+    if project == "Glitchspin":
+        merged_geo_groups = {**geo_groups, **GLITCHSPIN_EXTRA_GEOS}
+    elif project == "Vegazone":
+        merged_geo_groups = {**geo_groups, **VEGASZONE_EXTRA_GEOS}
+    else:
+        merged_geo_groups = geo_groups
     
     # Сначала пробуем найти точное совпадение GEO
     if geo in merged_geo_groups:
