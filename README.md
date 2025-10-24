@@ -1,93 +1,377 @@
-# b2b automaisation tool
+# 🚀 B2B Automation Tool
 
+**Комплексный инструмент для автоматизации работы с платежными системами и экспорта данных в Google Sheets**
 
+![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)
+![React](https://img.shields.io/badge/React-18+-blue.svg)
+![Status](https://img.shields.io/badge/Status-Production-brightgreen.svg)
 
-## Getting started
+## 📋 Описание
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+B2B Automation Tool - это мощная система для автоматизации работы с различными платежными проектами (Ritzo, Rolling, Vegazone, Glitchspin и др.). Инструмент позволяет:
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+- 🔍 **Извлекать данные** о платежных методах из различных проектов
+- 📊 **Экспортировать данные** в Excel и Google Sheets
+- 🤖 **Автоматизировать процессы** через Telegram бота
+- 🌍 **Поддерживать множественные GEO** и валюты
+- 🔄 **Синхронизировать данные** между различными окружениями
 
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+## 🏗️ Архитектура
 
 ```
-cd existing_repo
-git remote add origin https://gitlab.com/psp2511611/b2b-automaisation-tool.git
-git branch -M main
-git push -uf origin main
+├── 🖥️  Backend (FastAPI)     - API сервер и бизнес-логика
+├── 🌐 Frontend (React)       - Веб-интерфейс пользователя  
+├── 🤖 Telegram Bot          - Автоматизация и уведомления
+├── 📊 Google Sheets API     - Экспорт и синхронизация данных
+└── 🔧 Utilities             - Вспомогательные инструменты
 ```
 
-## Integrate with your tools
+## ⚡ Быстрый старт
 
-- [ ] [Set up project integrations](https://gitlab.com/psp2511611/b2b-automaisation-tool/-/settings/integrations)
+### 1️⃣ Клонирование репозитория
 
-## Collaborate with your team
+```bash
+git clone https://github.com/dmitriyl-sudo/b2b-automaisation-tool-GBL.git
+cd b2b-automaisation-tool-GBL
+```
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+### 2️⃣ Установка зависимостей Backend
 
-## Test and Deploy
+```bash
+# Создание виртуального окружения
+python3 -m venv myvenv
+source myvenv/bin/activate  # Linux/Mac
+# или
+myvenv\Scripts\activate     # Windows
 
-Use the built-in continuous integration in GitLab.
+# Установка Python зависимостей
+pip install -r requirements.txt
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+# Дополнительные зависимости (если нужны)
+pip install nest-asyncio python-telegram-bot google-api-python-client
+```
 
-***
+### 3️⃣ Установка зависимостей Frontend
 
-# Editing this README
+```bash
+cd frontend
+npm install
+cd ..
+```
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+### 4️⃣ Настройка конфигурации
 
-## Suggestions for a good README
+Создайте необходимые конфигурационные файлы:
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+```bash
+# Скопируйте примеры конфигураций
+cp telegram_config.py.example telegram_config.py
+cp credentials.json.example credentials.json
 
-## Name
-Choose a self-explaining name for your project.
+# Отредактируйте конфигурации под ваши нужды
+```
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+## 🚀 Запуск системы
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+### Backend API Server
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+```bash
+# Активация виртуального окружения
+source myvenv/bin/activate
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+# Запуск FastAPI сервера
+python api_fastapi_backend.py
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+# Сервер будет доступен на http://localhost:8000
+```
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+### Frontend React App
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+```bash
+cd frontend
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+# Development режим
+npm start
+# Приложение будет доступно на http://localhost:3000
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+# Production сборка
+npm run build
+```
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+### Telegram Bot
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+```bash
+# Активация виртуального окружения
+source myvenv/bin/activate
 
-## License
-For open source projects, say how it is licensed.
+# Запуск бота
+python telegram_bot_fixed.py
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+# Или через скрипт
+chmod +x launch_telegram_bot.sh
+./launch_telegram_bot.sh
+```
+
+## 📚 Использование
+
+### 🌐 Веб-интерфейс
+
+1. **Откройте браузер** → `http://localhost:3000`
+2. **Выберите проект** (Ritzo, Rolling, Vegazone, etc.)
+3. **Выберите GEO** (DE, IT, NZ, CH_CHF, etc.)
+4. **Выберите окружение** (prod/stage)
+5. **Нажмите "Load GEO Methods"** для получения данных
+6. **Экспортируйте** в Excel или Google Sheets
+
+### 🤖 Telegram Bot
+
+Доступные команды:
+
+```
+/start    - Приветствие и список команд
+/today    - Статистика экспортов за сегодня  
+/projects - Все проекты с последними ссылками
+/help     - Справка по командам
+```
+
+### 🔧 API Endpoints
+
+```bash
+# Получение списка GEO групп
+GET http://localhost:8000/geo-groups
+
+# Получение методов для конкретного GEO
+POST http://localhost:8000/get-methods-only
+{
+  "project": "Ritzo",
+  "geo": "DE", 
+  "env": "prod"
+}
+
+# Экспорт в Google Sheets
+POST http://localhost:8000/export-to-sheets
+{
+  "project": "Rolling",
+  "geo": "IT",
+  "env": "prod",
+  "export_type": "single"
+}
+```
+
+## 🗂️ Структура проекта
+
+```
+b2b-automaisation-tool-GBL/
+├── 📁 frontend/                 # React приложение
+│   ├── src/
+│   │   ├── components/         # React компоненты
+│   │   ├── panels/            # Панели интерфейса
+│   │   └── App.js             # Главный компонент
+│   ├── public/                # Статические файлы
+│   └── package.json           # NPM зависимости
+├── 📁 extractors/              # Экстракторы данных
+│   ├── base_extractor.py      # Базовый класс
+│   ├── ritzo_extractor.py     # Ritzo проект
+│   ├── rolling_extractor.py   # Rolling проект
+│   └── vegazone_extractor.py  # Vegazone проект
+├── 📁 utils/                   # Утилиты
+│   ├── excel_utils.py         # Работа с Excel
+│   ├── google_drive.py        # Google Sheets API
+│   └── export_logger.py       # Логирование экспортов
+├── 📁 archive/                 # Архив и тесты
+│   ├── tests/                 # Тестовые файлы
+│   └── scripts/               # Вспомогательные скрипты
+├── 📄 api_fastapi_backend.py   # FastAPI сервер
+├── 📄 main.py                  # Основная конфигурация
+├── 📄 telegram_bot_fixed.py    # Telegram бот
+├── 📄 delete_column.py         # Утилита удаления колонок
+├── 📄 requirements.txt         # Python зависимости
+└── 📄 .gitignore              # Git исключения
+```
+
+## ⚙️ Конфигурация
+
+### Основные настройки (main.py)
+
+```python
+# Группы аккаунтов по GEO
+geo_groups = {
+    "DE": ["account1", "account2", ...],
+    "IT": ["account3", "account4", ...],
+    # ...
+}
+
+# Специальные аккаунты для проектов
+VEGASZONE_EXTRA_GEOS = {
+    "CH_CHF": ["special_account1", "special_account2", ...]
+}
+
+# Список проектов
+site_list = [
+    {
+        "name": "Ritzo",
+        "stage_url": "https://stage.ritzo.com",
+        "prod_url": "https://ritzo.com"
+    }
+    # ...
+]
+```
+
+### Telegram конфигурация
+
+```python
+# telegram_config.py
+class TelegramConfig:
+    BOT_TOKEN = "YOUR_BOT_TOKEN"
+    CHAT_ID = "YOUR_CHAT_ID"
+```
+
+### Google Sheets API
+
+1. **Создайте проект** в Google Cloud Console
+2. **Включите Google Sheets API**
+3. **Создайте Service Account**
+4. **Скачайте credentials.json**
+5. **Поместите файл** в корень проекта
+
+## 🔧 Дополнительные утилиты
+
+### Удаление колонок из Google Sheets
+
+```bash
+# Отредактируйте ID таблицы в файле
+nano delete_column.py
+
+# Запустите скрипт
+python delete_column.py
+```
+
+### Тестирование системы
+
+```bash
+# Запуск тестов из архива
+python archive/tests/test_full_extractors.py
+```
+
+## 🐛 Решение проблем
+
+### Backend не запускается
+
+```bash
+# Проверьте виртуальное окружение
+source myvenv/bin/activate
+pip install -r requirements.txt
+
+# Проверьте порт 8000
+lsof -ti:8000
+kill -9 [PID]
+```
+
+### Frontend не загружается
+
+```bash
+cd frontend
+rm -rf node_modules package-lock.json
+npm install
+npm start
+```
+
+### Telegram бот не отвечает
+
+```bash
+# Проверьте процесс
+ps aux | grep telegram_bot_fixed
+
+# Перезапустите бота
+kill -9 [PID]
+python telegram_bot_fixed.py
+```
+
+### Google Sheets ошибки
+
+1. **Проверьте credentials.json**
+2. **Убедитесь что Service Account имеет доступ**
+3. **Проверьте квоты API**
+
+## 📊 Поддерживаемые проекты
+
+| Проект | Stage URL | Prod URL | Статус |
+|--------|-----------|----------|--------|
+| 🎰 Ritzo | stage.ritzo.com | ritzo.com | ✅ |
+| 🎲 Rolling | stage.rolling.com | rolling.com | ✅ |
+| 🎯 Vegazone | stage.vegazone.com | vegazone.com | ✅ |
+| ⚡ Glitchspin | stage.glitchspin.com | glitchspin.com | ✅ |
+| 🎪 Spinempire | stage.spinempire.com | spinempire.com | ✅ |
+
+## 🌍 Поддерживаемые GEO
+
+- 🇩🇪 **DE** - Германия (EUR)
+- 🇮🇹 **IT** - Италия (EUR)  
+- 🇳🇿 **NZ** - Новая Зеландия (NZD)
+- 🇨🇭 **CH_CHF** - Швейцария (CHF)
+- 🇨🇭 **CH_EUR** - Швейцария (EUR)
+- 🇳🇴 **NO_NOK** - Норвегия (NOK)
+- 🇭🇺 **HU_HUF** - Венгрия (HUF)
+- 🇦🇺 **AU_AUD** - Австралия (AUD)
+- 🇨🇦 **CA_CAD** - Канада (CAD)
+
+## 🔐 Безопасность
+
+- ✅ **Credentials файлы** исключены из git
+- ✅ **API ключи** хранятся в конфигурациях
+- ✅ **.pem файлы** игнорируются
+- ✅ **Логи** не содержат чувствительных данных
+
+## 📈 Мониторинг
+
+### Логи системы
+
+```bash
+# Backend логи
+tail -f bot_updated.log
+
+# Export логи  
+cat exports_log.json | jq
+
+# Telegram бот логи
+tail -f bot.log
+```
+
+### Статистика использования
+
+- 📊 **Экспорты отслеживаются** в `exports_log.json`
+- 📈 **Telegram команды** логируются
+- 🔍 **API вызовы** записываются в логи
+
+## 🤝 Поддержка
+
+При возникновении проблем:
+
+1. **Проверьте логи** системы
+2. **Убедитесь в правильности** конфигурации  
+3. **Проверьте доступность** внешних API
+4. **Создайте issue** в репозитории
+
+## 📝 Changelog
+
+### v2.0.0 (2024-10-24)
+- ✅ Исправлена логика CH_CHF аккаунтов для Vegazone
+- ✅ Улучшены команды Telegram бота (/projects, /today)
+- ✅ Перемещены тесты в archive/tests/
+- ✅ Добавлен .gitignore для .pem файлов
+- ✅ Создан подробный README
+
+### v1.0.0 (2024-10-20)
+- 🚀 Первый релиз системы
+- ✅ Базовая функциональность экспорта
+- ✅ Поддержка основных проектов
+- ✅ Telegram бот интеграция
+
+## 📄 Лицензия
+
+Этот проект предназначен для внутреннего использования.
+
+---
+
+**🚀 Готово к работе! Следуйте инструкциям выше для развертывания системы.**
