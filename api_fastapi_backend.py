@@ -542,6 +542,7 @@ def get_all_methods_for_geo(project: str, geo: str, env: str):
     # 🔧 УБРАНА ВСЯ ЛОГИКА ФИЛЬТРАЦИИ И ДЕДУПЛИКАЦИИ
     
     successful_accounts = 0
+    detected_currency = None  # Для сохранения валюты
     
     for i, login in enumerate(login_list):
         try:
@@ -555,6 +556,12 @@ def get_all_methods_for_geo(project: str, geo: str, env: str):
                 continue
             
             successful_accounts += 1
+            
+            # 🔧 СОХРАНЯЕМ ВАЛЮТУ ИЗ ПЕРВОГО УСПЕШНОГО АККАУНТА
+            if detected_currency is None:
+                detected_currency = result.get("currency")
+                if detected_currency:
+                    logging.info(f"[get_all_methods_for_geo] 💰 Валюта определена из {login}: {detected_currency}")
             
             # 🔧 ДОБАВЛЯЕМ ВСЕ МЕТОДЫ БЕЗ КАКОЙ-ЛИБО ФИЛЬТРАЦИИ
             deposit_methods = result.get("deposit_methods", [])
@@ -614,11 +621,13 @@ def get_all_methods_for_geo(project: str, geo: str, env: str):
         "recommended_methods": all_recommended_pairs,
         "min_deposit_map": all_min_deposit_list,
         "min_deposit_by_key": min_deposit_by_key,
+        "currency": detected_currency or "EUR",  # 🔧 ДОБАВЛЯЕМ ВАЛЮТУ
         "accounts_processed": successful_accounts,
         "total_accounts": len(login_list),
         "debug": {
             "total_skrill": total_skrill,
-            "accounts_used": [login for login in login_list[:successful_accounts]]
+            "accounts_used": [login for login in login_list[:successful_accounts]],
+            "detected_currency": detected_currency
         }
     }
 
